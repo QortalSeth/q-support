@@ -1,3 +1,8 @@
+import softwareIcon from '../assets/icons/software.webp'
+import gamingIcon from '../assets/icons/gaming.webp'
+import mediaIcon from '../assets/icons/media.webp'
+
+
 const useTestIdentifiers = true;
 
 export const QTUBE_VIDEO_BASE = useTestIdentifiers
@@ -218,3 +223,9 @@ export const subCategories3: CategoryMap = {
 
 
 };
+
+export const icons = {
+    1: softwareIcon,
+    2: gamingIcon,
+    3: mediaIcon
+}

@@ -19,7 +19,7 @@ import ResponsiveImage from '../../components/ResponsiveImage'
 import { formatDate, formatTimestampSeconds } from '../../utils/time'
 import { Video } from '../../state/features/videoSlice'
 import { queue } from '../../wrappers/GlobalWrapper'
-import { QTUBE_VIDEO_BASE } from '../../constants'
+import { QTUBE_VIDEO_BASE, icons } from '../../constants'
 import { formatBytes } from '../VideoContent/VideoContent'
 
 interface VideoListProps {
@@ -192,7 +192,11 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
                       gap: '25px',
                       alignItems: 'center'
                     }}>
-                      <AttachFileIcon />
+                     {icons[videoObj?.category] ? <img src={icons[videoObj?.category]} width="50px" style={{
+                        borderRadius: '5px'
+                      }}/> : (
+                         <AttachFileIcon />
+                      )}
                       <VideoCardTitle sx={{
                         width: '100px'
                       }}>

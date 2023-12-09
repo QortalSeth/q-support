@@ -59,7 +59,7 @@ import {
   setEditPlaylist,
   setEditVideo,
 } from "../../state/features/videoSlice";
-import { categories, subCategories, subCategories2, subCategories3 } from "../../constants";
+import { categories, icons, subCategories, subCategories2, subCategories3 } from "../../constants";
 import { Playlists } from "../../components/Playlists/Playlists";
 import { PlaylistSVG } from "../../assets/svgs/PlaylistSVG";
 import BlockIcon from "@mui/icons-material/Block";
@@ -753,7 +753,12 @@ export const VideoList = ({ mode }: VideoListProps) => {
                       gap: '25px',
                       alignItems: 'center'
                     }}>
-                      <AttachFileIcon />
+                      {icons[videoObj?.category] ? <img src={icons[videoObj?.category]} width="50px" style={{
+                        borderRadius: '5px'
+                      }}/> : (
+                         <AttachFileIcon />
+                      )}
+                     
                       <VideoCardTitle sx={{
                         width: '100px'
                       }}>
