@@ -8,7 +8,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import localForage from "localforage";
 import { useTheme } from "@mui/material";
 const generalLocal = localForage.createInstance({
-  name: "q-tube-general",
+  name: "q-share-general",
 });
 
 export default function ConsentModal() {
@@ -44,7 +44,7 @@ export default function ConsentModal() {
         <DialogTitle id="alert-dialog-title">Welcome</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Q-Tube is currently in its first version and as such there could be
+            Q-Share is currently in its first version and as such there could be
             some bugs. The Qortal community, along with its development team and
             the creators of this application, cannot be held accountable for any
             content published or displayed. Also, they are not responsible for

@@ -316,7 +316,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
     setSelectedSubCategoryVideos3(selectedOption || null);
   };
   const blockUserFunc = async (user: string) => {
-    if (user === "Q-Tube") return;
+    if (user === "Q-Share") return;
 
     try {
       const response = await qortalRequest({

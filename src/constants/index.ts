@@ -3,7 +3,7 @@ import gamingIcon from '../assets/icons/gaming.webp'
 import mediaIcon from '../assets/icons/media.webp'
 
 
-const useTestIdentifiers = true;
+const useTestIdentifiers = false;
 
 export const QTUBE_VIDEO_BASE = useTestIdentifiers
   ? "MYTEST_share_vid_"
