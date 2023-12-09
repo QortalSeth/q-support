@@ -56,7 +56,7 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
   const getVideos = React.useCallback(async () => {
     try {
       const offset = videos.length   
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}_&limit=20&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}_&limit=50&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

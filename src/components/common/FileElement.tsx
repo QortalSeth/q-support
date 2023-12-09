@@ -75,6 +75,8 @@ export default function FileElement({
   const [fileProperties, setFileProperties] = React.useState<any>(null);
   const [downloadLoader, setDownloadLoader] = React.useState<any>(false);
   const downloads  = useSelector((state: RootState) => state.global?.downloads);
+  const status = React.useRef<null | string>(null)
+
   const hasCommencedDownload = React.useRef(false);
   const dispatch = useDispatch();
   const reDownload = React.useRef<boolean>(false)
@@ -200,10 +202,10 @@ export default function FileElement({
   const refetchInInterval = ()=> {
     try {
       const interval = setInterval(()=> {
-          if(resourceStatus?.current === 'DOWNLOADED'){
+          if(status?.current === 'DOWNLOADED'){
             refetch()
           }
-          if(resourceStatus?.current === 'READY'){
+          if(status?.current === 'READY'){
             clearInterval(interval);
           }
          
@@ -212,6 +214,20 @@ export default function FileElement({
       
     }
   }
+
+  React.useEffect(() => {
+    if(resourceStatus?.status){
+      status.current = resourceStatus?.status
+    }
+    if (
+      resourceStatus?.status === 'DOWNLOADED' &&
+      reDownload?.current === false
+    ) {
+      refetchInInterval()
+      reDownload.current = true
+    }
+  }, [resourceStatus])
+
 
   React.useEffect(() => {
     if (
@@ -227,12 +243,6 @@ export default function FileElement({
           alertType: "info",
         })
       );
-    } else  if (
-      resourceStatus?.status === 'DOWNLOADED' &&
-      reDownload?.current === false
-    ) {
-      refetchInInterval()
-      reDownload.current = true
     }
   }, [resourceStatus, download]);
 

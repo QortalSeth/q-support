@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, Input, Popover, useTheme } from "@mui/material";
+import { Box, Button, Input, Popover, Typography, useTheme } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -100,6 +100,12 @@ const NavBar: React.FC<Props> = ({
   return (
     <CustomAppBar position="sticky" elevation={2}>
       <ThemeSelectRow>
+        <Box sx={{
+          display: 'flex',
+          height: '100%',
+          alignItems: 'center',
+          gap: '20px'
+        }}>
         <LogoContainer
           onClick={() => {
             navigate("/");
@@ -120,6 +126,11 @@ const NavBar: React.FC<Props> = ({
             }}
           />
         </LogoContainer>
+        <Typography sx={{
+          fontSize: '16px',
+          whiteSpace: 'nowrap'
+        }}>Sharing is caring</Typography>
+        </Box>
       </ThemeSelectRow>
       <Box
         sx={{
