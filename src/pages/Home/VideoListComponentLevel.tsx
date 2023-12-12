@@ -19,7 +19,7 @@ import ResponsiveImage from '../../components/ResponsiveImage'
 import { formatDate, formatTimestampSeconds } from '../../utils/time'
 import { Video } from '../../state/features/videoSlice'
 import { queue } from '../../wrappers/GlobalWrapper'
-import { QTUBE_VIDEO_BASE, icons } from '../../constants'
+import { QTUBE_VIDEO_BASE, categories, icons, subCategories, subCategories2, subCategories3 } from '../../constants'
 import { formatBytes } from '../VideoContent/VideoContent'
 
 interface VideoListProps {
@@ -153,7 +153,18 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
               }
 
 
-            
+              const category = categories?.find(item => item?.id === videoObj?.category);
+              const subcategory = subCategories[category?.id]?.find(item => item?.id === videoObj?.subcategory);
+              const subcategory2 = subCategories2[subcategory?.id]?.find(item => item.id === videoObj?.subcategory2);
+              const subcategory3 = subCategories3[subcategory2?.id]?.find(item => item.id === videoObj?.subcategory3);
+              
+              const catId = category?.id || null;
+              const subId = subcategory?.id || null;
+              const sub2Id = subcategory2?.id || null;
+              const sub3Id = subcategory3?.id || null;
+              
+              const icon = icons[sub3Id] || icons[sub2Id] || icons[subId] || icons[catId] || null;
+              
            
       
 
@@ -192,7 +203,7 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
                       gap: '25px',
                       alignItems: 'center'
                     }}>
-                     {icons[videoObj?.category] ? <img src={icons[videoObj?.category]} width="50px" style={{
+                     {icon ? <img src={icon} width="50px" style={{
                         borderRadius: '5px'
                       }}/> : (
                          <AttachFileIcon />
