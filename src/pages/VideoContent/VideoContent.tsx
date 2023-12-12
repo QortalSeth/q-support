@@ -33,7 +33,7 @@ import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
 } from "../../components/UploadVideo/Upload-styles";
-import { QTUBE_VIDEO_BASE } from "../../constants";
+import { QTUBE_VIDEO_BASE, categories, subCategories, subCategories2, subCategories3 } from "../../constants";
 import { Playlists } from "../../components/Playlists/Playlists";
 import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
@@ -277,7 +277,18 @@ export const VideoContent = () => {
     }
   }, [videoData]); 
 
+  const categoriesDisplay = useMemo(()=> {
+    const category = categories?.find((item)=> item?.id === videoData?.category)
+    if(!category) return null
+    const subcategory = subCategories[category?.id]?.find(item=> item?.id === videoData?.subcategory)
+    if(!subcategory) return category?.name
 
+    const subcategory2 = subCategories2[subcategory?.id]?.find(item => item.id === videoData?.subcategory2)
+    if(!subcategory2) return `${category?.name} > ${subcategory?.name}`
+    const subcategory3 = subCategories3[subcategory2?.id]?.find(item => item.id === videoData?.subcategory3)
+    if(!subcategory3) return `${category?.name} > ${subcategory?.name} > ${subcategory2?.name}`
+    return  `${category?.name} > ${subcategory?.name} > ${subcategory2?.name} > ${subcategory3?.name}`
+  }, [videoData])
   
 
   return (
@@ -352,6 +363,14 @@ export const VideoContent = () => {
               </AuthorTextComment>
             </StyledCardColComment>
           </StyledCardHeaderComment>
+        </Box>
+        <Spacer height="15px" />
+        <Box>
+          <Typography sx={{
+            fontWeight: 'bold',
+            fontSize: '16px',
+            userSelect: 'none'
+          }}>{categoriesDisplay}</Typography>
         </Box>
         <Spacer height="15px" />
         <Box

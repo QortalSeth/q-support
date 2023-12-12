@@ -682,7 +682,19 @@ export const VideoList = ({ mode }: VideoListProps) => {
                 hasHash = true;
               }
 
-
+              const category = categories?.find(item => item?.id === videoObj?.category);
+              const subcategory = subCategories[category?.id]?.find(item => item?.id === videoObj?.subcategory);
+              const subcategory2 = subCategories2[subcategory?.id]?.find(item => item.id === videoObj?.subcategory2);
+              const subcategory3 = subCategories3[subcategory2?.id]?.find(item => item.id === videoObj?.subcategory3);
+              
+              const catId = category?.id || null;
+              const subId = subcategory?.id || null;
+              const sub2Id = subcategory2?.id || null;
+              const sub3Id = subcategory3?.id || null;
+              
+              const icon = icons[sub3Id] || icons[sub2Id] || icons[subId] || icons[catId] || null;
+              
+             
             
            
       
@@ -753,7 +765,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
                       gap: '25px',
                       alignItems: 'center'
                     }}>
-                      {icons[videoObj?.category] ? <img src={icons[videoObj?.category]} width="50px" style={{
+                      {icon ? <img src={icon} width="50px" style={{
                         borderRadius: '5px'
                       }}/> : (
                          <AttachFileIcon />

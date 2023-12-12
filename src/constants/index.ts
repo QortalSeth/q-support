@@ -1,6 +1,9 @@
 import softwareIcon from '../assets/icons/software.webp'
 import gamingIcon from '../assets/icons/gaming.webp'
 import mediaIcon from '../assets/icons/media.webp'
+import audioIcon from '../assets/icons/audio.webp'
+import videoIcon from '../assets/icons/video.webp'
+import documentIcon from '../assets/icons/document.webp'
 
 
 const useTestIdentifiers = false;
@@ -227,5 +230,8 @@ export const subCategories3: CategoryMap = {
 export const icons = {
     1: softwareIcon,
     2: gamingIcon,
-    3: mediaIcon
+    3: mediaIcon,
+    302: videoIcon,
+    301: audioIcon,
+    304: documentIcon
 }

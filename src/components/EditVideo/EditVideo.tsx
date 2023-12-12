@@ -751,7 +751,7 @@ export const EditVideo = () => {
             dispatch(updateInHashMap(clonedCopy));
             dispatch(
               setNotification({
-                msg: "Video updated",
+                msg: "File updated",
                 alertType: "success",
               })
             );

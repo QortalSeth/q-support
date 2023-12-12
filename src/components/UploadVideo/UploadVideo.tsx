@@ -674,7 +674,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
             setPlaylistSetting(null);
             dispatch(
               setNotification({
-                msg: "Videos published",
+                msg: "Files published",
                 alertType: "success",
               })
             );
