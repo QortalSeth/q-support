@@ -9,9 +9,9 @@ import {
   Typography,
   useTheme
 } from '@mui/material'
-import { useFetchVideos } from '../../hooks/useFetchVideos'
+import { useFetchFiles } from '../../hooks/useFetchFiles.tsx'
 import LazyLoad from '../../components/common/LazyLoad'
-import { BottomParent, NameContainer, VideoCard, VideoCardName, VideoCardTitle, VideoContainer, VideoUploadDate } from './VideoList-styles'
+import { BottomParent, NameContainer, VideoCard, VideoCardName, VideoCardTitle, VideoContainer, VideoUploadDate } from './FileList-styles.tsx'
 import ResponsiveImage from '../../components/ResponsiveImage'
 import { formatDate, formatTimestampSeconds } from '../../utils/time'
 import { ChannelCard, ChannelTitle } from './Home-styles'

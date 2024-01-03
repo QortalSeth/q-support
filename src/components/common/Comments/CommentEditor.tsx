@@ -11,7 +11,7 @@ import {
   CommentInputContainer,
   SubmitCommentButton,
 } from "./Comments-styles";
-import { COMMENT_BASE } from "../../../constants";
+import { QSHARE_COMMENT_BASE } from "../../../constants/Identifiers.ts";
 const uid = new ShortUniqueId();
 
 const notification = localforage.createInstance({
@@ -201,13 +201,13 @@ export const CommentEditor = ({
     try {
       const id = uid();
 
-      let identifier = `${COMMENT_BASE}${postId.slice(-12)}_base_${id}`;
+      let identifier = `${QSHARE_COMMENT_BASE}${postId.slice(-12)}_base_${id}`;
       let idForNotification = identifier;
 
       if (isReply && commentId) {
         const removeBaseCommentId = commentId;
         removeBaseCommentId.replace("_base_", "");
-        identifier = `${COMMENT_BASE}${postId.slice(
+        identifier = `${QSHARE_COMMENT_BASE}${postId.slice(
           -12
         )}_reply_${removeBaseCommentId.slice(-6)}_${id}`;
         idForNotification = commentId;

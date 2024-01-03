@@ -12,7 +12,7 @@ import {
   NewCrowdfundTitle,
   StyledButton,
   TimesIcon,
-} from "./Upload-styles";
+} from "./Upload-styles.tsx";
 import {
   Box,
   FormControl,
@@ -43,11 +43,12 @@ import {
   setEditPlaylist,
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
-import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE, categories, subCategories } from "../../constants";
+import { QSHARE_PLAYLIST_BASE, QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
 import { Playlists } from "../Playlists/Playlists";
 import { PlaylistListEdit } from "../PlaylistListEdit/PlaylistListEdit";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
+import {categories, subCategories} from "../../constants/Categories.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -289,7 +290,7 @@ export const EditPlaylist = () => {
       let commentsId =  editVideoProperties?.id
       
       if(isNew){
-        commentsId = `${QTUBE_PLAYLIST_BASE}_cm_${id}`
+        commentsId = `${QSHARE_PLAYLIST_BASE}_cm_${id}`
       }
       const stringDescription = extractTextFromHTML(description)
 
@@ -322,7 +323,7 @@ export const EditPlaylist = () => {
         .trim()
         .toLowerCase();
       if(isNew){
-        identifier = `${QTUBE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        identifier = `${QSHARE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
       }
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
@@ -332,7 +333,7 @@ export const EditPlaylist = () => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier,
-        tag1: QTUBE_VIDEO_BASE,
+        tag1: QSHARE_FILE_BASE,
       };
 
       await qortalRequest(requestBodyJson);

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { VideoListComponentLevel } from '../Home/VideoListComponentLevel'
+import { FileListComponentLevel } from '../Home/FileListComponentLevel.tsx'
 import { HeaderContainer, ProfileContainer } from './Profile-styles'
 import { AuthorTextComment, StyledCardColComment, StyledCardHeaderComment } from '../VideoContent/VideoContent-styles'
 import { Avatar, Box, useTheme } from '@mui/material'
@@ -57,7 +57,7 @@ export const IndividualProfile = () => {
           </StyledCardHeaderComment>
         </Box>
       </HeaderContainer>
-      <VideoListComponentLevel />
+      <FileListComponentLevel />
     </ProfileContainer>
     
   )

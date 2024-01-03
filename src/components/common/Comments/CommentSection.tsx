@@ -14,8 +14,8 @@ import {
   LoadMoreCommentsButtonRow,
   NoCommentsRow,
 } from "./Comments-styles";
-import { COMMENT_BASE } from "../../../constants";
-import { CrowdfundSubTitle, CrowdfundSubTitleRow } from "../../UploadVideo/Upload-styles";
+import { QSHARE_COMMENT_BASE } from "../../../constants/Identifiers.ts";
+import { CrowdfundSubTitle, CrowdfundSubTitleRow } from "../../PublishFile/Upload-styles.tsx";
 
 interface CommentSectionProps {
   postId: string;
@@ -105,7 +105,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       const offset = 0;
 
       const removeBaseCommentId = commentId.replace("_base_", "");
-      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${COMMENT_BASE}${postId.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSHARE_COMMENT_BASE}${postId.slice(
         -12
       )}_reply_${removeBaseCommentId.slice(
         -6
@@ -150,7 +150,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         if (isNewMessages && numberOfComments) {
           offset = numberOfComments;
         }
-        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${COMMENT_BASE}${postId.slice(
+        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSHARE_COMMENT_BASE}${postId.slice(
           -12
         )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
         const response = await fetch(url, {

@@ -1,23 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
-  AddCoverImageButton,
-  AddLogoIcon,
-  CoverImagePreview,
   CrowdfundActionButton,
   CrowdfundActionButtonRow,
   CustomInputField,
-  CustomSelect,
-  LogoPreviewRow,
   ModalBody,
   NewCrowdfundTitle,
-  StyledButton,
-  TimesIcon,
 } from "./Upload-styles";
 import {
   Box,
-  Button,
   FormControl,
-  Input,
   InputLabel,
   MenuItem,
   Modal,
@@ -28,37 +19,21 @@ import {
   useTheme,
 } from "@mui/material";
 import RemoveIcon from "@mui/icons-material/Remove";
-import ShortUniqueId from "short-unique-id";
-import { useDispatch, useSelector } from "react-redux";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import { useDropzone } from "react-dropzone";
-import AddIcon from "@mui/icons-material/Add";
 
-import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
-import { RootState } from "../../state/store";
-import {
-  upsertVideosBeginning,
-  addToHashMap,
-  upsertVideos,
-} from "../../state/features/videoSlice";
-import ImageUploader from "../common/ImageUploader";
-import {
-  QTUBE_PLAYLIST_BASE,
-  QTUBE_VIDEO_BASE,
-  categories,
-  subCategories,
-  subCategories2,
-  subCategories3,
-} from "../../constants";
-import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
-import {
-  CrowdfundSubTitle,
-  CrowdfundSubTitleRow,
-} from "../EditPlaylist/Upload-styles";
-import { CardContentContainerComment } from "../common/Comments/Comments-styles";
-import { TextEditor } from "../common/TextEditor/TextEditor";
-import { extractTextFromHTML } from "../common/TextEditor/utils";
+import ShortUniqueId from "short-unique-id";
+import {useDispatch, useSelector} from "react-redux";
+import {useDropzone} from "react-dropzone";
+
+import {setNotification} from "../../state/features/notificationsSlice";
+import {objectToBase64} from "../../utils/toBase64";
+import {RootState} from "../../state/store";
+import {setEditVideo, updateInHashMap, updateVideo,} from "../../state/features/videoSlice";
+import {QSHARE_FILE_BASE,} from "../../constants/Identifiers.ts";
+import {MultiplePublish} from "../common/MultiplePublish/MultiplePublish";
+import {TextEditor} from "../common/TextEditor/TextEditor";
+import {extractTextFromHTML} from "../common/TextEditor/utils";
+import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
+import {titleFormatter} from "../../constants/Misc.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -77,30 +52,29 @@ interface VideoFile {
   title: string;
   description: string;
   coverImage?: string;
+  identifier?:string;
+  filename?:string
 }
-export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
+export const EditFile = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const userAddress = useSelector(
     (state: RootState) => state.auth?.user?.address
   );
-  const [files, setFiles] = useState<VideoFile[]>([]);
+  const editVideoProperties = useSelector(
+    (state: RootState) => state.video.editVideoProperties
+  );
+  const [publishes, setPublishes] = useState<any[]>([]);
+  const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
+  const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] =
+    useState(null);
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [step, setStep] = useState<string>("videos");
-  const [playlistCoverImage, setPlaylistCoverImage] = useState<null | string>(
-    null
-  );
-  const [selectExistingPlaylist, setSelectExistingPlaylist] =
-    useState<any>(null);
-  const [playlistTitle, setPlaylistTitle] = useState<string>("");
-  const [playlistDescription, setPlaylistDescription] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
+  const [coverImage, setCoverImage] = useState<string>("");
+  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState<VideoFile[]>([]);
 
   const [selectedCategoryVideos, setSelectedCategoryVideos] =
     useState<any>(null);
@@ -110,64 +84,161 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     useState<any>(null);
     const [selectedSubCategoryVideos3, setSelectedSubCategoryVideos3] =
     useState<any>(null);
-    
-  const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
-  const [publishes, setPublishes] = useState<any[]>([]);
-  const { getRootProps, getInputProps } = useDropzone({
-    maxFiles: 10,
-    maxSize: 419430400, // 400 MB in bytes
-    onDrop: (acceptedFiles, rejectedFiles) => {
-      const formatArray = acceptedFiles.map((item) => {
-        return {
-          file: item,
-          title: "",
-          description: "",
-          coverImage: "",
-        };
-      });
 
-      setFiles((prev) => [...prev, ...formatArray]);
-
-      let errorString = null;
-      rejectedFiles.forEach(({ file, errors }) => {
-        errors.forEach((error) => {
-          if (error.code === "file-too-large") {
-            errorString = "File must be under 400mb";
-          }
-          console.log(`Error with file ${file.name}: ${error.message}`);
+    const { getRootProps, getInputProps } = useDropzone({
+      maxFiles: 10,
+      maxSize: 419430400, // 400 MB in bytes
+      onDrop: (acceptedFiles, rejectedFiles) => {
+        const formatArray = acceptedFiles.map((item) => {
+          return {
+            file: item,
+            title: "",
+            description: "",
+            coverImage: "",
+          };
         });
-      });
-      if (errorString) {
-        const notificationObj = {
-          msg: errorString,
-          alertType: "error",
-        };
+  
+        setFiles((prev) => [...prev, ...formatArray]);
+  
+        let errorString = null;
+        rejectedFiles.forEach(({ file, errors }) => {
+          errors.forEach((error) => {
+            if (error.code === "file-too-large") {
+              errorString = "File must be under 400mb";
+            }
+            console.log(`Error with file ${file.name}: ${error.message}`);
+          });
+        });
+        if (errorString) {
+          const notificationObj = {
+            msg: errorString,
+            alertType: "error",
+          };
+  
+          dispatch(setNotification(notificationObj));
+        }
+      },
+    });
 
-        dispatch(setNotification(notificationObj));
-      }
-    },
-  });
+  // useEffect(() => {
+  //   if (editVideoProperties) {
+  //     const descriptionString = editVideoProperties?.description || "";
+  //     // Splitting the string at the asterisks
+  //     const parts = descriptionString.split("**");
+
+  //     // The part within the asterisks
+  //     const extractedString = parts[1];
+
+  //     // The part after the last asterisks
+  //     const description = parts[2] || ""; // Using '|| '' to handle cases where there is no text after the last **
+  //     setTitle(editVideoProperties?.title || "");
+  //     setDescription(editVideoProperties?.fullDescription || "");
+  //     setCoverImage(editVideoProperties?.videoImage || "");
+
+  //     // Split the extracted string into key-value pairs
+  //     const keyValuePairs = extractedString.split(";");
+
+  //     // Initialize variables to hold the category and subcategory values
+  //     let category, subcategory;
+
+  //     // Loop through each key-value pair
+  //     keyValuePairs.forEach((pair) => {
+  //       const [key, value] = pair.split(":");
+
+  //       // Check the key and assign the value to the appropriate variable
+  //       if (key === "category") {
+  //         category = value;
+  //       } else if (key === "subcategory") {
+  //         subcategory = value;
+  //       }
+  //     });
+
+  //     if(category){
+  //       const selectedOption = categories.find((option) => option.id === +category);
+  //   setSelectedCategoryVideos(selectedOption || null);
+  //     }
+
+  //     if(subcategory){
+  //       const selectedOption = categories.find((option) => option.id === +subcategory);
+  //   setSelectedCategoryVideos(selectedOption || null);
+  //     }
+
+  //   }
+  // }, [editVideoProperties]);
 
   useEffect(() => {
-    if (editContent) {
+    if (editVideoProperties) {
+      setTitle(editVideoProperties?.title || "");
+      setFiles(editVideoProperties?.files || [])
+      if(editVideoProperties?.htmlDescription){
+        setDescription(editVideoProperties?.htmlDescription);
+
+      } else if(editVideoProperties?.fullDescription) {
+        const paragraph = `<p>${editVideoProperties?.fullDescription}</p>`
+        setDescription(paragraph);
+
+      }
+
+      if (editVideoProperties?.category) {
+        const selectedOption = categories.find(
+          (option) => option.id === +editVideoProperties.category
+        );
+        setSelectedCategoryVideos(selectedOption || null);
+      }
+      if (
+        editVideoProperties?.category &&
+        editVideoProperties?.subcategory &&
+        subCategories[+editVideoProperties?.category]
+      ) {
+        const selectedOption = subCategories[
+          +editVideoProperties?.category
+        ]?.find((option) => option.id === +editVideoProperties.subcategory);
+        setSelectedSubCategoryVideos(selectedOption || null);
+      }
+      if (
+        editVideoProperties?.category &&
+        editVideoProperties?.subcategory2 &&
+        subCategories2[+editVideoProperties?.subcategory]
+      ) {
+        const selectedOption = subCategories2[
+          +editVideoProperties?.subcategory
+        ]?.find((option) => option.id === +editVideoProperties.subcategory2);
+        setSelectedSubCategoryVideos2(selectedOption || null);
+      }
+      if (
+        editVideoProperties?.category &&
+        editVideoProperties?.subcategory3 &&
+        subCategories3[+editVideoProperties?.subcategory2]
+      ) {
+
+        const selectedOption = subCategories3[
+          +editVideoProperties?.subcategory2
+        ]?.find((option) => option.id === +editVideoProperties.subcategory3);
+        setSelectedSubCategoryVideos3(selectedOption || null);
+      }
+
+      
     }
-  }, [editContent]);
+  }, [editVideoProperties]);
 
   const onClose = () => {
-    setIsOpen(false);
+    dispatch(setEditVideo(null));
+    setVideoPropertiesToSetToRedux(null);
+    setFile(null);
+    setTitle("");
+    setDescription("");
+    setCoverImage("");
   };
 
-
-
   async function publishQDNResource() {
+    try {
+      if (!title) throw new Error("Please enter a title");
+      if (!description) throw new Error("Please enter a description");
+      if (!selectedCategoryVideos) throw new Error("Please select a category");
+      if (!editVideoProperties) return;
+      if (!userAddress) throw new Error("Unable to locate user address");
+      if(files.length === 0) throw new Error("Add at least one file");
 
-      try {
-        if (!userAddress) throw new Error("Unable to locate user address");
-
-        if (!title) throw new Error("Please enter a title");
-        if (!description) throw new Error("Please enter a description");
-        if (!selectedCategoryVideos) throw new Error("Please select a category");
-        if(files.length === 0) throw new Error("Add at least one file");
       let errorMsg = "";
       let name = "";
       if (username) {
@@ -178,7 +249,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           "Cannot publish without access to your name. Please authenticate.";
       }
 
-      if (editId && editContent?.user !== name) {
+      if (editVideoProperties?.user !== username) {
         errorMsg = "Cannot publish another user's resource";
       }
 
@@ -191,30 +262,32 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         );
         return;
       }
-
       let fileReferences = []
 
       let listOfPublishes = [];
+      const fullDescription = extractTextFromHTML(description);
 
-        const fullDescription = extractTextFromHTML(description);
-        const category = selectedCategoryVideos.id;
-        const subcategory = selectedSubCategoryVideos?.id || "";
-        const subcategory2 = selectedSubCategoryVideos2?.id || "";
-        const subcategory3 = selectedSubCategoryVideos3?.id || "";
+      const category = selectedCategoryVideos.id;
+      const subcategory = selectedSubCategoryVideos?.id || "";
+      const subcategory2 = selectedSubCategoryVideos2?.id || "";
+      const subcategory3 = selectedSubCategoryVideos3?.id || "";
+      const sanitizeTitle = title
+      .replace(/[^a-zA-Z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim()
+      .toLowerCase();
 
-        const sanitizeTitle = title
-          .replace(/[^a-zA-Z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-")
-          .trim()
-          .toLowerCase();
 
       for (const publish of files) {
-     
+        if(publish?.identifier){
+          fileReferences.push(publish)
+          continue
+        }
         const file = publish.file;
         const id = uid();
 
-        const identifier = `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
         
 
@@ -249,7 +322,6 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         let metadescription =
         `**cat:${category};sub:${subcategory};sub2:${subcategory2};sub3:${subcategory3}**` +
           fullDescription.slice(0, 150);
-
      
         const requestBodyVideo: any = {
           action: "PUBLISH_QDN_RESOURCE",
@@ -260,7 +332,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           description: metadescription,
           identifier,
           filename,
-          tag1: QTUBE_VIDEO_BASE,
+          tag1: QSHARE_FILE_BASE,
         };
         listOfPublishes.push(requestBodyVideo);
         fileReferences.push({
@@ -273,14 +345,12 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         })
       }
 
-      const idMeta = uid();
-      const identifier = `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
       const fileObject: any = {
         title,
-        version: 1,
+        version: editVideoProperties.version,
         fullDescription,
         htmlDescription: description,
-        commentsId: `${QTUBE_VIDEO_BASE}_cm_${idMeta}`,
+        commentsId: editVideoProperties.commentsId,
         category,
         subcategory,
         subcategory2,
@@ -294,6 +364,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
 
       const crowdfundObjectToBase64 = await objectToBase64(fileObject);
       // Description is obtained from raw data
+
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
@@ -301,37 +372,58 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         data64: crowdfundObjectToBase64,
         title: title.slice(0, 50),
         description: metadescription,
-        identifier: identifier + "_metadata",
-        tag1: QTUBE_VIDEO_BASE,
+        identifier: editVideoProperties.id,
+        tag1: QSHARE_FILE_BASE,
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
+
       setPublishes(listOfPublishes);
       setIsOpenMultiplePublish(true);
+      setVideoPropertiesToSetToRedux({
+        ...editVideoProperties,
+        ...fileObject,
+      });
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
         notificationObj = {
-          msg: error || "Failed to publish share",
+          msg: error || "Failed to publish update",
           alertType: "error",
         };
       } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || "Failed to publish share",
+          msg: error?.error || "Failed to publish update",
           alertType: "error",
         };
       } else {
         notificationObj = {
-          msg: error?.message || "Failed to publish share",
+          msg: error?.message || "Failed to publish update",
           alertType: "error",
         };
       }
       if (!notificationObj) return;
       dispatch(setNotification(notificationObj));
+
+      throw new Error("Failed to publish update");
     }
   }
 
-
+  const handleOnchange = (index: number, type: string, value: string) => {
+    // setFiles((prev) => {
+    //   let formattedValue = value
+    //   console.log({type})
+    //   if(type === 'title'){
+    //     formattedValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
+    //   }
+    //   const copyFiles = [...prev];
+    //   copyFiles[index] = {
+    //     ...copyFiles[index],
+    //     [type]: formattedValue,
+    //   };
+    //   return copyFiles;
+    // });
+  };
 
   const handleOptionCategoryChangeVideos = (
     event: SelectChangeEvent<string>
@@ -350,6 +442,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     );
     setSelectedSubCategoryVideos(selectedOption || null);
   };
+
 
   const handleOptionSubCategoryChangeVideos2 = (
     event: SelectChangeEvent<string>,
@@ -374,27 +467,10 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
   };
 
 
-
   return (
     <>
-      {username && (
-        <>
-          {editId ? null : (
-            <StyledButton
-              color="primary"
-              startIcon={<AddBoxIcon />}
-              onClick={() => {
-                setIsOpen(true);
-              }}
-            >
-              share
-            </StyledButton>
-          )}
-        </>
-      )}
-
       <Modal
-        open={isOpen}
+        open={!!editVideoProperties}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
@@ -406,29 +482,24 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
               justifyContent: "space-between",
             }}
           >
-          
-              <NewCrowdfundTitle>Share</NewCrowdfundTitle>
-       
+            <NewCrowdfundTitle>Update share</NewCrowdfundTitle>
           </Box>
-
-          {step === "videos" && (
-            <>
-              <Box
-                {...getRootProps()}
-                sx={{
-                  border: "1px dashed gray",
-                  padding: 2,
-                  textAlign: "center",
-                  marginBottom: 2,
-                  cursor: "pointer",
-                }}
-              >
-                <input {...getInputProps()} />
-                <Typography>
-                  Drag and drop files here or click to select files
-                </Typography>
-              </Box>
-              {files.map((file, index) => {
+          <>
+            <Box
+              {...getRootProps()}
+              sx={{
+                border: "1px dashed gray",
+                padding: 2,
+                textAlign: "center",
+                marginBottom: 2,
+                cursor: "pointer",
+              }}
+            >
+              <input {...getInputProps()} />
+              <Typography>Click to add more files</Typography>
+            </Box>
+            {files.map((file, index) => {
+              const isExistingFile = !!file?.identifier
                 return (
                   <React.Fragment key={index}>
                     <Box
@@ -438,7 +509,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography>{file?.file?.name}</Typography>
+                      <Typography>{isExistingFile? file.filename : file?.file?.name}</Typography>
                       <RemoveIcon
                         onClick={() => {
                           setFiles((prev) => {
@@ -455,14 +526,15 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   </React.Fragment>
                 );
               })}
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "20px",
-                  alignItems: "flex-start",
-                }}
-              >
-                {files?.length > 0 && (
+           
+            <Box
+              sx={{
+                display: "flex",
+                gap: "20px",
+                alignItems: "flex-start",
+              }}
+            >
+               {files?.length > 0 && (
                   <>
                    <Box sx={{
                       display: 'flex',
@@ -589,8 +661,8 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                    
                   </>
                 )}
-              </Box>
-              {files?.length > 0 && (
+            </Box>
+            {files?.length > 0 && (
                 <>
                   <CustomInputField
                     name="title"
@@ -599,10 +671,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                     value={title}
                     onChange={(e) => {
                       const value = e.target.value;
-                      const formattedValue = value.replace(
-                        /[^a-zA-Z0-9\s-_!?]/g,
-                        ""
-                      );
+                      const formattedValue = value.replace(titleFormatter, "");
                       setTitle(formattedValue);
                     }}
                     inputProps={{ maxLength: 180 }}
@@ -623,9 +692,8 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                   />
                 </>
               )}
-            
-            </>
-          )}
+          </>
+
           <CrowdfundActionButtonRow>
             <CrowdfundActionButton
               onClick={() => {
@@ -655,29 +723,21 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           </CrowdfundActionButtonRow>
         </ModalBody>
       </Modal>
-
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
-            setIsOpen(false);
-            setFiles([]);
-            setStep("videos");
-            setPlaylistCoverImage(null);
-            setPlaylistTitle("");
-            setPlaylistDescription("");
-            setSelectedCategory(null);
-            setSelectedSubCategory(null);
-            setSelectedCategoryVideos(null);
-            setSelectedSubCategoryVideos(null);
-            setPlaylistSetting(null);
+            const clonedCopy = structuredClone(videoPropertiesToSetToRedux);
+            dispatch(updateVideo(clonedCopy));
+            dispatch(updateInHashMap(clonedCopy));
             dispatch(
               setNotification({
-                msg: "Files published",
+                msg: "File updated",
                 alertType: "success",
               })
             );
+            onClose();
           }}
           publishes={publishes}
         />

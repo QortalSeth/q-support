@@ -1,42 +1,25 @@
-import softwareIcon from '../assets/icons/software.webp'
-import gamingIcon from '../assets/icons/gaming.webp'
-import mediaIcon from '../assets/icons/media.webp'
-import audioIcon from '../assets/icons/audio.webp'
-import videoIcon from '../assets/icons/video.webp'
-import documentIcon from '../assets/icons/document.webp'
+import softwareIcon from "../assets/icons/software.webp";
+import gamingIcon from "../assets/icons/gaming.webp";
+import mediaIcon from "../assets/icons/media.webp";
+import videoIcon from "../assets/icons/video.webp";
+import audioIcon from "../assets/icons/audio.webp";
+import documentIcon from "../assets/icons/document.webp";
 
-
-const useTestIdentifiers = false;
-
-export const QTUBE_VIDEO_BASE = useTestIdentifiers
-  ? "MYTEST_share_vid_"
-  : "qshare_file_";
-
-  export const QTUBE_PLAYLIST_BASE = useTestIdentifiers
-  ? "MYTEST_share_playlist_"
-  : "qshare_playlist_";
-
-  export const COMMENT_BASE = useTestIdentifiers
-  ? "qcomment_v1_MYTEST_"
-  : "qcomment_v1_qshare_";
-
-  interface SubCategory {
+interface SubCategory {
     id: number;
     name: string;
 }
 
-interface CategoryMap {
+interface Categories {
     [key: number]: SubCategory[];
 }
-
 
 export const categories = [
     {"id": 1, "name": "Software"},
     {"id": 2, "name": "Gaming"},
     {"id": 3, "name": "Media"}
 ];
-
-export const subCategories: CategoryMap = {
+export const subCategories: Categories = {
     1: [
         {"id": 101, "name": "OS"},
         {"id": 102, "name": "Application"},
@@ -57,11 +40,7 @@ export const subCategories: CategoryMap = {
         {"id": 305, "name": "Other Media Formats"}
     ]
 };
-
-
-
-
-export const subCategories2: CategoryMap = {
+export const subCategories2: Categories = {
     201: [ // NES
         {"id": 20101, "name": "ROM"},
         {"id": 20102, "name": "Romhack"},
@@ -73,21 +52,21 @@ export const subCategories2: CategoryMap = {
         {"id": 20203, "name": "Emulator"},
     ],
     301: [ // Audio
-    {"id": 30101, "name": "Music"},
-    {"id": 30102, "name": "Podcasts"},
-    {"id": 30103, "name": "Audiobooks"},
-    {"id": 30104, "name": "Sound Effects"},
-    {"id": 30105, "name": "Lectures & Speeches"},
-    {"id": 30106, "name": "Radio Shows"},
-    {"id": 30107, "name": "Ambient Sounds"},
-    {"id": 30108, "name": "Language Learning Material"},
-    {"id": 30109, "name": "Comedy & Satire"},
-    {"id": 30110, "name": "Documentaries"},
-    {"id": 30111, "name": "Guided Meditations & Yoga"},
-    {"id": 30112, "name": "Live Performances"},
-    {"id": 30113, "name": "Nature Sounds"},
-    {"id": 30114, "name": "Soundtracks"},
-    {"id": 30115, "name": "Interviews"}
+        {"id": 30101, "name": "Music"},
+        {"id": 30102, "name": "Podcasts"},
+        {"id": 30103, "name": "Audiobooks"},
+        {"id": 30104, "name": "Sound Effects"},
+        {"id": 30105, "name": "Lectures & Speeches"},
+        {"id": 30106, "name": "Radio Shows"},
+        {"id": 30107, "name": "Ambient Sounds"},
+        {"id": 30108, "name": "Language Learning Material"},
+        {"id": 30109, "name": "Comedy & Satire"},
+        {"id": 30110, "name": "Documentaries"},
+        {"id": 30111, "name": "Guided Meditations & Yoga"},
+        {"id": 30112, "name": "Live Performances"},
+        {"id": 30113, "name": "Nature Sounds"},
+        {"id": 30114, "name": "Soundtracks"},
+        {"id": 30115, "name": "Interviews"}
     ],
     302: [ // Under Video
         {"id": 30201, "name": "Movies"},
@@ -115,26 +94,26 @@ export const subCategories2: CategoryMap = {
         {"id": 30223, "name": "History"}
     ],
     303: [ // Image
-    {"id": 30301, "name": "Nature"},
-    {"id": 30302, "name": "Urban & Cityscapes"},
-    {"id": 30303, "name": "People & Portraits"},
-    {"id": 30304, "name": "Art & Abstract"},
-    {"id": 30305, "name": "Travel & Adventure"},
-    {"id": 30306, "name": "Animals & Wildlife"},
-    {"id": 30307, "name": "Sports & Action"},
-    {"id": 30308, "name": "Food & Cuisine"},
-    {"id": 30309, "name": "Fashion & Beauty"},
-    {"id": 30310, "name": "Technology & Science"},
-    {"id": 30311, "name": "Historical & Cultural"},
-    {"id": 30312, "name": "Aerial & Drone"},
-    {"id": 30313, "name": "Black & White"},
-    {"id": 30314, "name": "Events & Celebrations"},
-    {"id": 30315, "name": "Business & Corporate"},
-    {"id": 30316, "name": "Health & Wellness"},
-    {"id": 30317, "name": "Transportation & Vehicles"},
-    {"id": 30318, "name": "Still Life & Objects"},
-    {"id": 30319, "name": "Architecture & Buildings"},
-    {"id": 30320, "name": "Landscapes & Seascapes"}
+        {"id": 30301, "name": "Nature"},
+        {"id": 30302, "name": "Urban & Cityscapes"},
+        {"id": 30303, "name": "People & Portraits"},
+        {"id": 30304, "name": "Art & Abstract"},
+        {"id": 30305, "name": "Travel & Adventure"},
+        {"id": 30306, "name": "Animals & Wildlife"},
+        {"id": 30307, "name": "Sports & Action"},
+        {"id": 30308, "name": "Food & Cuisine"},
+        {"id": 30309, "name": "Fashion & Beauty"},
+        {"id": 30310, "name": "Technology & Science"},
+        {"id": 30311, "name": "Historical & Cultural"},
+        {"id": 30312, "name": "Aerial & Drone"},
+        {"id": 30313, "name": "Black & White"},
+        {"id": 30314, "name": "Events & Celebrations"},
+        {"id": 30315, "name": "Business & Corporate"},
+        {"id": 30316, "name": "Health & Wellness"},
+        {"id": 30317, "name": "Transportation & Vehicles"},
+        {"id": 30318, "name": "Still Life & Objects"},
+        {"id": 30319, "name": "Architecture & Buildings"},
+        {"id": 30320, "name": "Landscapes & Seascapes"}
     ],
     304: [ // Document
         {"id": 30401, "name": "PDF"},
@@ -144,9 +123,7 @@ export const subCategories2: CategoryMap = {
         {"id": 30405, "name": "Books"}
     ]
 };
-
-
-export const subCategories3: CategoryMap = {
+export const subCategories3: Categories = {
     30201: [ // Under Movies
         {"id": 3020101, "name": "Action & Adventure"},
         {"id": 3020102, "name": "Comedy"},
@@ -184,49 +161,48 @@ export const subCategories3: CategoryMap = {
         {"id": 3020216, "name": "Other"}
     ],
     30405: [ // Under Books
-    {"id": 3040501, "name": "Fiction"},
-    {"id": 3040502, "name": "Non-Fiction"},
-    {"id": 3040503, "name": "Science Fiction & Fantasy"},
-    {"id": 3040504, "name": "Biographies & Memoirs"},
-    {"id": 3040505, "name": "Children's Books"},
-    {"id": 3040506, "name": "Educational"},
-    {"id": 3040507, "name": "Self-Help"},
-    {"id": 3040508, "name": "Cookbooks, Food & Wine"},
-    {"id": 3040509, "name": "Mystery & Thriller"},
-    {"id": 3040510, "name": "History"},
-    {"id": 3040511, "name": "Poetry"},
-    {"id": 3040512, "name": "Art & Photography"},
-    {"id": 3040513, "name": "Religion & Spirituality"},
-    {"id": 3040514, "name": "Travel"},
-    {"id": 3040515, "name": "Comics & Graphic Novels"},
-    
-],
-30101: [ // Under Music
-    {"id": 3010101, "name": "Rock"},
-    {"id": 3010102, "name": "Pop"},
-    {"id": 3010103, "name": "Classical"},
-    {"id": 3010104, "name": "Jazz"},
-    {"id": 3010105, "name": "Electronic"},
-    {"id": 3010106, "name": "Country"},
-    {"id": 3010107, "name": "Hip Hop/Rap"},
-    {"id": 3010108, "name": "Blues"},
-    {"id": 3010109, "name": "R&B/Soul"},
-    {"id": 3010110, "name": "Reggae"},
-    {"id": 3010111, "name": "Folk"},
-    {"id": 3010112, "name": "Metal"},
-    {"id": 3010113, "name": "World Music"},
-    {"id": 3010114, "name": "Latin"},
-    {"id": 3010115, "name": "Indie"},
-    {"id": 3010116, "name": "Punk"},
-    {"id": 3010117, "name": "Soundtracks"},
-    {"id": 3010118, "name": "Children's Music"},
-    {"id": 3010119, "name": "New Age"},
-    {"id": 3010120, "name": "Classical Crossover"}
-]
+        {"id": 3040501, "name": "Fiction"},
+        {"id": 3040502, "name": "Non-Fiction"},
+        {"id": 3040503, "name": "Science Fiction & Fantasy"},
+        {"id": 3040504, "name": "Biographies & Memoirs"},
+        {"id": 3040505, "name": "Children's Books"},
+        {"id": 3040506, "name": "Educational"},
+        {"id": 3040507, "name": "Self-Help"},
+        {"id": 3040508, "name": "Cookbooks, Food & Wine"},
+        {"id": 3040509, "name": "Mystery & Thriller"},
+        {"id": 3040510, "name": "History"},
+        {"id": 3040511, "name": "Poetry"},
+        {"id": 3040512, "name": "Art & Photography"},
+        {"id": 3040513, "name": "Religion & Spirituality"},
+        {"id": 3040514, "name": "Travel"},
+        {"id": 3040515, "name": "Comics & Graphic Novels"},
+
+    ],
+    30101: [ // Under Music
+        {"id": 3010101, "name": "Rock"},
+        {"id": 3010102, "name": "Pop"},
+        {"id": 3010103, "name": "Classical"},
+        {"id": 3010104, "name": "Jazz"},
+        {"id": 3010105, "name": "Electronic"},
+        {"id": 3010106, "name": "Country"},
+        {"id": 3010107, "name": "Hip Hop/Rap"},
+        {"id": 3010108, "name": "Blues"},
+        {"id": 3010109, "name": "R&B/Soul"},
+        {"id": 3010110, "name": "Reggae"},
+        {"id": 3010111, "name": "Folk"},
+        {"id": 3010112, "name": "Metal"},
+        {"id": 3010113, "name": "World Music"},
+        {"id": 3010114, "name": "Latin"},
+        {"id": 3010115, "name": "Indie"},
+        {"id": 3010116, "name": "Punk"},
+        {"id": 3010117, "name": "Soundtracks"},
+        {"id": 3010118, "name": "Children's Music"},
+        {"id": 3010119, "name": "New Age"},
+        {"id": 3010120, "name": "Classical Crossover"}
+    ]
 
 
 };
-
 export const icons = {
     1: softwareIcon,
     2: gamingIcon,

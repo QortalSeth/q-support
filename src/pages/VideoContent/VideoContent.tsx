@@ -32,11 +32,12 @@ import { CommentSection } from "../../components/common/Comments/CommentSection"
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
-} from "../../components/UploadVideo/Upload-styles";
-import { QTUBE_VIDEO_BASE, categories, subCategories, subCategories2, subCategories3 } from "../../constants";
+} from "../../components/PublishFile/Upload-styles.tsx";
+import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
 import { Playlists } from "../../components/Playlists/Playlists";
 import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
+import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
 
 export function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -110,7 +111,7 @@ export const VideoContent = () => {
       if (!name || !id) return;
       dispatch(setIsLoadingGlobal(true));
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

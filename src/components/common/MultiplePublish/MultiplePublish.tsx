@@ -8,7 +8,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { ModalBody } from "../../UploadVideo/Upload-styles";
+import { ModalBody } from "../../PublishFile/Upload-styles.tsx";
 import { CircleSVG } from "../../../assets/svgs/CircleSVG";
 import { EmptyCircleSVG } from "../../../assets/svgs/EmptyCircleSVG";
 
