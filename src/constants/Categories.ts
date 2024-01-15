@@ -14,43 +14,50 @@ interface Categories {
     [key: number]: SubCategory[];
 }
 
+const sortCategory = (a: SubCategory, b: SubCategory) => {
+    if (a.name === "Other") return 1;
+    else if (b.name === "Other") return -1;
+    else return a.name.localeCompare(b.name);
+};
+
 export const categories = [
     {"id": 1, "name": "Software"},
     {"id": 2, "name": "Gaming"},
-    {"id": 3, "name": "Media"}
-];
+    {"id": 3, "name": "Media"},
+    {"id": 4, "name": "Other"}
+].sort(sortCategory);
 export const subCategories: Categories = {
     1: [
         {"id": 101, "name": "OS"},
         {"id": 102, "name": "Application"},
         {"id": 103, "name": "Source Code"},
         {"id": 104, "name": "Other"}
-    ],
+    ].sort(sortCategory),
     2: [
         {"id": 201, "name": "NES"},
         {"id": 202, "name": "SNES"},
         {"id": 203, "name": "PC"},
-        {"id": 204, "name": "Other Gaming Systems"}
-    ],
+        {"id": 204, "name": "Other"}
+    ].sort(sortCategory),
     3: [
         {"id": 301, "name": "Audio"},
         {"id": 302, "name": "Video"},
         {"id": 303, "name": "Image"},
         {"id": 304, "name": "Document"},
-        {"id": 305, "name": "Other Media Formats"}
-    ]
+        {"id": 305, "name": "Other"}
+    ].sort(sortCategory)
 };
-export const subCategories2: Categories = {
-    201: [ // NES
+
+const gamingSystems = [
         {"id": 20101, "name": "ROM"},
         {"id": 20102, "name": "Romhack"},
         {"id": 20103, "name": "Emulator"},
-    ],
-    202: [ // SNES
-        {"id": 20201, "name": "ROM"},
-        {"id": 20202, "name": "Romhack"},
-        {"id": 20203, "name": "Emulator"},
-    ],
+        {"id": 20104, "name": "Guide"},
+        {"id": 20105, "name": "Other"},
+    ].sort(sortCategory)
+export const subCategories2: Categories = {
+    201: gamingSystems,  // NES
+    202: gamingSystems,  // SNES
     301: [ // Audio
         {"id": 30101, "name": "Music"},
         {"id": 30102, "name": "Podcasts"},
@@ -67,7 +74,7 @@ export const subCategories2: Categories = {
         {"id": 30113, "name": "Nature Sounds"},
         {"id": 30114, "name": "Soundtracks"},
         {"id": 30115, "name": "Interviews"}
-    ],
+    ].sort(sortCategory),
     302: [ // Under Video
         {"id": 30201, "name": "Movies"},
         {"id": 30202, "name": "Series"},
@@ -92,7 +99,7 @@ export const subCategories2: Categories = {
         {"id": 30221, "name": "Personal Development"},
         {"id": 30222, "name": "Other"},
         {"id": 30223, "name": "History"}
-    ],
+    ].sort(sortCategory),
     303: [ // Image
         {"id": 30301, "name": "Nature"},
         {"id": 30302, "name": "Urban & Cityscapes"},
@@ -114,14 +121,14 @@ export const subCategories2: Categories = {
         {"id": 30318, "name": "Still Life & Objects"},
         {"id": 30319, "name": "Architecture & Buildings"},
         {"id": 30320, "name": "Landscapes & Seascapes"}
-    ],
+    ].sort(sortCategory),
     304: [ // Document
         {"id": 30401, "name": "PDF"},
         {"id": 30402, "name": "Word Document"},
         {"id": 30403, "name": "Spreadsheet"},
         {"id": 30404, "name": "Powerpoint"},
         {"id": 30405, "name": "Books"}
-    ]
+    ].sort(sortCategory)
 };
 export const subCategories3: Categories = {
     30201: [ // Under Movies
@@ -141,7 +148,7 @@ export const subCategories3: Categories = {
         {"id": 3020114, "name": "International Films"},
         {"id": 3020115, "name": "Biographies & True Stories"},
         {"id": 3020116, "name": "Other"}
-    ],
+    ].sort(sortCategory),
     30202: [ // Under Series
         {"id": 3020201, "name": "Dramas"},
         {"id": 3020202, "name": "Comedies"},
@@ -159,7 +166,7 @@ export const subCategories3: Categories = {
         {"id": 3020214, "name": "International Series"},
         {"id": 3020215, "name": "Miniseries"},
         {"id": 3020216, "name": "Other"}
-    ],
+    ].sort(sortCategory),
     30405: [ // Under Books
         {"id": 3040501, "name": "Fiction"},
         {"id": 3040502, "name": "Non-Fiction"},
@@ -177,7 +184,7 @@ export const subCategories3: Categories = {
         {"id": 3040514, "name": "Travel"},
         {"id": 3040515, "name": "Comics & Graphic Novels"},
 
-    ],
+    ].sort(sortCategory),
     30101: [ // Under Music
         {"id": 3010101, "name": "Rock"},
         {"id": 3010102, "name": "Pop"},
@@ -199,7 +206,7 @@ export const subCategories3: Categories = {
         {"id": 3010118, "name": "Children's Music"},
         {"id": 3010119, "name": "New Age"},
         {"id": 3010120, "name": "Classical Crossover"}
-    ]
+    ].sort(sortCategory)
 
 
 };
@@ -207,6 +214,7 @@ export const icons = {
     1: softwareIcon,
     2: gamingIcon,
     3: mediaIcon,
+    4: softwareIcon,
     302: videoIcon,
     301: audioIcon,
     304: documentIcon

@@ -51,7 +51,7 @@ import {
 
 
 } from "../../constants/Identifiers.ts";
-import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
+import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
@@ -114,7 +114,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
     useState<any>(null);
     
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
-  const [publishes, setPublishes] = useState<any[]>([]);
+  const [publishes, setPublishes] = useState<any>(null);
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
     maxSize: 419430400, // 400 MB in bytes
@@ -308,8 +308,14 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
-      setPublishes(listOfPublishes);
+
+        const multiplePublish = {
+          action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+          resources: [...listOfPublishes],
+        };
+        setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
+
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -658,6 +664,18 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
+          onError={(messageNotification)=> {
+            setIsOpenMultiplePublish(false);
+            setPublishes(null)
+            if(messageNotification){
+              dispatch(
+                  setNotification({
+                    msg: messageNotification,
+                    alertType: 'error'
+                  })
+              )
+            }
+          }}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
             setIsOpen(false);

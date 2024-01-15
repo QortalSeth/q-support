@@ -29,7 +29,7 @@ import {objectToBase64} from "../../utils/toBase64";
 import {RootState} from "../../state/store";
 import {setEditVideo, updateInHashMap, updateVideo,} from "../../state/features/videoSlice";
 import {QSHARE_FILE_BASE,} from "../../constants/Identifiers.ts";
-import {MultiplePublish} from "../common/MultiplePublish/MultiplePublish";
+import {MultiplePublish} from "../common/MultiplePublish/MultiplePublishAll";
 import {TextEditor} from "../common/TextEditor/TextEditor";
 import {extractTextFromHTML} from "../common/TextEditor/utils";
 import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
@@ -65,7 +65,7 @@ export const EditFile = () => {
   const editVideoProperties = useSelector(
     (state: RootState) => state.video.editVideoProperties
   );
-  const [publishes, setPublishes] = useState<any[]>([]);
+  const [publishes, setPublishes] = useState<any>(null);
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
   const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] =
     useState(null);
@@ -378,7 +378,11 @@ export const EditFile = () => {
       };
       listOfPublishes.push(requestBodyJson);
 
-      setPublishes(listOfPublishes);
+      const multiplePublish = {
+        action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+        resources: [...listOfPublishes],
+      };
+      setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
       setVideoPropertiesToSetToRedux({
         ...editVideoProperties,
@@ -726,6 +730,18 @@ export const EditFile = () => {
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
+          onError={(messageNotification)=> {
+            setIsOpenMultiplePublish(false);
+            setPublishes(null)
+            if(messageNotification){
+              dispatch(
+                  setNotification({
+                    msg: messageNotification,
+                    alertType: 'error'
+                  })
+              )
+            }
+          }}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
             const clonedCopy = structuredClone(videoPropertiesToSetToRedux);

@@ -376,7 +376,7 @@ export const FileList = ({ mode }: VideoListProps) => {
             }}
             onKeyDown={searchOnEnter}
             value={filterName}
-            placeholder="User's Exact Name"
+            placeholder="User's Name (Exact)"
             sx={{
               marginTop: "20px",
               borderBottom: "1px solid white",
