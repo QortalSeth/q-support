@@ -15,7 +15,7 @@ import { setUserAvatarHash } from "../state/features/globalSlice";
 import { VideoPlayerGlobal } from "../components/common/VideoPlayerGlobal";
 import { Rnd } from "react-rnd";
 import { RequestQueue } from "../utils/queue";
-import { EditVideo } from "../components/EditVideo/EditVideo";
+import { EditFile } from "../components/EditFile/EditFile.tsx";
 import { EditPlaylist } from "../components/EditPlaylist/EditPlaylist";
 import ConsentModal from "../components/common/ConsentModal";
 
@@ -138,7 +138,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         userAvatar={userAvatar}
         authenticate={askForAccountInformation}
       />
-      <EditVideo />
+      <EditFile />
       <EditPlaylist />
       <Rnd
         onDragStart={onDragStart}

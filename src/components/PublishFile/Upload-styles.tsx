@@ -67,9 +67,9 @@ export const ModalBody = styled(Box)(({ theme }) => ({
   overflowY: "auto",
   maxHeight: "95vh",
   boxShadow:
-    theme.palette.mode === "dark"
-      ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
-      : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+      theme.palette.mode === "dark"
+          ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
+          : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
   "&::-webkit-scrollbar-track": {
     backgroundColor: theme.palette.background.paper,
   },
@@ -203,11 +203,11 @@ export const CrowdfundDescription = styled(Typography)(({ theme }) => ({
 
 export const Spacer = ({ height }: any) => {
   return (
-    <Box
-      sx={{
-        height: height,
-      }}
-    />
+      <Box
+          sx={{
+            height: height,
+          }}
+      />
   );
 };
 
@@ -314,14 +314,14 @@ export const AddCrowdFundButton = styled(Button)(({ theme }) => ({
   gap: "8px",
   color: "#ffffff",
   backgroundColor:
-    theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
+      theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
   border: "none",
   borderRadius: "5px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
     backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
+        theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
   },
 }));
 
@@ -333,14 +333,14 @@ export const EditCrowdFundButton = styled(Button)(({ theme }) => ({
   gap: "8px",
   color: "#ffffff",
   backgroundColor:
-    theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
+      theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
   border: "none",
   borderRadius: "5px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
     backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
+        theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
   },
 }));
 

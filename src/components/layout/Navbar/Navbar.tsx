@@ -35,8 +35,8 @@ import {
 } from "../../../state/features/videoSlice";
 import { RootState } from "../../../state/store";
 import { useWindowSize } from "../../../hooks/useWindowSize";
-import { UploadVideo } from "../../UploadVideo/UploadVideo";
-import { StyledButton } from "../../UploadVideo/Upload-styles";
+import { PublishFile } from "../../PublishFile/PublishFile.tsx";
+import { StyledButton } from "../../PublishFile/Upload-styles.tsx";
 interface Props {
   isAuthenticated: boolean;
   userName: string | null;
@@ -400,7 +400,7 @@ const NavBar: React.FC<Props> = ({
         <AvatarContainer>
           {isAuthenticated && userName && (
             <>
-            <UploadVideo />
+            <PublishFile />
             </>
           )}
           

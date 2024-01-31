@@ -1,6 +1,6 @@
 import React from 'react'
 import { CardContentContainerComment } from '../common/Comments/Comments-styles'
-import { CrowdfundSubTitle, CrowdfundSubTitleRow } from '../UploadVideo/Upload-styles'
+import { CrowdfundSubTitle, CrowdfundSubTitleRow } from '../PublishFile/Upload-styles.tsx'
 import { Box, Typography, useTheme } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 

@@ -21,7 +21,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { useFetchVideos } from "../../hooks/useFetchVideos";
+import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
 import {
   BlockIconContainer,
@@ -40,7 +40,7 @@ import {
   VideoCardTitle,
   VideoContainer,
   VideoUploadDate,
-} from "./VideoList-styles";
+} from "./FileList-styles.tsx";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import { formatDate, formatTimestampSeconds } from "../../utils/time";
 import { Subtitle, SubtitleContainer } from "./Home-styles";
@@ -59,17 +59,17 @@ import {
   setEditPlaylist,
   setEditVideo,
 } from "../../state/features/videoSlice";
-import { categories, icons, subCategories, subCategories2, subCategories3 } from "../../constants";
 import { Playlists } from "../../components/Playlists/Playlists";
 import { PlaylistSVG } from "../../assets/svgs/PlaylistSVG";
 import BlockIcon from "@mui/icons-material/Block";
 import EditIcon from '@mui/icons-material/Edit';
 import { formatBytes } from "../VideoContent/VideoContent";
+import {categories, icons, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
 
 interface VideoListProps {
   mode?: string;
 }
-export const VideoList = ({ mode }: VideoListProps) => {
+export const FileList = ({ mode }: VideoListProps) => {
   const theme = useTheme();
   const prevVal = useRef("");
   const isFiltering = useSelector(
@@ -152,10 +152,10 @@ export const VideoList = ({ mode }: VideoListProps) => {
     (state: RootState) => state.video
   );
   const navigate = useNavigate();
-  const { getVideos, getNewVideos, checkNewVideos, getVideosFiltered } =
-    useFetchVideos();
+  const { getFiles, getNewFiles, checkNewFiles, getFilesFiltered } =
+    useFetchFiles();
 
-  const getVideosHandler = React.useCallback(
+  const getFilesHandler = React.useCallback(
     async (reset?: boolean, resetFilers?: boolean) => {
       
 
@@ -168,7 +168,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
           subcategory2: selectedSubCategoryVideos2?.id,
           subcategory3: selectedSubCategoryVideos3?.id,
       })
-      await getVideos(
+      await getFiles(
         {
           name: filterName,
           category: selectedCategoryVideos?.id,
@@ -184,9 +184,9 @@ export const VideoList = ({ mode }: VideoListProps) => {
       isFetching.current = false;
     },
     [
-      getVideos,
+      getFiles,
       filterValue,
-      getVideosFiltered,
+      getFilesFiltered,
       isFiltering,
       filterName,
       selectedCategoryVideos,
@@ -198,24 +198,30 @@ export const VideoList = ({ mode }: VideoListProps) => {
     ]
   );
 
+  const searchOnEnter = e => {
+    if (e.keyCode == 13) {
+      getFilesHandler(true);
+    }
+  };
+
   useEffect(() => {
     if (isFiltering && filterValue !== prevVal?.current) {
       prevVal.current = filterValue;
-      getVideosHandler();
+      getFilesHandler();
     }
   }, [filterValue, isFiltering, filteredVideos]);
 
-  const getVideosHandlerMount = React.useCallback(async () => {
+  const getFilesHandlerMount = React.useCallback(async () => {
     if (firstFetch.current) return;
     firstFetch.current = true;
     setIsLoading(true);
 
-    await getVideos();
+    await getFiles();
     afterFetch.current = true;
     isFetching.current = false;
 
     setIsLoading(false);
-  }, [getVideos]);
+  }, [getFiles]);
 
   let videos = globalVideos;
 
@@ -259,12 +265,12 @@ export const VideoList = ({ mode }: VideoListProps) => {
       globalVideos.length === 0
     ) {
       isFetching.current = true;
-      getVideosHandlerMount();
+      getFilesHandlerMount();
     } else {
       firstFetch.current = true;
       afterFetch.current = true;
     }
-  }, [getVideosHandlerMount, globalVideos]);
+  }, [getFilesHandlerMount, globalVideos]);
 
   const filtersToDefault = async () => {
     setFilterType("videos");
@@ -274,7 +280,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
     setSelectedSubCategoryVideos(null);
 
     ReactDOM.flushSync(() => {
-      getVideosHandler(true, true);
+      getFilesHandler(true, true);
     });
   };
 
@@ -340,6 +346,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
             onChange={(e) => {
               setFilterSearch(e.target.value);
             }}
+            onKeyDown={searchOnEnter}
             value={filterSearch}
             placeholder="Search"
             sx={{
@@ -367,8 +374,9 @@ export const VideoList = ({ mode }: VideoListProps) => {
             onChange={(e) => {
               setFilterName(e.target.value);
             }}
+            onKeyDown={searchOnEnter}
             value={filterName}
-            placeholder="User's name"
+            placeholder="User's Name (Exact)"
             sx={{
               marginTop: "20px",
               borderBottom: "1px solid white",
@@ -640,7 +648,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
           </Button>
           <Button
             onClick={() => {
-              getVideosHandler(true);
+              getFilesHandler(true);
             }}
             sx={{
               marginTop: "20px",
@@ -833,7 +841,7 @@ export const VideoList = ({ mode }: VideoListProps) => {
           </VideoContainer>
 
           <LazyLoad
-            onLoadMore={getVideosHandler}
+            onLoadMore={getFilesHandler}
             isLoading={isLoading}
           ></LazyLoad>
         </Box>

@@ -1,17 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
-  AddCoverImageButton,
-  AddLogoIcon,
-  CoverImagePreview,
   CrowdfundActionButton,
   CrowdfundActionButtonRow,
   CustomInputField,
-  CustomSelect,
-  LogoPreviewRow,
   ModalBody,
   NewCrowdfundTitle,
-  StyledButton,
-  TimesIcon,
 } from "./Upload-styles";
 import {
   Box,
@@ -28,27 +21,19 @@ import {
 import RemoveIcon from "@mui/icons-material/Remove";
 
 import ShortUniqueId from "short-unique-id";
-import { useDispatch, useSelector } from "react-redux";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import { useDropzone } from "react-dropzone";
+import {useDispatch, useSelector} from "react-redux";
+import {useDropzone} from "react-dropzone";
 
-import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
-import { RootState } from "../../state/store";
-import {
-  upsertVideosBeginning,
-  addToHashMap,
-  upsertVideos,
-  setEditVideo,
-  updateVideo,
-  updateInHashMap,
-} from "../../state/features/videoSlice";
-import ImageUploader from "../common/ImageUploader";
-import { QTUBE_VIDEO_BASE, categories, subCategories,   subCategories2,
-  subCategories3, } from "../../constants";
-import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
-import { TextEditor } from "../common/TextEditor/TextEditor";
-import { extractTextFromHTML } from "../common/TextEditor/utils";
+import {setNotification} from "../../state/features/notificationsSlice";
+import {objectToBase64} from "../../utils/toBase64";
+import {RootState} from "../../state/store";
+import {setEditVideo, updateInHashMap, updateVideo,} from "../../state/features/videoSlice";
+import {QSHARE_FILE_BASE,} from "../../constants/Identifiers.ts";
+import {MultiplePublish} from "../common/MultiplePublish/MultiplePublishAll";
+import {TextEditor} from "../common/TextEditor/TextEditor";
+import {extractTextFromHTML} from "../common/TextEditor/utils";
+import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
+import {titleFormatter} from "../../constants/Misc.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -70,7 +55,7 @@ interface VideoFile {
   identifier?:string;
   filename?:string
 }
-export const EditVideo = () => {
+export const EditFile = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.auth?.user?.name);
@@ -80,7 +65,7 @@ export const EditVideo = () => {
   const editVideoProperties = useSelector(
     (state: RootState) => state.video.editVideoProperties
   );
-  const [publishes, setPublishes] = useState<any[]>([]);
+  const [publishes, setPublishes] = useState<any>(null);
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
   const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] =
     useState(null);
@@ -302,7 +287,7 @@ export const EditVideo = () => {
         const file = publish.file;
         const id = uid();
 
-        const identifier = `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
         
 
@@ -347,7 +332,7 @@ export const EditVideo = () => {
           description: metadescription,
           identifier,
           filename,
-          tag1: QTUBE_VIDEO_BASE,
+          tag1: QSHARE_FILE_BASE,
         };
         listOfPublishes.push(requestBodyVideo);
         fileReferences.push({
@@ -388,12 +373,16 @@ export const EditVideo = () => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editVideoProperties.id,
-        tag1: QTUBE_VIDEO_BASE,
+        tag1: QSHARE_FILE_BASE,
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
 
-      setPublishes(listOfPublishes);
+      const multiplePublish = {
+        action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+        resources: [...listOfPublishes],
+      };
+      setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
       setVideoPropertiesToSetToRedux({
         ...editVideoProperties,
@@ -686,10 +675,7 @@ export const EditVideo = () => {
                     value={title}
                     onChange={(e) => {
                       const value = e.target.value;
-                      const formattedValue = value.replace(
-                        /[^a-zA-Z0-9\s-_!?]/g,
-                        ""
-                      );
+                      const formattedValue = value.replace(titleFormatter, "");
                       setTitle(formattedValue);
                     }}
                     inputProps={{ maxLength: 180 }}
@@ -744,6 +730,18 @@ export const EditVideo = () => {
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
+          onError={(messageNotification)=> {
+            setIsOpenMultiplePublish(false);
+            setPublishes(null)
+            if(messageNotification){
+              dispatch(
+                  setNotification({
+                    msg: messageNotification,
+                    alertType: 'error'
+                  })
+              )
+            }
+          }}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
             const clonedCopy = structuredClone(videoPropertiesToSetToRedux);

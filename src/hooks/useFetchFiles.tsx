@@ -14,13 +14,13 @@ import {
 } from '../state/features/globalSlice'
 import { RootState } from '../state/store'
 import { fetchAndEvaluateVideos } from '../utils/fetchVideos'
-import { QTUBE_PLAYLIST_BASE, QTUBE_VIDEO_BASE } from '../constants'
+import { QSHARE_PLAYLIST_BASE, QSHARE_FILE_BASE } from '../constants/Identifiers.ts'
 import { RequestQueue } from '../utils/queue'
 import { queue } from '../wrappers/GlobalWrapper'
 
 
 
-export const useFetchVideos = () => {
+export const useFetchFiles = () => {
   const dispatch = useDispatch()
   const hashMapVideos = useSelector(
     (state: RootState) => state.video.hashMapVideos
@@ -95,7 +95,7 @@ export const useFetchVideos = () => {
       dispatch(setIsLoadingGlobal(true))
       
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -213,11 +213,11 @@ export const useFetchVideos = () => {
       }
       if(type === 'playlists'){
         defaultUrl = defaultUrl + `&service=PLAYLIST`
-        defaultUrl = defaultUrl + `&identifier=${QTUBE_PLAYLIST_BASE}`
+        defaultUrl = defaultUrl + `&identifier=${QSHARE_PLAYLIST_BASE}`
         
       } else {
         defaultUrl = defaultUrl + `&service=DOCUMENT`
-        defaultUrl = defaultUrl + `&identifier=${QTUBE_VIDEO_BASE}`
+        defaultUrl = defaultUrl + `&identifier=${QSHARE_FILE_BASE}`
       }
 
       // const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}&limit=${videoLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
@@ -288,7 +288,7 @@ export const useFetchVideos = () => {
       const offset = filteredVideos.length
       const replaceSpacesWithUnderscore = filterValue.replace(/ /g, '_');
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${replaceSpacesWithUnderscore}&identifier=${QTUBE_VIDEO_BASE}&limit=10&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${replaceSpacesWithUnderscore}&identifier=${QSHARE_FILE_BASE}&limit=10&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -345,7 +345,7 @@ export const useFetchVideos = () => {
     try {
     
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -382,12 +382,12 @@ export const useFetchVideos = () => {
 
 
   return {
-    getVideos,
+    getFiles: getVideos,
     checkAndUpdateVideo,
     getVideo,
     hashMapVideos,
-    getNewVideos,
-    checkNewVideos,
-    getVideosFiltered
+    getNewFiles: getNewVideos,
+    checkNewFiles: checkNewVideos,
+    getFilesFiltered: getVideosFiltered
   }
 }

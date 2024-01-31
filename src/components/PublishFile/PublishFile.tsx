@@ -44,21 +44,23 @@ import {
 } from "../../state/features/videoSlice";
 import ImageUploader from "../common/ImageUploader";
 import {
-  QTUBE_PLAYLIST_BASE,
-  QTUBE_VIDEO_BASE,
-  categories,
-  subCategories,
-  subCategories2,
-  subCategories3,
-} from "../../constants";
-import { MultiplePublish } from "../common/MultiplePublish/MultiplePublish";
+  QSHARE_PLAYLIST_BASE,
+  QSHARE_FILE_BASE,
+
+
+
+
+} from "../../constants/Identifiers.ts";
+import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
-} from "../EditPlaylist/Upload-styles";
+} from "../EditPlaylist/Upload-styles.tsx";
 import { CardContentContainerComment } from "../common/Comments/Comments-styles";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
+import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
+import {titleFormatter} from "../../constants/Misc.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -78,7 +80,7 @@ interface VideoFile {
   description: string;
   coverImage?: string;
 }
-export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
+export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
@@ -112,7 +114,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
     useState<any>(null);
     
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
-  const [publishes, setPublishes] = useState<any[]>([]);
+  const [publishes, setPublishes] = useState<any>(null);
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
     maxSize: 419430400, // 400 MB in bytes
@@ -214,7 +216,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         const file = publish.file;
         const id = uid();
 
-        const identifier = `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
         
 
@@ -260,7 +262,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
           description: metadescription,
           identifier,
           filename,
-          tag1: QTUBE_VIDEO_BASE,
+          tag1: QSHARE_FILE_BASE,
         };
         listOfPublishes.push(requestBodyVideo);
         fileReferences.push({
@@ -274,13 +276,13 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
       }
 
       const idMeta = uid();
-      const identifier = `${QTUBE_VIDEO_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
+      const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
       const fileObject: any = {
         title,
         version: 1,
         fullDescription,
         htmlDescription: description,
-        commentsId: `${QTUBE_VIDEO_BASE}_cm_${idMeta}`,
+        commentsId: `${QSHARE_FILE_BASE}_cm_${idMeta}`,
         category,
         subcategory,
         subcategory2,
@@ -302,12 +304,18 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier + "_metadata",
-        tag1: QTUBE_VIDEO_BASE,
+        tag1: QSHARE_FILE_BASE,
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
-      setPublishes(listOfPublishes);
+
+        const multiplePublish = {
+          action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+          resources: [...listOfPublishes],
+        };
+        setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
+
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -599,10 +607,7 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
                     value={title}
                     onChange={(e) => {
                       const value = e.target.value;
-                      const formattedValue = value.replace(
-                        /[^a-zA-Z0-9\s-_!?]/g,
-                        ""
-                      );
+                      const formattedValue = value.replace(titleFormatter, "");
                       setTitle(formattedValue);
                     }}
                     inputProps={{ maxLength: 180 }}
@@ -659,6 +664,18 @@ export const UploadVideo = ({ editId, editContent }: NewCrowdfundProps) => {
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
+          onError={(messageNotification)=> {
+            setIsOpenMultiplePublish(false);
+            setPublishes(null)
+            if(messageNotification){
+              dispatch(
+                  setNotification({
+                    msg: messageNotification,
+                    alertType: 'error'
+                  })
+              )
+            }
+          }}
           onSubmit={() => {
             setIsOpenMultiplePublish(false);
             setIsOpen(false);

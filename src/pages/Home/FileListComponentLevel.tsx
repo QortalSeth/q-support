@@ -12,20 +12,21 @@ import {
   Typography,
   useTheme
 } from '@mui/material'
-import { useFetchVideos } from '../../hooks/useFetchVideos'
+import { useFetchFiles } from '../../hooks/useFetchFiles.tsx'
 import LazyLoad from '../../components/common/LazyLoad'
-import { BottomParent, NameContainer, VideoCard, VideoCardName, VideoCardTitle, VideoContainer, VideoUploadDate } from './VideoList-styles'
+import { BottomParent, NameContainer, VideoCard, VideoCardName, VideoCardTitle, VideoContainer, VideoUploadDate } from './FileList-styles.tsx'
 import ResponsiveImage from '../../components/ResponsiveImage'
 import { formatDate, formatTimestampSeconds } from '../../utils/time'
 import { Video } from '../../state/features/videoSlice'
 import { queue } from '../../wrappers/GlobalWrapper'
-import { QTUBE_VIDEO_BASE, categories, icons, subCategories, subCategories2, subCategories3 } from '../../constants'
+import { QSHARE_FILE_BASE } from '../../constants/Identifiers.ts'
 import { formatBytes } from '../VideoContent/VideoContent'
+import {categories, icons, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
 
 interface VideoListProps {
   mode?: string
 }
-export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
+export const FileListComponentLevel = ({ mode }: VideoListProps) => {
   const { name: paramName } = useParams()
   const theme = useTheme()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -48,15 +49,15 @@ export const VideoListComponentLevel = ({ mode }: VideoListProps) => {
   const navigate = useNavigate()
   const {
     getVideo,
-    getNewVideos,
-    checkNewVideos,
+    getNewFiles,
+    checkNewFiles,
     checkAndUpdateVideo
-  } = useFetchVideos()
+  } = useFetchFiles()
 
   const getVideos = React.useCallback(async () => {
     try {
       const offset = videos.length   
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}_&limit=50&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}_&limit=50&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
