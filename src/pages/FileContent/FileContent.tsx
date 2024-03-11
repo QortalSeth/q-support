@@ -1,72 +1,67 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { Avatar, Box, Typography, useTheme } from "@mui/material";
-import { VideoPlayer } from "../../components/common/VideoPlayer";
 import { RootState } from "../../state/store";
-import { addToHashMap } from "../../state/features/videoSlice";
+import { addToHashMap } from "../../state/features/fileSlice.ts";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
-
-import mockImg from "../../test/mockimg.jpg";
 import {
   AuthorTextComment,
   FileAttachmentContainer,
   FileAttachmentFont,
+  FileDescription,
+  FilePlayerContainer,
+  FileTitle,
   Spacer,
   StyledCardColComment,
   StyledCardHeaderComment,
-  VideoDescription,
-  VideoPlayerContainer,
-  VideoTitle,
-} from "./VideoContent-styles";
-import { setUserAvatarHash } from "../../state/features/globalSlice";
-import {
-  formatDate,
-  formatDateSeconds,
-  formatTimestampSeconds,
-} from "../../utils/time";
-import { NavbarName } from "../../components/layout/Navbar/Navbar-styles";
+} from "./FileContent-styles.tsx";
+import { formatDate } from "../../utils/time";
 import { CommentSection } from "../../components/common/Comments/CommentSection";
-import {
-  CrowdfundSubTitle,
-  CrowdfundSubTitleRow,
-} from "../../components/PublishFile/Upload-styles.tsx";
 import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
-import { Playlists } from "../../components/Playlists/Playlists";
 import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
-import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
+import {
+  allCategoryData,
+  iconCategories,
+} from "../../constants/Categories/1stCategories.ts";
+import {
+  Category,
+  getCategoriesFromObject,
+} from "../../components/common/CategoryList/CategoryList.tsx";
+import {
+  findAllCategoryData,
+  findCategoryData,
+  getCategoriesWithIcons,
+  getIconsFromObject,
+} from "../../constants/Categories/CategoryFunctions.ts";
 
 export function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-
-
-
-export const VideoContent = () => {
+export const FileContent = () => {
   const { name, id } = useParams();
   const [isExpandedDescription, setIsExpandedDescription] =
     useState<boolean>(false);
-    const [descriptionHeight, setDescriptionHeight] =
-    useState<null | number>(null);
-    
+  const [descriptionHeight, setDescriptionHeight] = useState<null | number>(
+    null
+  );
+  const [icon, setIcon] = useState<string>("");
   const userAvatarHash = useSelector(
     (state: RootState) => state.global.userAvatarHash
   );
   const contentRef = useRef(null);
-  
-  
 
   const avatarUrl = useMemo(() => {
     let url = "";
@@ -79,15 +74,15 @@ export const VideoContent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const [videoData, setVideoData] = useState<any>(null);
+  const [fileData, setFileData] = useState<any>(null);
   const [playlistData, setPlaylistData] = useState<any>(null);
 
   const hashMapVideos = useSelector(
-    (state: RootState) => state.video.hashMapVideos
+    (state: RootState) => state.file.hashMapFiles
   );
   const videoReference = useMemo(() => {
-    if (!videoData) return null;
-    const { videoReference } = videoData;
+    if (!fileData) return null;
+    const { videoReference } = fileData;
     if (
       videoReference?.identifier &&
       videoReference?.name &&
@@ -97,13 +92,13 @@ export const VideoContent = () => {
     } else {
       return null;
     }
-  }, [videoData]);
+  }, [fileData]);
 
   const videoCover = useMemo(() => {
-    if (!videoData) return null;
-    const { videoImage } = videoData;
+    if (!fileData) return null;
+    const { videoImage } = fileData;
     return videoImage || null;
-  }, [videoData]);
+  }, [fileData]);
   const dispatch = useDispatch();
 
   const getVideoData = React.useCallback(async (name: string, id: string) => {
@@ -147,8 +142,7 @@ export const VideoContent = () => {
             ...resourceData,
             ...responseData,
           };
-
-          setVideoData(combinedData);
+          setFileData(combinedData);
           dispatch(addToHashMap(combinedData));
           checkforPlaylist(name, id, combinedData?.code);
         }
@@ -230,7 +224,7 @@ export const VideoContent = () => {
       const existingVideo = hashMapVideos[id];
 
       if (existingVideo) {
-        setVideoData(existingVideo);
+        setFileData(existingVideo);
         checkforPlaylist(name, id, existingVideo?.code);
       } else {
         getVideoData(name, id);
@@ -272,25 +266,51 @@ export const VideoContent = () => {
   useEffect(() => {
     if (contentRef.current) {
       const height = contentRef.current.offsetHeight;
-      if (height > 100) { // Assuming 100px is your threshold
-        setDescriptionHeight(100)
+      if (height > 100) {
+        // Assuming 100px is your threshold
+        setDescriptionHeight(100);
       }
     }
-  }, [videoData]); 
+    if (fileData) {
+      //const icon = getIconsFromObject(fileData)[0]?.icon || null;
 
-  const categoriesDisplay = useMemo(()=> {
-    const category = categories?.find((item)=> item?.id === videoData?.category)
-    if(!category) return null
-    const subcategory = subCategories[category?.id]?.find(item=> item?.id === videoData?.subcategory)
-    if(!subcategory) return category?.name
+      const icon = getIconsFromObject(fileData);
+      setIcon(icon);
+    }
+  }, [fileData]);
 
-    const subcategory2 = subCategories2[subcategory?.id]?.find(item => item.id === videoData?.subcategory2)
-    if(!subcategory2) return `${category?.name} > ${subcategory?.name}`
-    const subcategory3 = subCategories3[subcategory2?.id]?.find(item => item.id === videoData?.subcategory3)
-    if(!subcategory3) return `${category?.name} > ${subcategory?.name} > ${subcategory2?.name}`
-    return  `${category?.name} > ${subcategory?.name} > ${subcategory2?.name} > ${subcategory3?.name}`
-  }, [videoData])
-  
+  const categoriesDisplay = useMemo(() => {
+    if (fileData) {
+      const categoryList = getCategoriesFromObject(fileData);
+
+      const categoryNames = categoryList.map((categoryID, index) => {
+        let categoryName: Category;
+        if (index === 0) {
+          categoryName = allCategoryData.category.find(
+            item => item?.id === +categoryList[0]
+          );
+        } else {
+          const subCategories = allCategoryData.subCategories[index - 1];
+          const selectedSubCategory = subCategories[categoryList[index - 1]];
+          if (selectedSubCategory) {
+            categoryName = selectedSubCategory.find(
+              item => item?.id === +categoryList[index]
+            );
+          }
+        }
+        return categoryName?.name;
+      });
+      const filteredCategoryNames = categoryNames.filter(name => name);
+      let categoryDisplay = "";
+      const separator = " > ";
+      filteredCategoryNames.map((name, index) => {
+        categoryDisplay +=
+          index !== filteredCategoryNames.length - 1 ? name + separator : name;
+      });
+      return categoryDisplay;
+    }
+    return "no videodata";
+  }, [fileData]);
 
   return (
     <Box
@@ -301,24 +321,42 @@ export const VideoContent = () => {
         padding: "20px 10px",
       }}
     >
-      <VideoPlayerContainer
+      <FilePlayerContainer
         sx={{
           marginBottom: "30px",
         }}
       >
-       
         <Spacer height="15px" />
-       
-        <VideoTitle
-          variant="h1"
-          color="textPrimary"
-          sx={{
-            textAlign: "center",
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
           }}
         >
-          {videoData?.title}
-        </VideoTitle>
-        {videoData?.created && (
+          {icon ? (
+            <img
+              src={icon}
+              width="50px"
+              style={{
+                borderRadius: "5px",
+                marginRight: "10px",
+              }}
+            />
+          ) : (
+            <AttachFileIcon />
+          )}
+          <FileTitle
+            variant="h1"
+            color="textPrimary"
+            sx={{
+              textAlign: "center",
+            }}
+          >
+            {fileData?.title}
+          </FileTitle>
+        </div>
+        {fileData?.created && (
           <Typography
             variant="h6"
             sx={{
@@ -326,7 +364,7 @@ export const VideoContent = () => {
             }}
             color={theme.palette.text.primary}
           >
-            {formatDate(videoData.created)}
+            {formatDate(fileData.created)}
           </Typography>
         )}
 
@@ -367,11 +405,15 @@ export const VideoContent = () => {
         </Box>
         <Spacer height="15px" />
         <Box>
-          <Typography sx={{
-            fontWeight: 'bold',
-            fontSize: '16px',
-            userSelect: 'none'
-          }}>{categoriesDisplay}</Typography>
+          <Typography
+            sx={{
+              fontWeight: "bold",
+              fontSize: "16px",
+              userSelect: "none",
+            }}
+          >
+            {categoriesDisplay}
+          </Typography>
         </Box>
         <Spacer height="15px" />
         <Box
@@ -380,10 +422,16 @@ export const VideoContent = () => {
             borderRadius: "5px",
             padding: "5px",
             width: "100%",
-            cursor: !descriptionHeight ? "default" : isExpandedDescription ? "default" : "pointer",
+            cursor: !descriptionHeight
+              ? "default"
+              : isExpandedDescription
+                ? "default"
+                : "pointer",
             position: "relative",
           }}
-          className={!descriptionHeight ? "": isExpandedDescription ? "" : "hover-click"}
+          className={
+            !descriptionHeight ? "" : isExpandedDescription ? "" : "hover-click"
+          }
         >
           {descriptionHeight && !isExpandedDescription && (
             <Box
@@ -402,95 +450,101 @@ export const VideoContent = () => {
             />
           )}
           <Box
-          ref={contentRef}
+            ref={contentRef}
             sx={{
-              height: !descriptionHeight ? 'auto' : isExpandedDescription ? "auto" : "100px",
+              height: !descriptionHeight
+                ? "auto"
+                : isExpandedDescription
+                  ? "auto"
+                  : "100px",
               overflow: "hidden",
             }}
           >
-            {videoData?.htmlDescription ? (
-              <DisplayHtml html={videoData?.htmlDescription} />
+            {fileData?.htmlDescription ? (
+              <DisplayHtml html={fileData?.htmlDescription} />
             ) : (
-              <VideoDescription variant="body1" color="textPrimary" sx={{
-                cursor: 'default'
-              }}>
-                {videoData?.fullDescription}
-              </VideoDescription>
+              <FileDescription
+                variant="body1"
+                color="textPrimary"
+                sx={{
+                  cursor: "default",
+                }}
+              >
+                {fileData?.fullDescription}
+              </FileDescription>
             )}
           </Box>
           {descriptionHeight && (
-             <Typography
-             onClick={() => {
-               setIsExpandedDescription((prev) => !prev);
-             }}
-             sx={{
-               fontWeight: "bold",
-               fontSize: "16px",
-               cursor: "pointer",
-               paddingLeft: "15px",
-               paddingTop: "15px",
-             }}
-           >
-             {isExpandedDescription ? "Show less" : "...more"}
-           </Typography>
+            <Typography
+              onClick={() => {
+                setIsExpandedDescription(prev => !prev);
+              }}
+              sx={{
+                fontWeight: "bold",
+                fontSize: "16px",
+                cursor: "pointer",
+                paddingLeft: "15px",
+                paddingTop: "15px",
+              }}
+            >
+              {isExpandedDescription ? "Show less" : "...more"}
+            </Typography>
           )}
-         
         </Box>
-        <Box sx={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'flex-start',
-          flexDirection: 'column',
-          gap: '25px',
-          marginTop: '25px'
-        }}>
-          {videoData?.files?.map((file)=> {
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "flex-start",
+            flexDirection: "column",
+            gap: "25px",
+            marginTop: "25px",
+          }}
+        >
+          {fileData?.files?.map((file, index) => {
             return (
-              <FileAttachmentContainer sx={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}>
-                  
-                    <FileAttachmentFont>
-                      {file.filename}
-                    </FileAttachmentFont>
-                    <Box sx={{
-         
-          display: 'flex',
-          gap: '25px',
-          alignItems: 'center',
-        
-        }}>
-
-                    
-                    <FileAttachmentFont>
-                      {formatBytes(file?.size || 0)}
-                    </FileAttachmentFont>
-                    <FileElement
-                      fileInfo={{...file,
-                        filename: file?.filename,
-                        mimeType: file?.mimetype
-                      
-                      }}
-                      jsonId={id}
-                      title={file?.filename}
-                      customStyles={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <DownloadIcon />
-                    </FileElement>
-                    </Box>
-                  </FileAttachmentContainer>
-            )
+              <FileAttachmentContainer
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+                key={file.toString() + index}
+              >
+                <FileAttachmentFont>{file.filename}</FileAttachmentFont>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: "25px",
+                    alignItems: "center",
+                  }}
+                >
+                  <FileAttachmentFont>
+                    {formatBytes(file?.size || 0)}
+                  </FileAttachmentFont>
+                  <FileElement
+                    fileInfo={{
+                      ...file,
+                      filename: file?.filename,
+                      mimeType: file?.mimetype,
+                    }}
+                    jsonId={id}
+                    title={file?.filename}
+                    customStyles={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <DownloadIcon />
+                  </FileElement>
+                </Box>
+              </FileAttachmentContainer>
+            );
           })}
-        
-                  </Box>
-      </VideoPlayerContainer>
-            
+        </Box>
+      </FilePlayerContainer>
+
       <Box
         sx={{
           display: "flex",
