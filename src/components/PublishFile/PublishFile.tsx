@@ -7,18 +7,7 @@ import {
   NewCrowdfundTitle,
   StyledButton,
 } from "./Upload-styles";
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Modal,
-  OutlinedInput,
-  Select,
-  SelectChangeEvent,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Modal, Typography, useTheme } from "@mui/material";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,13 +21,7 @@ import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
-import {
-  firstCategories,
-  secondCategories,
-  thirdCategories,
-  fourthCategories,
-  allCategoryData,
-} from "../../constants/Categories/1stCategories.ts";
+import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
 import { titleFormatter } from "../../constants/Misc.ts";
 import {
   CategoryList,

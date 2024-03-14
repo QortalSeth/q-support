@@ -1,48 +1,27 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
-import {
-  Avatar,
-  Box,
-  Button,
-  Skeleton,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Avatar, Box, Skeleton, useTheme } from "@mui/material";
 import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
 import {
   BottomParent,
+  FileContainer,
   NameContainer,
   VideoCard,
   VideoCardName,
   VideoCardTitle,
-  FileContainer,
   VideoUploadDate,
 } from "./FileList-styles.tsx";
-import ResponsiveImage from "../../components/ResponsiveImage";
-import { formatDate, formatTimestampSeconds } from "../../utils/time";
+import { formatDate } from "../../utils/time";
 import { Video } from "../../state/features/fileSlice.ts";
 import { queue } from "../../wrappers/GlobalWrapper";
 import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
 import { formatBytes } from "../FileContent/FileContent.tsx";
-import {
-  firstCategories,
-  secondCategories,
-  thirdCategories,
-  fourthCategories,
-  iconCategories,
-} from "../../constants/Categories/1stCategories.ts";
-import { getCategoriesFromObject } from "../../components/common/CategoryList/CategoryList.tsx";
-import {
-  findAllCategoryData,
-  findCategoryData,
-  getCategoriesWithIcons,
-  getIconsFromObject,
-} from "../../constants/Categories/CategoryFunctions.ts";
+import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
 
 interface VideoListProps {
   mode?: string;
