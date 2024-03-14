@@ -1,66 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  AddCoverImageButton,
-  AddLogoIcon,
-  CoverImagePreview,
   CrowdfundActionButton,
   CrowdfundActionButtonRow,
   CustomInputField,
-  CustomSelect,
-  LogoPreviewRow,
   ModalBody,
   NewCrowdfundTitle,
   StyledButton,
-  TimesIcon,
 } from "./Upload-styles";
-import {
-  Box,
-  Button,
-  FormControl,
-  Input,
-  InputLabel,
-  MenuItem,
-  Modal,
-  OutlinedInput,
-  Select,
-  SelectChangeEvent,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Modal, Typography, useTheme } from "@mui/material";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useDropzone } from "react-dropzone";
-import AddIcon from "@mui/icons-material/Add";
 
 import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
+import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
-import {
-  upsertVideosBeginning,
-  addToHashMap,
-  upsertVideos,
-} from "../../state/features/videoSlice";
-import ImageUploader from "../common/ImageUploader";
-import {
-  QSHARE_PLAYLIST_BASE,
-  QSHARE_FILE_BASE,
-
-
-
-
-} from "../../constants/Identifiers.ts";
+import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
-import {
-  CrowdfundSubTitle,
-  CrowdfundSubTitleRow,
-} from "../EditPlaylist/Upload-styles.tsx";
-import { CardContentContainerComment } from "../common/Comments/Comments-styles";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
-import {categories, subCategories, subCategories2, subCategories3} from "../../constants/Categories.ts";
-import {titleFormatter} from "../../constants/Misc.ts";
+import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
+import { titleFormatter } from "../../constants/Misc.ts";
+import {
+  CategoryList,
+  CategoryListRef,
+} from "../common/CategoryList/CategoryList.tsx";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -104,22 +70,15 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
 
-  const [selectedCategoryVideos, setSelectedCategoryVideos] =
-    useState<any>(null);
-  const [selectedSubCategoryVideos, setSelectedSubCategoryVideos] =
-    useState<any>(null);
-    const [selectedSubCategoryVideos2, setSelectedSubCategoryVideos2] =
-    useState<any>(null);
-    const [selectedSubCategoryVideos3, setSelectedSubCategoryVideos3] =
-    useState<any>(null);
-    
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
   const [publishes, setPublishes] = useState<any>(null);
+  const categoryListRef = useRef<CategoryListRef>(null);
+
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
     maxSize: 419430400, // 400 MB in bytes
     onDrop: (acceptedFiles, rejectedFiles) => {
-      const formatArray = acceptedFiles.map((item) => {
+      const formatArray = acceptedFiles.map(item => {
         return {
           file: item,
           title: "",
@@ -128,11 +87,11 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
         };
       });
 
-      setFiles((prev) => [...prev, ...formatArray]);
+      setFiles(prev => [...prev, ...formatArray]);
 
       let errorString = null;
       rejectedFiles.forEach(({ file, errors }) => {
-        errors.forEach((error) => {
+        errors.forEach(error => {
           if (error.code === "file-too-large") {
             errorString = "File must be under 400mb";
           }
@@ -159,17 +118,16 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
     setIsOpen(false);
   };
 
-
-
   async function publishQDNResource() {
+    try {
+      if (!categoryListRef.current) throw new Error("No CategoryListRef found");
+      if (!userAddress) throw new Error("Unable to locate user address");
 
-      try {
-        if (!userAddress) throw new Error("Unable to locate user address");
-
-        if (!title) throw new Error("Please enter a title");
-        if (!description) throw new Error("Please enter a description");
-        if (!selectedCategoryVideos) throw new Error("Please select a category");
-        if(files.length === 0) throw new Error("Add at least one file");
+      if (!title) throw new Error("Please enter a title");
+      if (!description) throw new Error("Please enter a description");
+      if (!categoryListRef.current?.getSelectedCategories()[0])
+        throw new Error("Please select a category");
+      if (files.length === 0) throw new Error("Add at least one file");
       let errorMsg = "";
       let name = "";
       if (username) {
@@ -194,41 +152,34 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
         return;
       }
 
-      let fileReferences = []
+      let fileReferences = [];
 
       let listOfPublishes = [];
 
-        const fullDescription = extractTextFromHTML(description);
-        const category = selectedCategoryVideos.id;
-        const subcategory = selectedSubCategoryVideos?.id || "";
-        const subcategory2 = selectedSubCategoryVideos2?.id || "";
-        const subcategory3 = selectedSubCategoryVideos3?.id || "";
+      const fullDescription = extractTextFromHTML(description);
 
-        const sanitizeTitle = title
-          .replace(/[^a-zA-Z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-")
-          .trim()
-          .toLowerCase();
+      const sanitizeTitle = title
+        .replace(/[^a-zA-Z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim()
+        .toLowerCase();
 
       for (const publish of files) {
-     
         const file = publish.file;
         const id = uid();
 
         const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
-
-        
 
         let fileExtension = "";
         const fileExtensionSplit = file?.name?.split(".");
         if (fileExtensionSplit?.length > 1) {
           fileExtension = fileExtensionSplit?.pop() || "";
         }
-        let firstPartName = fileExtensionSplit[0]
+        let firstPartName = fileExtensionSplit[0];
 
         let filename = firstPartName.slice(0, 15);
-     
+
         // Step 1: Replace all white spaces with underscores
 
         // Replace all forms of whitespace (including non-standard ones) with underscores
@@ -240,19 +191,16 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
           ""
         );
 
-        if(fileExtension){
-          filename = `${alphanumericString.trim()}.${fileExtension}`
+        if (fileExtension) {
+          filename = `${alphanumericString.trim()}.${fileExtension}`;
         } else {
-          filename = alphanumericString
+          filename = alphanumericString;
         }
 
-        
-
         let metadescription =
-        `**cat:${category};sub:${subcategory};sub2:${subcategory2};sub3:${subcategory3}**` +
+          `**${categoryListRef.current?.getCategoriesFetchString()}**` +
           fullDescription.slice(0, 150);
 
-     
         const requestBodyVideo: any = {
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
@@ -269,10 +217,10 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
           filename: file.name,
           identifier,
           name,
-          service: 'FILE',
+          service: "FILE",
           mimetype: file.type,
-          size: file.size
-        })
+          size: file.size,
+        });
       }
 
       const idMeta = uid();
@@ -283,15 +231,12 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
         fullDescription,
         htmlDescription: description,
         commentsId: `${QSHARE_FILE_BASE}_cm_${idMeta}`,
-        category,
-        subcategory,
-        subcategory2,
-        subcategory3,
-        files: fileReferences
+        ...categoryListRef.current?.categoriesToObject(),
+        files: fileReferences,
       };
 
       let metadescription =
-        `**cat:${category};sub:${subcategory};sub2:${subcategory2}**` +
+        `**${categoryListRef.current?.getCategoriesFetchString()}**` +
         fullDescription.slice(0, 150);
 
       const crowdfundObjectToBase64 = await objectToBase64(fileObject);
@@ -309,13 +254,12 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       };
       listOfPublishes.push(requestBodyJson);
 
-        const multiplePublish = {
-          action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
-          resources: [...listOfPublishes],
-        };
-        setPublishes(multiplePublish);
+      const multiplePublish = {
+        action: "PUBLISH_MULTIPLE_QDN_RESOURCES",
+        resources: [...listOfPublishes],
+      };
+      setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
-
     } catch (error: any) {
       let notificationObj: any = null;
       if (typeof error === "string") {
@@ -338,50 +282,6 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       dispatch(setNotification(notificationObj));
     }
   }
-
-
-
-  const handleOptionCategoryChangeVideos = (
-    event: SelectChangeEvent<string>
-  ) => {
-    const optionId = event.target.value;
-    const selectedOption = categories.find((option) => option.id === +optionId);
-    setSelectedCategoryVideos(selectedOption || null);
-  };
-  const handleOptionSubCategoryChangeVideos = (
-    event: SelectChangeEvent<string>,
-    subcategories: any[]
-  ) => {
-    const optionId = event.target.value;
-    const selectedOption = subcategories.find(
-      (option) => option.id === +optionId
-    );
-    setSelectedSubCategoryVideos(selectedOption || null);
-  };
-
-  const handleOptionSubCategoryChangeVideos2 = (
-    event: SelectChangeEvent<string>,
-    subcategories: any[]
-  ) => {
-    const optionId = event.target.value;
-    const selectedOption = subcategories.find(
-      (option) => option.id === +optionId
-    );
-    setSelectedSubCategoryVideos2(selectedOption || null);
-  };
-
-  const handleOptionSubCategoryChangeVideos3 = (
-    event: SelectChangeEvent<string>,
-    subcategories: any[]
-  ) => {
-    const optionId = event.target.value;
-    const selectedOption = subcategories.find(
-      (option) => option.id === +optionId
-    );
-    setSelectedSubCategoryVideos3(selectedOption || null);
-  };
-
-
 
   return (
     <>
@@ -414,9 +314,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
               justifyContent: "space-between",
             }}
           >
-          
-              <NewCrowdfundTitle>Share</NewCrowdfundTitle>
-       
+            <NewCrowdfundTitle>Share</NewCrowdfundTitle>
           </Box>
 
           {step === "videos" && (
@@ -449,7 +347,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                       <Typography>{file?.file?.name}</Typography>
                       <RemoveIcon
                         onClick={() => {
-                          setFiles((prev) => {
+                          setFiles(prev => {
                             const copyPrev = [...prev];
                             copyPrev.splice(index, 1);
                             return copyPrev;
@@ -463,149 +361,28 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                   </React.Fragment>
                 );
               })}
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "20px",
-                  alignItems: "flex-start",
-                }}
-              >
-                {files?.length > 0 && (
-                  <>
-                   <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '20px',
-                      width: '50%'
-                    }}>
-                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                      <InputLabel id="Category">Select a Category</InputLabel>
-                      <Select
-                        labelId="Category"
-                        input={<OutlinedInput label="Select a Category" />}
-                        value={selectedCategoryVideos?.id || ""}
-                        onChange={handleOptionCategoryChangeVideos}
-                      >
-                        {categories.map((option) => (
-                          <MenuItem key={option.id} value={option.id}>
-                            {option.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    </Box>
-                    {selectedCategoryVideos && (
-                      <>
-                         <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '20px',
-                      width: '50%'
-                    }}>
 
-                   
-                    {selectedCategoryVideos &&
-                      subCategories[selectedCategoryVideos?.id] && (
-                        <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                          <InputLabel id="Category">
-                            Select a Sub-Category
-                          </InputLabel>
-                          <Select
-                            labelId="Sub-Category"
-                            input={
-                              <OutlinedInput label="Select a Sub-Category" />
-                            }
-                            value={selectedSubCategoryVideos?.id || ""}
-                            onChange={(e) =>
-                              handleOptionSubCategoryChangeVideos(
-                                e,
-                                subCategories[selectedCategoryVideos?.id]
-                              )
-                            }
-                          >
-                            {subCategories[selectedCategoryVideos.id].map(
-                              (option) => (
-                                <MenuItem key={option.id} value={option.id}>
-                                  {option.name}
-                                </MenuItem>
-                              )
-                            )}
-                          </Select>
-                        </FormControl>
-                      )}
-                       {selectedSubCategoryVideos &&
-                      subCategories2[selectedSubCategoryVideos?.id] && (
-                        <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                          <InputLabel id="Category">
-                            Select a Sub-sub-Category
-                          </InputLabel>
-                          <Select
-                            labelId="Sub-Category"
-                            input={
-                              <OutlinedInput label="Select a Sub-sub-Category" />
-                            }
-                            value={selectedSubCategoryVideos2?.id || ""}
-                            onChange={(e) =>
-                              handleOptionSubCategoryChangeVideos2(
-                                e,
-                                subCategories2[selectedSubCategoryVideos?.id]
-                              )
-                            }
-                          >
-                            {subCategories2[selectedSubCategoryVideos.id].map(
-                              (option) => (
-                                <MenuItem key={option.id} value={option.id}>
-                                  {option.name}
-                                </MenuItem>
-                              )
-                            )}
-                          </Select>
-                        </FormControl>
-                      )}
-                      {selectedSubCategoryVideos2 &&
-                      subCategories3[selectedSubCategoryVideos2?.id] && (
-                        <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                          <InputLabel id="Category">
-                            Select a Sub-3x-subCategory
-                          </InputLabel>
-                          <Select
-                            labelId="Sub-Category"
-                            input={
-                              <OutlinedInput label="Select a Sub-3x-Category" />
-                            }
-                            value={selectedSubCategoryVideos3?.id || ""}
-                            onChange={(e) =>
-                              handleOptionSubCategoryChangeVideos3(
-                                e,
-                                subCategories3[selectedSubCategoryVideos2?.id]
-                              )
-                            }
-                          >
-                            {subCategories3[selectedSubCategoryVideos2.id].map(
-                              (option) => (
-                                <MenuItem key={option.id} value={option.id}>
-                                  {option.name}
-                                </MenuItem>
-                              )
-                            )}
-                          </Select>
-                        </FormControl>
-                      )}
-                      </Box>
-                      </>
-                    )}
-                   
-                  </>
-                )}
-              </Box>
               {files?.length > 0 && (
                 <>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: "20px",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <CategoryList
+                      categoryData={allCategoryData}
+                      ref={categoryListRef}
+                      columns={3}
+                    />
+                  </Box>
                   <CustomInputField
                     name="title"
                     label="Title of share"
                     variant="filled"
                     value={title}
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = e.target.value;
                       const formattedValue = value.replace(titleFormatter, "");
                       setTitle(formattedValue);
@@ -622,13 +399,12 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                   </Typography>
                   <TextEditor
                     inlineContent={description}
-                    setInlineContent={(value) => {
+                    setInlineContent={value => {
                       setDescription(value);
                     }}
                   />
                 </>
               )}
-            
             </>
           )}
           <CrowdfundActionButtonRow>
@@ -664,16 +440,16 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       {isOpenMultiplePublish && (
         <MultiplePublish
           isOpen={isOpenMultiplePublish}
-          onError={(messageNotification)=> {
+          onError={messageNotification => {
             setIsOpenMultiplePublish(false);
-            setPublishes(null)
-            if(messageNotification){
+            setPublishes(null);
+            if (messageNotification) {
               dispatch(
-                  setNotification({
-                    msg: messageNotification,
-                    alertType: 'error'
-                  })
-              )
+                setNotification({
+                  msg: messageNotification,
+                  alertType: "error",
+                })
+              );
             }
           }}
           onSubmit={() => {
@@ -686,9 +462,8 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
             setPlaylistDescription("");
             setSelectedCategory(null);
             setSelectedSubCategory(null);
-            setSelectedCategoryVideos(null);
-            setSelectedSubCategoryVideos(null);
             setPlaylistSetting(null);
+            categoryListRef.current?.clearCategories();
             dispatch(
               setNotification({
                 msg: "Files published",

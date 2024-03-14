@@ -1,5 +1,12 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, Input, Popover, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Input,
+  Popover,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesModal";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -28,11 +35,11 @@ import { DownloadTaskManager } from "../../common/DownloadTaskManager";
 import QShareLogo from "../../../assets/img/q-share-icon.webp";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addFilteredVideos,
+  addFilteredFiles,
   setEditPlaylist,
   setFilterValue,
   setIsFiltering,
-} from "../../../state/features/videoSlice";
+} from "../../../state/features/fileSlice.ts";
 import { RootState } from "../../../state/store";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { PublishFile } from "../../PublishFile/PublishFile.tsx";
@@ -67,9 +74,7 @@ const NavBar: React.FC<Props> = ({
 
   const [anchorElNotification, setAnchorElNotification] =
     React.useState<HTMLButtonElement | null>(null);
-  const filterValue = useSelector(
-    (state: RootState) => state.video.filterValue
-  );
+  const filterValue = useSelector((state: RootState) => state.file.filterValue);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.currentTarget as unknown as HTMLButtonElement | null;
@@ -100,36 +105,42 @@ const NavBar: React.FC<Props> = ({
   return (
     <CustomAppBar position="sticky" elevation={2}>
       <ThemeSelectRow>
-        <Box sx={{
-          display: 'flex',
-          height: '100%',
-          alignItems: 'center',
-          gap: '20px'
-        }}>
-        <LogoContainer
-          onClick={() => {
-            navigate("/");
-            dispatch(setIsFiltering(false));
-            dispatch(setFilterValue(""));
-            dispatch(addFilteredVideos([]));
-            searchValRef.current = "";
-            if (!inputRef.current) return;
-            inputRef.current.value = "";
+        <Box
+          sx={{
+            display: "flex",
+            height: "100%",
+            alignItems: "center",
+            gap: "20px",
           }}
         >
-          <img
-            src={QShareLogo}
-            style={{
-              width: "auto",
-              height: "55px",
-              padding: "2px",
+          <LogoContainer
+            onClick={() => {
+              navigate("/");
+              dispatch(setIsFiltering(false));
+              dispatch(setFilterValue(""));
+              dispatch(addFilteredFiles([]));
+              searchValRef.current = "";
+              if (!inputRef.current) return;
+              inputRef.current.value = "";
             }}
-          />
-        </LogoContainer>
-        <Typography sx={{
-          fontSize: '16px',
-          whiteSpace: 'nowrap'
-        }}>Sharing is caring</Typography>
+          >
+            <img
+              src={QShareLogo}
+              style={{
+                width: "auto",
+                height: "55px",
+                padding: "2px",
+              }}
+            />
+          </LogoContainer>
+          <Typography
+            sx={{
+              fontSize: "16px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Sharing is caring
+          </Typography>
         </Box>
       </ThemeSelectRow>
       <Box
@@ -289,15 +300,15 @@ const NavBar: React.FC<Props> = ({
             <Input
               id="standard-adornment-name"
               inputRef={inputRef}
-              onChange={(e) => {
+              onChange={e => {
                 searchValRef.current = e.target.value;
               }}
-              onKeyDown={(event) => {
+              onKeyDown={event => {
                 if (event.key === "Enter" || event.keyCode === 13) {
                   if (!searchValRef.current) {
                     dispatch(setIsFiltering(false));
                     dispatch(setFilterValue(""));
-                    dispatch(addFilteredVideos([]));
+                    dispatch(addFilteredFiles([]));
                     searchValRef.current = "";
                     if (!inputRef.current) return;
                     inputRef.current.value = "";
@@ -305,7 +316,7 @@ const NavBar: React.FC<Props> = ({
                   }
                   navigate("/");
                   dispatch(setIsFiltering(true));
-                  dispatch(addFilteredVideos([]));
+                  dispatch(addFilteredFiles([]));
                   dispatch(setFilterValue(searchValRef.current));
                 }
               }}
@@ -338,7 +349,7 @@ const NavBar: React.FC<Props> = ({
                 if (!searchValRef.current) {
                   dispatch(setIsFiltering(false));
                   dispatch(setFilterValue(""));
-                  dispatch(addFilteredVideos([]));
+                  dispatch(addFilteredFiles([]));
                   searchValRef.current = "";
                   if (!inputRef.current) return;
                   inputRef.current.value = "";
@@ -346,7 +357,7 @@ const NavBar: React.FC<Props> = ({
                 }
                 navigate("/");
                 dispatch(setIsFiltering(true));
-                dispatch(addFilteredVideos([]));
+                dispatch(addFilteredFiles([]));
                 dispatch(setFilterValue(searchValRef.current));
               }}
             />
@@ -357,7 +368,7 @@ const NavBar: React.FC<Props> = ({
               onClick={() => {
                 dispatch(setIsFiltering(false));
                 dispatch(setFilterValue(""));
-                dispatch(addFilteredVideos([]));
+                dispatch(addFilteredFiles([]));
                 searchValRef.current = "";
                 if (!inputRef.current) return;
                 inputRef.current.value = "";
@@ -400,11 +411,9 @@ const NavBar: React.FC<Props> = ({
         <AvatarContainer>
           {isAuthenticated && userName && (
             <>
-            <PublishFile />
+              <PublishFile />
             </>
           )}
-          
-          
         </AvatarContainer>
 
         <Popover

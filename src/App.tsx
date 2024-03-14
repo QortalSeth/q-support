@@ -8,7 +8,7 @@ import { Provider } from "react-redux";
 import GlobalWrapper from "./wrappers/GlobalWrapper";
 import Notification from "./components/common/Notification/Notification";
 import { Home } from "./pages/Home/Home";
-import { VideoContent } from "./pages/VideoContent/VideoContent";
+import { FileContent } from "./pages/FileContent/FileContent.tsx";
 import DownloadWrapper from "./wrappers/DownloadWrapper";
 import { IndividualProfile } from "./pages/IndividualProfile/IndividualProfile";
 
@@ -22,14 +22,14 @@ function App() {
       <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
         <Notification />
         <DownloadWrapper>
-        <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
-          <CssBaseline />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/share/:name/:id" element={<VideoContent />} />
-            <Route path="/channel/:name" element={<IndividualProfile />} />
-          </Routes>
-        </GlobalWrapper>
+          <GlobalWrapper setTheme={(val: string) => setTheme(val)}>
+            <CssBaseline />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/share/:name/:id" element={<FileContent />} />
+              <Route path="/channel/:name" element={<IndividualProfile />} />
+            </Routes>
+          </GlobalWrapper>
         </DownloadWrapper>
       </ThemeProvider>
     </Provider>
