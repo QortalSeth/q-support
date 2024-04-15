@@ -6,11 +6,9 @@ import {
   CrowdfundActionButton,
   CrowdfundActionButtonRow,
   CustomInputField,
-  CustomSelect,
   LogoPreviewRow,
   ModalBody,
   NewCrowdfundTitle,
-  StyledButton,
   TimesIcon,
 } from "./Upload-styles.tsx";
 import {
@@ -27,27 +25,20 @@ import {
 } from "@mui/material";
 import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import { useDropzone } from "react-dropzone";
 
 import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64, uint8ArrayToBase64 } from "../../utils/toBase64";
+import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
 import {
-  upsertFilesBeginning,
-  addToHashMap,
-  upsertFiles,
-  setEditFile,
+  setEditPlaylist,
   updateFile,
   updateInHashMap,
-  setEditPlaylist,
 } from "../../state/features/fileSlice.ts";
-import ImageUploader from "../common/ImageUploader";
+import ImageUploader from "../common/ImagePublisher/ImageUploader.tsx";
 import {
-  QSHARE_PLAYLIST_BASE,
-  QSHARE_FILE_BASE,
+  QSUPPORT_FILE_BASE,
+  QSUPPORT_PLAYLIST_BASE,
 } from "../../constants/Identifiers.ts";
-import { Playlists } from "../Playlists/Playlists";
 import { PlaylistListEdit } from "../PlaylistListEdit/PlaylistListEdit";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
@@ -87,7 +78,7 @@ export const EditPlaylist = () => {
   const [playlistData, setPlaylistData] = useState<any>(null);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [coverImage, setCoverImage] = useState<string>("");
+  const [coverImage, setCoverImage] = useState<string[]>([]);
   const [videos, setVideos] = useState([]);
   const [selectedCategoryVideos, setSelectedCategoryVideos] =
     useState<any>(null);
@@ -222,7 +213,7 @@ export const EditPlaylist = () => {
     setPlaylistData(null);
     setSelectedCategoryVideos(null);
     setSelectedSubCategoryVideos(null);
-    setCoverImage("");
+    setCoverImage([]);
     dispatch(setEditPlaylist(null));
   };
 
@@ -292,7 +283,7 @@ export const EditPlaylist = () => {
       let commentsId = editVideoProperties?.id;
 
       if (isNew) {
-        commentsId = `${QSHARE_PLAYLIST_BASE}_cm_${id}`;
+        commentsId = `${QSUPPORT_PLAYLIST_BASE}_cm_${id}`;
       }
       const stringDescription = extractTextFromHTML(description);
 
@@ -324,7 +315,7 @@ export const EditPlaylist = () => {
         .trim()
         .toLowerCase();
       if (isNew) {
-        identifier = `${QSHARE_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        identifier = `${QSUPPORT_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
       }
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
@@ -334,7 +325,7 @@ export const EditPlaylist = () => {
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier,
-        tag1: QSHARE_FILE_BASE,
+        tag1: QSUPPORT_FILE_BASE,
       };
 
       await qortalRequest(requestBodyJson);
@@ -519,7 +510,7 @@ export const EditPlaylist = () => {
             </Box>
             <React.Fragment>
               {!coverImage ? (
-                <ImageUploader onPick={(img: string) => setCoverImage(img)}>
+                <ImageUploader onPick={(img: string[]) => setCoverImage(img)}>
                   <AddCoverImageButton variant="contained">
                     Add Cover Image
                     <AddLogoIcon
@@ -532,10 +523,15 @@ export const EditPlaylist = () => {
                 </ImageUploader>
               ) : (
                 <LogoPreviewRow>
-                  <CoverImagePreview src={coverImage} alt="logo" />
+                  {coverImage.map(
+                    image =>
+                      image && (
+                        <CoverImagePreview src={image} alt="logo" key={image} />
+                      )
+                  )}
                   <TimesIcon
                     color={theme.palette.text.primary}
-                    onClickFunc={() => setCoverImage("")}
+                    onClickFunc={() => setCoverImage([])}
                     height={"32"}
                     width={"32"}
                   ></TimesIcon>

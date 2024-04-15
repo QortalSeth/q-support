@@ -14,29 +14,22 @@ import {
   FileDescription,
   FilePlayerContainer,
   FileTitle,
+  ImageContainer,
   Spacer,
   StyledCardColComment,
   StyledCardHeaderComment,
-} from "./FileContent-styles.tsx";
+} from "./IssueContent-styles.tsx";
 import { formatDate } from "../../utils/time";
 import { CommentSection } from "../../components/common/Comments/CommentSection";
-import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
-import {
-  allCategoryData,
-  iconCategories,
-} from "../../constants/Categories/1stCategories.ts";
+import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
 import {
   Category,
   getCategoriesFromObject,
 } from "../../components/common/CategoryList/CategoryList.tsx";
-import {
-  findAllCategoryData,
-  findCategoryData,
-  getCategoriesWithIcons,
-  getIconsFromObject,
-} from "../../constants/Categories/CategoryFunctions.ts";
+import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
 
 export function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
@@ -50,7 +43,7 @@ export function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-export const FileContent = () => {
+export const IssueContent = () => {
   const { name, id } = useParams();
   const [isExpandedDescription, setIsExpandedDescription] =
     useState<boolean>(false);
@@ -106,7 +99,7 @@ export const FileContent = () => {
       if (!name || !id) return;
       dispatch(setIsLoadingGlobal(true));
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSUPPORT_FILE_BASE}&limit=1&includemetadata=true&reverse=true&excludeblocked=true&name=${name}&exactmatchnames=true&offset=0&identifier=${id}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -272,8 +265,6 @@ export const FileContent = () => {
       }
     }
     if (fileData) {
-      //const icon = getIconsFromObject(fileData)[0]?.icon || null;
-
       const icon = getIconsFromObject(fileData);
       setIcon(icon);
     }
@@ -415,6 +406,19 @@ export const FileContent = () => {
             {categoriesDisplay}
           </Typography>
         </Box>
+        <ImageContainer>
+          {fileData?.images &&
+            fileData.images.map(image => {
+              return (
+                <img
+                  src={image}
+                  width={`${1280 / fileData.images.length}px`}
+                  height={"480px"}
+                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                />
+              );
+            })}
+        </ImageContainer>
         <Spacer height="15px" />
         <Box
           sx={{

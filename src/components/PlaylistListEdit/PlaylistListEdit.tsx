@@ -3,15 +3,15 @@ import { CardContentContainerComment } from "../common/Comments/Comments-styles"
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
-} from "../PublishFile/Upload-styles.tsx";
+} from "../PublishIssue/Upload-styles.tsx";
 import { Box, Button, Input, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { removeFile } from "../../state/features/fileSlice.ts";
 import AddIcon from "@mui/icons-material/Add";
-import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
+
 export const PlaylistListEdit = ({ playlistData, removeVideo, addVideo }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export const PlaylistListEdit = ({ playlistData, removeVideo, addVideo }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [filterSearch, setFilterSearch] = useState("");
   const search = async () => {
-    const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&mode=ALL&identifier=${QSHARE_FILE_BASE}&title=${filterSearch}&limit=20&includemetadata=true&reverse=true&name=${username}&exactmatchnames=true&offset=0`;
+    const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&mode=ALL&identifier=${QSUPPORT_FILE_BASE}&title=${filterSearch}&limit=20&includemetadata=true&reverse=true&name=${username}&exactmatchnames=true&offset=0`;
     const response = await fetch(url, {
       method: "GET",
       headers: {

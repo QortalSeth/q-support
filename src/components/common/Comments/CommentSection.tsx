@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CommentEditor } from "./CommentEditor";
 import { Comment } from "./Comment";
-import { Box, Button, CircularProgress, useTheme } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { styled } from "@mui/system";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   CommentContainer,
   CommentEditorContainer,
@@ -14,8 +14,11 @@ import {
   LoadMoreCommentsButtonRow,
   NoCommentsRow,
 } from "./Comments-styles";
-import { QSHARE_COMMENT_BASE } from "../../../constants/Identifiers.ts";
-import { CrowdfundSubTitle, CrowdfundSubTitleRow } from "../../PublishFile/Upload-styles.tsx";
+import { QSUPPORT_COMMENT_BASE } from "../../../constants/Identifiers.ts";
+import {
+  CrowdfundSubTitle,
+  CrowdfundSubTitleRow,
+} from "../../PublishIssue/Upload-styles.tsx";
 
 interface CommentSectionProps {
   postId: string;
@@ -105,7 +108,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
       const offset = 0;
 
       const removeBaseCommentId = commentId.replace("_base_", "");
-      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSHARE_COMMENT_BASE}${postId.slice(
+      const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSUPPORT_COMMENT_BASE}${postId.slice(
         -12
       )}_reply_${removeBaseCommentId.slice(
         -6
@@ -150,7 +153,7 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
         if (isNewMessages && numberOfComments) {
           offset = numberOfComments;
         }
-        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSHARE_COMMENT_BASE}${postId.slice(
+        const url = `/arbitrary/resources/search?mode=ALL&service=BLOG_COMMENT&query=${QSUPPORT_COMMENT_BASE}${postId.slice(
           -12
         )}_base_&limit=20&includemetadata=false&offset=${offset}&reverse=false&excludeblocked=true`;
         const response = await fetch(url, {
@@ -218,11 +221,10 @@ export const CommentSection = ({ postId, postName }: CommentSectionProps) => {
 
   return (
     <>
-    
       <Panel>
-      <CrowdfundSubTitleRow >
-        <CrowdfundSubTitle>Comments</CrowdfundSubTitle>
-      </CrowdfundSubTitleRow>
+        <CrowdfundSubTitleRow>
+          <CrowdfundSubTitle>Comments</CrowdfundSubTitle>
+        </CrowdfundSubTitleRow>
         <CommentsContainer>
           {loadingComments ? (
             <NoCommentsRow>

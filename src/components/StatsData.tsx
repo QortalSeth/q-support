@@ -25,13 +25,13 @@ export const StatsData = () => {
     getFilesCount,
   } = useFetchFiles();
 
-  const totalVideosPublished = useSelector(
+  const totalIssuesPublished = useSelector(
     (state: RootState) => state.global.totalFilesPublished
   );
   const totalNamesPublished = useSelector(
     (state: RootState) => state.global.totalNamesPublished
   );
-  const videosPerNamePublished = useSelector(
+  const issuesPerNamePublished = useSelector(
     (state: RootState) => state.global.filesPerNamePublished
   );
 
@@ -40,22 +40,28 @@ export const StatsData = () => {
   }, [getFilesCount]);
 
   return (
-    <StatsCol>
-      <div>
-        Shares:{" "}
-        <span style={{ fontWeight: "bold" }}>{totalVideosPublished}</span>
-      </div>
-      <div>
-        Publishers:{" "}
-        <span style={{ fontWeight: "bold" }}>{totalNamesPublished}</span>
-      </div>
-      <div>
-        Average:{" "}
-        <span style={{ fontWeight: "bold" }}>
-          {videosPerNamePublished > 0 &&
-            Number(videosPerNamePublished).toFixed(0)}
-        </span>
-      </div>
-    </StatsCol>
+    totalIssuesPublished > 0 && (
+      <StatsCol>
+        <div>
+          Issues Published:{" "}
+          <span style={{ fontWeight: "bold" }}>
+            {totalIssuesPublished || ""}
+          </span>
+        </div>
+        <div>
+          Publishers:{" "}
+          <span style={{ fontWeight: "bold" }}>
+            {totalNamesPublished || ""}
+          </span>
+        </div>
+        <div>
+          Average:{" "}
+          <span style={{ fontWeight: "bold" }}>
+            {issuesPerNamePublished > 0 &&
+              Number(issuesPerNamePublished).toFixed(0)}
+          </span>
+        </div>
+      </StatsCol>
+    )
   );
 };

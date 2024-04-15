@@ -2,12 +2,12 @@ import { Avatar, Box, Skeleton, Tooltip } from "@mui/material";
 import {
   BlockIconContainer,
   BottomParent,
+  FileContainer,
   IconsBox,
   NameContainer,
   VideoCard,
   VideoCardName,
   VideoCardTitle,
-  FileContainer,
   VideoUploadDate,
 } from "./FileList-styles.tsx";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,7 +18,7 @@ import {
 } from "../../state/features/fileSlice.ts";
 import BlockIcon from "@mui/icons-material/Block";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { formatBytes } from "../FileContent/FileContent.tsx";
+import { formatBytes } from "../IssueContent/IssueContent.tsx";
 import { formatDate } from "../../utils/time.ts";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -88,7 +88,7 @@ export const FileList = ({ files }: FileListProps) => {
                   }}
                 >
                   {fileObj?.user === username && (
-                    <Tooltip title="Edit video properties" placement="top">
+                    <Tooltip title="Edit Issue Properties" placement="top">
                       <BlockIconContainer>
                         <EditIcon
                           onClick={() => {

@@ -8,15 +8,6 @@ import unknownIcon from "../../assets/icons/unknown.webp";
 import videoIcon from "../../assets/icons/video.webp";
 
 import {
-  audioSubCategories,
-  bookSubCategories,
-  documentSubCategories,
-  imageSubCategories,
-  softwareSubCategories,
-  videoSubCategories,
-} from "./2ndCategories.ts";
-import { musicSubCategories } from "./3rdCategories.ts";
-import {
   Categories,
   Category,
   CategoryData,
@@ -25,30 +16,30 @@ import {
   getAllCategoriesWithIcons,
   sortCategory,
 } from "./CategoryFunctions.ts";
+import { QappCategories, SupportState } from "./2ndCategories.ts";
 
 export const firstCategories: Category[] = [
-  { id: 1, name: "Software", icon: softwareIcon },
-  { id: 2, name: "Gaming", icon: gamingIcon },
-  { id: 3, name: "Audio", icon: audioIcon },
-  { id: 4, name: "Video", icon: videoIcon },
-  { id: 5, name: "Image", icon: imageIcon },
-  { id: 6, name: "Document", icon: documentIcon },
-  { id: 7, name: "Book", icon: bookIcon },
-  { id: 99, name: "Other", icon: unknownIcon },
-].sort(sortCategory);
+  { id: 1, name: "Core" },
+  { id: 2, name: "UI" },
+  { id: 3, name: "Q-Apps" },
+  { id: 4, name: "Website" },
+  { id: 5, name: "Marketing" },
+  { id: 99, name: "Other" },
+];
 export const secondCategories: Categories = {
-  1: softwareSubCategories.sort(sortCategory),
-  3: audioSubCategories.sort(sortCategory),
-  4: videoSubCategories.sort(sortCategory),
-  5: imageSubCategories.sort(sortCategory),
-  6: documentSubCategories.sort(sortCategory),
-  7: bookSubCategories.sort(sortCategory),
+  1: SupportState,
+  2: SupportState,
+  3: QappCategories,
+  4: SupportState,
+  5: SupportState,
+  99: SupportState,
 };
 
-export const thirdCategories: Categories = {
-  301: musicSubCategories,
-};
-
+export let thirdCategories: Categories = {};
+QappCategories.map(
+  supportStateCategory =>
+    (thirdCategories[supportStateCategory.id] = SupportState)
+);
 export const allCategoryData: CategoryData = {
   category: firstCategories,
   subCategories: [secondCategories, thirdCategories],

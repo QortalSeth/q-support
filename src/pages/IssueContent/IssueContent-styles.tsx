@@ -1,5 +1,5 @@
 import { styled } from "@mui/system";
-import { Box, Grid, Typography, Checkbox } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 export const FilePlayerContainer = styled(Box)(({ theme }) => ({
   maxWidth: "95%",
@@ -23,6 +23,10 @@ export const FileDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   userSelect: "none",
   wordBreak: "break-word",
+}));
+
+export const ImageContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
 }));
 
 export const Spacer = ({ height }: any) => {

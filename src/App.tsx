@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import { lightTheme, darkTheme } from "./styles/theme";
+import { darkTheme, lightTheme } from "./styles/theme";
 import { store } from "./state/store";
 import { Provider } from "react-redux";
 import GlobalWrapper from "./wrappers/GlobalWrapper";
 import Notification from "./components/common/Notification/Notification";
 import { Home } from "./pages/Home/Home";
-import { FileContent } from "./pages/FileContent/FileContent.tsx";
+import { IssueContent } from "./pages/IssueContent/IssueContent.tsx";
 import DownloadWrapper from "./wrappers/DownloadWrapper";
 import { IndividualProfile } from "./pages/IndividualProfile/IndividualProfile";
 
@@ -26,7 +26,7 @@ function App() {
             <CssBaseline />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/share/:name/:id" element={<FileContent />} />
+              <Route path="/share/:name/:id" element={<IssueContent />} />
               <Route path="/channel/:name" element={<IndividualProfile />} />
             </Routes>
           </GlobalWrapper>

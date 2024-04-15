@@ -19,8 +19,8 @@ import {
 import { RootState } from "../state/store";
 import { fetchAndEvaluateVideos } from "../utils/fetchVideos";
 import {
-  QSHARE_PLAYLIST_BASE,
-  QSHARE_FILE_BASE,
+  QSUPPORT_PLAYLIST_BASE,
+  QSUPPORT_FILE_BASE,
 } from "../constants/Identifiers.ts";
 import { RequestQueue } from "../utils/queue";
 import { queue } from "../wrappers/GlobalWrapper";
@@ -114,7 +114,7 @@ export const useFetchFiles = () => {
     try {
       dispatch(setIsLoadingGlobal(true));
 
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSUPPORT_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -218,10 +218,10 @@ export const useFetchFiles = () => {
         }
         if (type === "playlists") {
           defaultUrl = defaultUrl + `&service=PLAYLIST`;
-          defaultUrl = defaultUrl + `&identifier=${QSHARE_PLAYLIST_BASE}`;
+          defaultUrl = defaultUrl + `&identifier=${QSUPPORT_PLAYLIST_BASE}`;
         } else {
           defaultUrl = defaultUrl + `&service=DOCUMENT`;
-          defaultUrl = defaultUrl + `&identifier=${QSHARE_FILE_BASE}`;
+          defaultUrl = defaultUrl + `&identifier=${QSUPPORT_FILE_BASE}`;
         }
 
         // const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QTUBE_VIDEO_BASE}&limit=${videoLimit}&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`
@@ -289,7 +289,7 @@ export const useFetchFiles = () => {
         const offset = filteredVideos.length;
         const replaceSpacesWithUnderscore = filterValue.replace(/ /g, "_");
 
-        const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${replaceSpacesWithUnderscore}&identifier=${QSHARE_FILE_BASE}&limit=10&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`;
+        const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${replaceSpacesWithUnderscore}&identifier=${QSUPPORT_FILE_BASE}&limit=10&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}`;
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -345,7 +345,7 @@ export const useFetchFiles = () => {
 
   const checkNewFiles = React.useCallback(async () => {
     try {
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSUPPORT_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -382,7 +382,7 @@ export const useFetchFiles = () => {
 
   const getFilesCount = React.useCallback(async () => {
     try {
-      let url = `/arbitrary/resources/search?mode=ALL&includemetadata=false&limit=0&service=DOCUMENT&identifier=${QSHARE_FILE_BASE}`;
+      let url = `/arbitrary/resources/search?mode=ALL&includemetadata=false&limit=0&service=DOCUMENT&identifier=${QSUPPORT_FILE_BASE}`;
 
       const response = await fetch(url, {
         method: "GET",

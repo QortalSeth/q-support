@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  CrowdfundActionButton,
-  CrowdfundActionButtonRow,
+  ActionButton,
+  ActionButtonRow,
   CustomInputField,
   ModalBody,
   NewCrowdfundTitle,
@@ -17,16 +17,22 @@ import { useDropzone } from "react-dropzone";
 import { setNotification } from "../../state/features/notificationsSlice";
 import { objectToBase64 } from "../../utils/toBase64";
 import { RootState } from "../../state/store";
-import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
 import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
 import { titleFormatter } from "../../constants/Misc.ts";
 import {
+  appendCategoryToList,
   CategoryList,
   CategoryListRef,
 } from "../common/CategoryList/CategoryList.tsx";
+import { SupportState } from "../../constants/Categories/2ndCategories.ts";
+import {
+  ImagePublisher,
+  ImagePublisherRef,
+} from "../common/ImagePublisher/ImagePublisher.tsx";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -46,7 +52,7 @@ interface VideoFile {
   description: string;
   coverImage?: string;
 }
-export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
+export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
@@ -73,7 +79,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
   const [publishes, setPublishes] = useState<any>(null);
   const categoryListRef = useRef<CategoryListRef>(null);
-
+  const imagePublisherRef = useRef<ImagePublisherRef>(null);
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
     maxSize: 419430400, // 400 MB in bytes
@@ -127,7 +133,6 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       if (!description) throw new Error("Please enter a description");
       if (!categoryListRef.current?.getSelectedCategories()[0])
         throw new Error("Please select a category");
-      if (files.length === 0) throw new Error("Add at least one file");
       let errorMsg = "";
       let name = "";
       if (username) {
@@ -169,7 +174,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
         const file = publish.file;
         const id = uid();
 
-        const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        const identifier = `${QSUPPORT_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
         let fileExtension = "";
         const fileExtensionSplit = file?.name?.split(".");
@@ -197,9 +202,12 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
           filename = alphanumericString;
         }
 
-        let metadescription =
-          `**${categoryListRef.current?.getCategoriesFetchString()}**` +
-          fullDescription.slice(0, 150);
+        const categoryList = appendCategoryToList(
+          categoryListRef.current?.getSelectedCategories(),
+          "101"
+        );
+        const categoryString = `**${categoryListRef.current?.getCategoriesFetchString(categoryList)}**`;
+        let metadescription = categoryString + fullDescription.slice(0, 150);
 
         const requestBodyVideo: any = {
           action: "PUBLISH_QDN_RESOURCE",
@@ -210,7 +218,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
           description: metadescription,
           identifier,
           filename,
-          tag1: QSHARE_FILE_BASE,
+          tag1: QSUPPORT_FILE_BASE,
         };
         listOfPublishes.push(requestBodyVideo);
         fileReferences.push({
@@ -224,32 +232,38 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       }
 
       const idMeta = uid();
-      const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
+      const identifier = `${QSUPPORT_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
+
+      const categoryList = appendCategoryToList(
+        categoryListRef.current?.getSelectedCategories(),
+        "101"
+      );
+
       const fileObject: any = {
         title,
         version: 1,
         fullDescription,
         htmlDescription: description,
-        commentsId: `${QSHARE_FILE_BASE}_cm_${idMeta}`,
-        ...categoryListRef.current?.categoriesToObject(),
+        commentsId: `${QSUPPORT_FILE_BASE}_cm_${idMeta}`,
+        ...categoryListRef.current?.categoriesToObject(categoryList),
         files: fileReferences,
+        images: imagePublisherRef?.current?.getImageArray(),
       };
 
-      let metadescription =
-        `**${categoryListRef.current?.getCategoriesFetchString()}**` +
-        fullDescription.slice(0, 150);
+      const categoryString = `**${categoryListRef.current?.getCategoriesFetchString(categoryList)}**`;
+      let metadescription = categoryString + fullDescription.slice(0, 150);
 
-      const crowdfundObjectToBase64 = await objectToBase64(fileObject);
+      const fileObjectToBase64 = await objectToBase64(fileObject);
       // Description is obtained from raw data
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
-        data64: crowdfundObjectToBase64,
+        data64: fileObjectToBase64,
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier + "_metadata",
-        tag1: QSHARE_FILE_BASE,
+        tag1: QSUPPORT_FILE_BASE,
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
@@ -264,17 +278,17 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
       let notificationObj: any = null;
       if (typeof error === "string") {
         notificationObj = {
-          msg: error || "Failed to publish share",
+          msg: error || "Failed to publish issue",
           alertType: "error",
         };
       } else if (typeof error?.error === "string") {
         notificationObj = {
-          msg: error?.error || "Failed to publish share",
+          msg: error?.error || "Failed to publish issue",
           alertType: "error",
         };
       } else {
         notificationObj = {
-          msg: error?.message || "Failed to publish share",
+          msg: error?.message || "Failed to publish issue",
           alertType: "error",
         };
       }
@@ -295,7 +309,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                 setIsOpen(true);
               }}
             >
-              share
+              Open an Issue
             </StyledButton>
           )}
         </>
@@ -314,7 +328,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
               justifyContent: "space-between",
             }}
           >
-            <NewCrowdfundTitle>Share</NewCrowdfundTitle>
+            <NewCrowdfundTitle>Issue</NewCrowdfundTitle>
           </Box>
 
           {step === "videos" && (
@@ -331,7 +345,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
               >
                 <input {...getInputProps()} />
                 <Typography>
-                  Drag and drop files here or click to select files
+                  Publish files related to issue (Optional)
                 </Typography>
               </Box>
               {files.map((file, index) => {
@@ -362,53 +376,53 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                 );
               })}
 
-              {files?.length > 0 && (
-                <>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: "20px",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <CategoryList
-                      categoryData={allCategoryData}
-                      ref={categoryListRef}
-                      columns={3}
-                    />
-                  </Box>
-                  <CustomInputField
-                    name="title"
-                    label="Title of share"
-                    variant="filled"
-                    value={title}
-                    onChange={e => {
-                      const value = e.target.value;
-                      const formattedValue = value.replace(titleFormatter, "");
-                      setTitle(formattedValue);
-                    }}
-                    inputProps={{ maxLength: 180 }}
-                    required
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: "20px",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <CategoryList
+                    categoryData={allCategoryData}
+                    ref={categoryListRef}
+                    columns={3}
+                    excludeCategories={SupportState}
                   />
-                  <Typography
-                    sx={{
-                      fontSize: "18px",
-                    }}
-                  >
-                    Description of share
-                  </Typography>
-                  <TextEditor
-                    inlineContent={description}
-                    setInlineContent={value => {
-                      setDescription(value);
-                    }}
-                  />
-                </>
-              )}
+                </Box>
+                <ImagePublisher ref={imagePublisherRef} />
+                <CustomInputField
+                  name="title"
+                  label="Title of Issue"
+                  variant="filled"
+                  value={title}
+                  onChange={e => {
+                    const value = e.target.value;
+                    const formattedValue = value.replace(titleFormatter, "");
+                    setTitle(formattedValue);
+                  }}
+                  inputProps={{ maxLength: 180 }}
+                  required
+                />
+                <Typography
+                  sx={{
+                    fontSize: "18px",
+                  }}
+                >
+                  Description of Issue
+                </Typography>
+                <TextEditor
+                  inlineContent={description}
+                  setInlineContent={value => {
+                    setDescription(value);
+                  }}
+                />
+              </>
             </>
           )}
-          <CrowdfundActionButtonRow>
-            <CrowdfundActionButton
+          <ActionButtonRow>
+            <ActionButton
               onClick={() => {
                 onClose();
               }}
@@ -416,7 +430,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
               color="error"
             >
               Cancel
-            </CrowdfundActionButton>
+            </ActionButton>
             <Box
               sx={{
                 display: "flex",
@@ -424,16 +438,16 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
                 alignItems: "center",
               }}
             >
-              <CrowdfundActionButton
+              <ActionButton
                 variant="contained"
                 onClick={() => {
                   publishQDNResource();
                 }}
               >
                 Publish
-              </CrowdfundActionButton>
+              </ActionButton>
             </Box>
-          </CrowdfundActionButtonRow>
+          </ActionButtonRow>
         </ModalBody>
       </Modal>
 
@@ -466,7 +480,7 @@ export const PublishFile = ({ editId, editContent }: NewCrowdfundProps) => {
             categoryListRef.current?.clearCategories();
             dispatch(
               setNotification({
-                msg: "Files published",
+                msg: "Issue published",
                 alertType: "success",
               })
             );

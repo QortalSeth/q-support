@@ -5,11 +5,10 @@ import {
   AuthorTextComment,
   StyledCardColComment,
   StyledCardHeaderComment,
-} from "../FileContent/FileContent-styles.tsx";
+} from "../IssueContent/IssueContent-styles.tsx";
 import { Avatar, Box, useTheme } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { setUserAvatarHash } from "../../state/features/globalSlice";
 import { RootState } from "../../state/store";
 
 export const IndividualProfile = () => {

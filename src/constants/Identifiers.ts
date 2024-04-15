@@ -1,13 +1,13 @@
 const useTestIdentifiers = false;
 
-export const QSHARE_FILE_BASE = useTestIdentifiers
-  ? "MYTEST_share_vid_"
-  : "qshare_file_";
+export const QSUPPORT_FILE_BASE = useTestIdentifiers
+  ? "MYTEST_support_issue_"
+  : "q_support_issue_";
 
-export const QSHARE_PLAYLIST_BASE = useTestIdentifiers
-  ? "MYTEST_share_playlist_"
-  : "qshare_playlist_";
+export const QSUPPORT_PLAYLIST_BASE = useTestIdentifiers
+  ? "MYTEST_support_playlist_"
+  : "q_support_playlist_";
 
-export const QSHARE_COMMENT_BASE = useTestIdentifiers
-  ? "qcomment_v1_MYTEST_"
-  : "qcomment_v1_qshare_";
+export const QSUPPORT_COMMENT_BASE = useTestIdentifiers
+  ? "qcomment_v1_MYTEST_support_"
+  : "qcomment_v1_q_support_";

@@ -275,6 +275,8 @@ export const Home = ({ mode }: HomeProps) => {
             }}
             sx={{
               marginTop: "20px",
+              fontWeight: 1000,
+              color: "white",
             }}
             variant="contained"
           >
@@ -286,6 +288,8 @@ export const Home = ({ mode }: HomeProps) => {
             }}
             sx={{
               marginTop: "20px",
+              fontWeight: 1000,
+              color: "white",
             }}
             variant="contained"
           >

@@ -1,9 +1,9 @@
 import React, {
-  useEffect,
-  useState,
   useCallback,
-  useRef,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -15,7 +15,7 @@ import { setUserAvatarHash } from "../state/features/globalSlice";
 import { VideoPlayerGlobal } from "../components/common/VideoPlayerGlobal";
 import { Rnd } from "react-rnd";
 import { RequestQueue } from "../utils/queue";
-import { EditFile } from "../components/EditFile/EditFile.tsx";
+import { EditIssue } from "../components/EditIssue/EditIssue.tsx";
 import { EditPlaylist } from "../components/EditPlaylist/EditPlaylist";
 import ConsentModal from "../components/common/ConsentModal";
 
@@ -138,7 +138,7 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
         userAvatar={userAvatar}
         authenticate={askForAccountInformation}
       />
-      <EditFile />
+      <EditIssue />
       <EditPlaylist />
       <Rnd
         onDragStart={onDragStart}

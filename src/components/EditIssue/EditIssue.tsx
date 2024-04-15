@@ -21,7 +21,7 @@ import {
   updateFile,
   updateInHashMap,
 } from "../../state/features/fileSlice.ts";
-import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
@@ -32,6 +32,10 @@ import {
   CategoryListRef,
   getCategoriesFromObject,
 } from "../common/CategoryList/CategoryList.tsx";
+import {
+  ImagePublisher,
+  ImagePublisherRef,
+} from "../common/ImagePublisher/ImagePublisher.tsx";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -53,7 +57,7 @@ interface VideoFile {
   identifier?: string;
   filename?: string;
 }
-export const EditFile = () => {
+export const EditIssue = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const username = useSelector((state: RootState) => state.auth?.user?.name);
@@ -75,6 +79,7 @@ export const EditFile = () => {
   const [files, setFiles] = useState<VideoFile[]>([]);
   const [editCategories, setEditCategories] = useState<string[]>([]);
   const categoryListRef = useRef<CategoryListRef>(null);
+  const imagePublisherRef = useRef<ImagePublisherRef>(null);
 
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
@@ -121,7 +126,10 @@ export const EditFile = () => {
         const paragraph = `<p>${editFileProperties?.fullDescription}</p>`;
         setDescription(paragraph);
       }
-      setEditCategories(getCategoriesFromObject(editFileProperties));
+
+      const categoriesFromEditFile =
+        getCategoriesFromObject(editFileProperties);
+      setEditCategories(categoriesFromEditFile);
     }
   }, [editFileProperties]);
   const onClose = () => {
@@ -141,7 +149,6 @@ export const EditFile = () => {
       if (!categoryList[0]) throw new Error("Please select a category");
       if (!editFileProperties) return;
       if (!userAddress) throw new Error("Unable to locate user address");
-      if (files.length === 0) throw new Error("Add at least one file");
 
       let errorMsg = "";
       let name = "";
@@ -186,7 +193,7 @@ export const EditFile = () => {
         const file = publish.file;
         const id = uid();
 
-        const identifier = `${QSHARE_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
+        const identifier = `${QSUPPORT_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
 
         let fileExtension = "";
         const fileExtensionSplit = file?.name?.split(".");
@@ -227,7 +234,7 @@ export const EditFile = () => {
           description: metadescription,
           identifier,
           filename,
-          tag1: QSHARE_FILE_BASE,
+          tag1: QSUPPORT_FILE_BASE,
         };
         listOfPublishes.push(requestBodyVideo);
         fileReferences.push({
@@ -248,24 +255,25 @@ export const EditFile = () => {
         commentsId: editFileProperties.commentsId,
         ...categoryListRef.current?.categoriesToObject(),
         files: fileReferences,
+        images: imagePublisherRef?.current?.getImageArray(),
       };
 
       let metadescription =
         `**${categoryListRef.current?.getCategoriesFetchString()}**` +
         fullDescription.slice(0, 150);
 
-      const crowdfundObjectToBase64 = await objectToBase64(fileObject);
+      const fileObjectToBase64 = await objectToBase64(fileObject);
       // Description is obtained from raw data
 
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
-        data64: crowdfundObjectToBase64,
+        data64: fileObjectToBase64,
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editFileProperties.id,
-        tag1: QSHARE_FILE_BASE,
+        tag1: QSUPPORT_FILE_BASE,
         filename: `video_metadata.json`,
       };
       listOfPublishes.push(requestBodyJson);
@@ -336,7 +344,7 @@ export const EditFile = () => {
               justifyContent: "space-between",
             }}
           >
-            <NewCrowdfundTitle>Update share</NewCrowdfundTitle>
+            <NewCrowdfundTitle>Update Issue</NewCrowdfundTitle>
           </Box>
           <>
             <Box
@@ -390,56 +398,52 @@ export const EditFile = () => {
                 alignItems: "flex-start",
               }}
             >
-              {files?.length > 0 && (
-                <>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "20px",
-                      width: "100%",
-                    }}
-                  >
-                    <CategoryList
-                      categoryData={allCategoryData}
-                      initialCategories={editCategories}
-                      columns={3}
-                      ref={categoryListRef}
-                    />
-                  </Box>
-                </>
-              )}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                  width: "100%",
+                }}
+              >
+                <CategoryList
+                  categoryData={allCategoryData}
+                  initialCategories={editCategories}
+                  columns={3}
+                  ref={categoryListRef}
+                />
+              </Box>
             </Box>
-            {files?.length > 0 && (
-              <>
-                <CustomInputField
-                  name="title"
-                  label="Title of share"
-                  variant="filled"
-                  value={title}
-                  onChange={e => {
-                    const value = e.target.value;
-                    const formattedValue = value.replace(titleFormatter, "");
-                    setTitle(formattedValue);
-                  }}
-                  inputProps={{ maxLength: 180 }}
-                  required
-                />
-                <Typography
-                  sx={{
-                    fontSize: "18px",
-                  }}
-                >
-                  Description of share
-                </Typography>
-                <TextEditor
-                  inlineContent={description}
-                  setInlineContent={value => {
-                    setDescription(value);
-                  }}
-                />
-              </>
-            )}
+            <ImagePublisher
+              ref={imagePublisherRef}
+              initialImages={editFileProperties?.images}
+            />
+            <CustomInputField
+              name="title"
+              label="Title of Issue"
+              variant="filled"
+              value={title}
+              onChange={e => {
+                const value = e.target.value;
+                const formattedValue = value.replace(titleFormatter, "");
+                setTitle(formattedValue);
+              }}
+              inputProps={{ maxLength: 180 }}
+              required
+            />
+            <Typography
+              sx={{
+                fontSize: "18px",
+              }}
+            >
+              Description of Issue
+            </Typography>
+            <TextEditor
+              inlineContent={description}
+              setInlineContent={value => {
+                setDescription(value);
+              }}
+            />
           </>
 
           <CrowdfundActionButtonRow>

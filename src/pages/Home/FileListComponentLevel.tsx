@@ -19,8 +19,8 @@ import {
 import { formatDate } from "../../utils/time";
 import { Video } from "../../state/features/fileSlice.ts";
 import { queue } from "../../wrappers/GlobalWrapper";
-import { QSHARE_FILE_BASE } from "../../constants/Identifiers.ts";
-import { formatBytes } from "../FileContent/FileContent.tsx";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
+import { formatBytes } from "../IssueContent/IssueContent.tsx";
 import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
 
 interface VideoListProps {
@@ -46,7 +46,7 @@ export const FileListComponentLevel = ({ mode }: VideoListProps) => {
   const getVideos = React.useCallback(async () => {
     try {
       const offset = videos.length;
-      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSHARE_FILE_BASE}_&limit=50&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`;
+      const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSUPPORT_FILE_BASE}_&limit=50&includemetadata=false&reverse=true&excludeblocked=true&name=${paramName}&exactmatchnames=true&offset=${offset}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

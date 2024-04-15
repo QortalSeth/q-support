@@ -10,9 +10,10 @@ import {
   Theme,
 } from "@mui/material";
 
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, { useEffect, useImperativeHandle, useState } from "react";
 import { CategoryContainer } from "./CategoryList-styles.tsx";
 import { allCategoryData } from "../../../constants/Categories/1stCategories.ts";
+import { log } from "../../../constants/Misc.ts";
 
 export interface Category {
   id: number;
@@ -29,19 +30,22 @@ export interface CategoryData {
 }
 
 type ListDirection = "column" | "row";
+
 interface CategoryListProps {
   sx?: SxProps<Theme>;
   categoryData: CategoryData;
   initialCategories?: string[];
   columns?: number;
+  afterChange?: (categories: string[]) => void;
+  excludeCategories?: Category[];
 }
 
 export type CategoryListRef = {
   getSelectedCategories: () => string[];
   setSelectedCategories: (arr: string[]) => void;
   clearCategories: () => void;
-  getCategoriesFetchString: () => string;
-  categoriesToObject: () => object;
+  getCategoriesFetchString: (categories?: string[]) => string;
+  categoriesToObject: (categories?: string[]) => object;
 };
 
 export const CategoryList = React.forwardRef<
@@ -49,7 +53,14 @@ export const CategoryList = React.forwardRef<
   CategoryListProps
 >(
   (
-    { sx, categoryData, initialCategories, columns = 1 }: CategoryListProps,
+    {
+      sx,
+      categoryData,
+      initialCategories,
+      columns = 1,
+      afterChange,
+      excludeCategories,
+    }: CategoryListProps,
     ref
   ) => {
     const categoriesLength = categoryData.subCategories.length + 1;
@@ -60,20 +71,27 @@ export const CategoryList = React.forwardRef<
     const [selectedCategories, setSelectedCategories] = useState<string[]>(
       initialCategories || emptyCategories
     );
+    useEffect(() => {
+      if (initialCategories) setSelectedCategories(initialCategories);
+    }, [initialCategories]);
 
-    const categoriesToObject = () => {
+    const updateCategories = (categories: string[]) => {
+      setSelectedCategories(categories);
+      if (afterChange) afterChange(categories);
+    };
+    const categoriesToObject = (categories: string[]) => {
       let categoriesObject = {};
-      selectedCategories.map((category, index) => {
+      categories.map((category, index) => {
         if (index === 0) categoriesObject["category"] = category;
         else if (index === 1) categoriesObject["subcategory"] = category;
         else categoriesObject[`subcategory${index}`] = category;
       });
-      console.log("categoriesObject is: ", categoriesObject);
+      if (log) console.log("categoriesObject is: ", categoriesObject);
       return categoriesObject;
     };
 
     const clearCategories = () => {
-      setSelectedCategories(emptyCategories);
+      updateCategories(emptyCategories);
     };
 
     useImperativeHandle(ref, () => ({
@@ -81,26 +99,31 @@ export const CategoryList = React.forwardRef<
         return selectedCategories;
       },
       setSelectedCategories: categories => {
-        console.log("setSelectedCategories: ", categories);
-        //categories.map((category, index) => selectCategory(category, index));
-        setSelectedCategories(categories);
+        if (log) console.log("setSelectedCategories: ", categories);
+        updateCategories(categories);
       },
       clearCategories,
-      getCategoriesFetchString: () =>
-        getCategoriesFetchString(selectedCategories),
-      categoriesToObject,
+      getCategoriesFetchString: (categories?: string[]) =>
+        getCategoriesFetchString(categories || selectedCategories),
+      categoriesToObject: (categories?: string[]) =>
+        categoriesToObject(categories || selectedCategories),
     }));
 
     const selectCategory = (optionId: string, index: number) => {
       const isMainCategory = index === 0;
       const subCategoryIndex = index - 1;
+      let selectedOption: Category | undefined;
+      if (isMainCategory)
+        selectedOption = categoryData.category.find(
+          option => option.id === +optionId
+        );
+      else {
+        const subCategoryLevel = categoryData.subCategories[subCategoryIndex];
+        const parentCategory = selectedCategories[subCategoryIndex];
+        const subCategory = subCategoryLevel[parentCategory];
 
-      const selectedOption = isMainCategory
-        ? categoryData.category.find(option => option.id === +optionId)
-        : categoryData.subCategories[subCategoryIndex][
-            selectedCategories[subCategoryIndex]
-          ].find(option => option.id === +optionId);
-
+        selectedOption = subCategory.find(option => option.id === +optionId);
+      }
       const newSelectedCategories: string[] = selectedCategories.map(
         (category, categoryIndex) => {
           if (index > categoryIndex) return category;
@@ -108,7 +131,7 @@ export const CategoryList = React.forwardRef<
           else return "";
         }
       );
-      setSelectedCategories(newSelectedCategories);
+      updateCategories(newSelectedCategories);
     };
 
     const selectCategoryEvent = (event: SelectChangeEvent, index: number) => {
@@ -136,15 +159,16 @@ export const CategoryList = React.forwardRef<
 
     const fillMenu = (category: Categories, index: number) => {
       const subCategoryIndex = selectedCategories[index];
-      console.log("selected categories: ", selectedCategories);
-      console.log("index is: ", index);
-      console.log("subCategoryIndex is: ", subCategoryIndex);
-      console.log("category is: ", category);
-      console.log(
-        "subCategoryIndex within category: ",
-        selectedCategories[subCategoryIndex]
-      );
-      console.log("categoryData: ", categoryData);
+      if (log) console.log("selected categories: ", selectedCategories);
+      if (log) console.log("index is: ", index);
+      if (log) console.log("subCategoryIndex is: ", subCategoryIndex);
+      if (log) console.log("category is: ", category);
+      if (log)
+        console.log(
+          "subCategoryIndex within category: ",
+          selectedCategories[subCategoryIndex]
+        );
+      if (log) console.log("categoryData: ", categoryData);
 
       const menuToFill = category[subCategoryIndex];
       if (menuToFill)
@@ -158,6 +182,7 @@ export const CategoryList = React.forwardRef<
     const hasSubCategory = (category: Categories, index: number) => {
       const subCategoryIndex = selectedCategories[index];
       const subCategory = category[subCategoryIndex];
+      if (excludeCategories && subCategory === excludeCategories) return false;
       return subCategory && subCategoryIndex;
     };
 
@@ -265,8 +290,19 @@ export const getCategoriesFetchString = (categories: string[]) => {
       else fetchString += `;sub${index}:${category}`;
     }
   });
-  console.log("categoriesAsDescription: ", fetchString);
+  if (log) console.log("categoriesAsDescription: ", fetchString);
   return fetchString;
+};
+
+export const appendCategoryToList = (
+  categories: string[],
+  appendedCategoryID: string
+) => {
+  const filteredCategories = categories.filter(
+    categoryString => categoryString.length > 0
+  );
+  filteredCategories.push(appendedCategoryID);
+  return filteredCategories;
 };
 
 export const getCategoriesFromObject = (editFileProperties: any) => {

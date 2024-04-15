@@ -7,9 +7,9 @@ import {
   Button,
   Grid,
   Rating,
+  Select,
   TextField,
   Typography,
-  Select
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -67,9 +67,9 @@ export const ModalBody = styled(Box)(({ theme }) => ({
   overflowY: "auto",
   maxHeight: "95vh",
   boxShadow:
-      theme.palette.mode === "dark"
-          ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
-          : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
+    theme.palette.mode === "dark"
+      ? "0px 4px 5px 0px hsla(0,0%,0%,0.14),  0px 1px 10px 0px hsla(0,0%,0%,0.12),  0px 2px 4px -1px hsla(0,0%,0%,0.2)"
+      : "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
   "&::-webkit-scrollbar-track": {
     backgroundColor: theme.palette.background.paper,
   },
@@ -159,8 +159,6 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-
-
 export const CrowdfundTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Copse",
   letterSpacing: "1px",
@@ -203,11 +201,11 @@ export const CrowdfundDescription = styled(Typography)(({ theme }) => ({
 
 export const Spacer = ({ height }: any) => {
   return (
-      <Box
-          sx={{
-            height: height,
-          }}
-      />
+    <Box
+      sx={{
+        height: height,
+      }}
+    />
   );
 };
 
@@ -314,14 +312,14 @@ export const AddCrowdFundButton = styled(Button)(({ theme }) => ({
   gap: "8px",
   color: "#ffffff",
   backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
+    theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
   border: "none",
   borderRadius: "5px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
     backgroundColor:
-        theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
+      theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
   },
 }));
 
@@ -333,14 +331,14 @@ export const EditCrowdFundButton = styled(Button)(({ theme }) => ({
   gap: "8px",
   color: "#ffffff",
   backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
+    theme.palette.mode === "dark" ? theme.palette.primary.main : "#2a9a86",
   border: "none",
   borderRadius: "5px",
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     cursor: "pointer",
     backgroundColor:
-        theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
+      theme.palette.mode === "dark" ? theme.palette.primary.dark : "#217e6d",
   },
 }));
 
@@ -466,14 +464,14 @@ export const CoverImage = styled("img")({
   objectPosition: "center",
 });
 
-export const CrowdfundActionButtonRow = styled(Box)({
+export const ActionButtonRow = styled(Box)({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   width: "100%",
 });
 
-export const CrowdfundActionButton = styled(Button)(({ theme }) => ({
+export const ActionButton = styled(Button)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   fontFamily: "Montserrat",
@@ -540,8 +538,8 @@ export const NoReviewsFont = styled(Typography)(({ theme }) => ({
 export const StyledButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   color: theme.palette.text.primary,
-  fontFamily: "Cairo"
-}))
+  fontFamily: "Cairo",
+}));
 
 export const CustomSelect = styled(Select)(({ theme }) => ({
   fontFamily: "Mulish",
@@ -550,34 +548,34 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
   fontWeight: 400,
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
-  '& .MuiSelect-select': {
-    padding: '12px',
+  "& .MuiSelect-select": {
+    padding: "12px",
     fontFamily: "Mulish",
     fontSize: "19px",
     letterSpacing: "0px",
     fontWeight: 400,
     borderRadius: theme.shape.borderRadius, // Match border radius
   },
-  '&:before': {
+  "&:before": {
     // Underline style
     borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
   },
-  '&:after': {
+  "&:after": {
     // Underline style when focused
     borderBottomColor: theme.palette.secondary.main,
   },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
       borderColor: "#E0E3E7",
     },
-    '&:hover fieldset': {
+    "&:hover fieldset": {
       borderColor: "#B2BAC2",
     },
-    '&.Mui-focused fieldset': {
+    "&.Mui-focused fieldset": {
       borderColor: "#6F7E8C",
     },
   },
-  '& .MuiInputBase-root': {
+  "& .MuiInputBase-root": {
     fontFamily: "Mulish",
     fontSize: "19px",
     letterSpacing: "0px",
