@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  CrowdfundActionButton,
+  ActionButton,
   CrowdfundActionButtonRow,
   CustomInputField,
   ModalBody,
@@ -36,6 +36,7 @@ import {
   ImagePublisher,
   ImagePublisherRef,
 } from "../common/ImagePublisher/ImagePublisher.tsx";
+import { ThemeButtonBright } from "../../pages/Home/Home-styles.tsx";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -448,15 +449,16 @@ export const EditIssue = () => {
           </>
 
           <CrowdfundActionButtonRow>
-            <CrowdfundActionButton
+            <ActionButton
               onClick={() => {
                 onClose();
               }}
               variant="contained"
               color="error"
+              sx={{ color: theme.palette.text.primary }}
             >
               Cancel
-            </CrowdfundActionButton>
+            </ActionButton>
             <Box
               sx={{
                 display: "flex",
@@ -464,14 +466,20 @@ export const EditIssue = () => {
                 alignItems: "center",
               }}
             >
-              <CrowdfundActionButton
+              <ThemeButtonBright
                 variant="contained"
                 onClick={() => {
                   publishQDNResource();
                 }}
+                sx={{
+                  fontFamily: "Montserrat",
+                  fontSize: "16px",
+                  fontWeight: 400,
+                  letterSpacing: "0.2px",
+                }}
               >
                 Publish
-              </CrowdfundActionButton>
+              </ThemeButtonBright>
             </Box>
           </CrowdfundActionButtonRow>
         </ModalBody>

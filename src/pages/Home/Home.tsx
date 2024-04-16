@@ -3,11 +3,11 @@ import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { IssueList } from "./IssueList.tsx";
-import { Box, Button, Grid, Input, useTheme } from "@mui/material";
+import { Box, Grid, Input, useTheme } from "@mui/material";
 import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
 import { FiltersCol, FiltersContainer } from "./IssueList-styles.tsx";
-import { SubtitleContainer } from "./Home-styles";
+import { SubtitleContainer, ThemeButton } from "./Home-styles";
 import {
   changefilterName,
   changefilterSearch,
@@ -219,7 +219,8 @@ export const Home = ({ mode }: HomeProps) => {
             value={filterSearch}
             placeholder="Search"
             sx={{
-              borderBottom: "1px solid white",
+              color: theme.palette.text.primary,
+              borderBottom: `1px solid ${theme.palette.text.primary}`,
               "&&:before": {
                 borderBottom: "none",
               },
@@ -235,7 +236,7 @@ export const Home = ({ mode }: HomeProps) => {
               "&&.Mui-focused": {
                 outline: "none",
               },
-              fontSize: "18px",
+              fontSize: "20px",
             }}
           />
           <Input
@@ -248,7 +249,7 @@ export const Home = ({ mode }: HomeProps) => {
             placeholder="User's Name (Exact)"
             sx={{
               marginTop: "20px",
-              borderBottom: "1px solid white",
+              borderBottom: `1px solid ${theme.palette.text.primary}`,
               "&&:before": {
                 borderBottom: "none",
               },
@@ -264,37 +265,35 @@ export const Home = ({ mode }: HomeProps) => {
               "&&.Mui-focused": {
                 outline: "none",
               },
-              fontSize: "18px",
+              fontSize: "20px",
             }}
           />
           <CategoryList categoryData={allCategoryData} ref={categoryListRef} />
 
-          <Button
+          <ThemeButton
             onClick={() => {
               filtersToDefault();
             }}
             sx={{
               marginTop: "20px",
               fontWeight: 1000,
-              color: "white",
             }}
             variant="contained"
           >
             reset
-          </Button>
-          <Button
+          </ThemeButton>
+          <ThemeButton
             onClick={() => {
               getFilesHandler(true);
             }}
             sx={{
               marginTop: "20px",
               fontWeight: 1000,
-              color: "white",
             }}
             variant="contained"
           >
             Search
-          </Button>
+          </ThemeButton>
         </FiltersContainer>
       </FiltersCol>
       <Grid item xs={12} md={10} sm={9}>

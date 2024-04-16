@@ -90,9 +90,9 @@ const lightTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#ffffff",
+      main: "#FCFCFC",
       dark: "#F5F5F5",
-      light: "#FCFCFC",
+      light: "#FFFFFF",
     },
     secondary: {
       main: "#417Ed4",

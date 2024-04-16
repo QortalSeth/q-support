@@ -1,19 +1,18 @@
 import { styled } from "@mui/system";
-import { Box, Grid, Typography, Checkbox } from "@mui/material";
-
+import { Box, Button, Grid, Typography } from "@mui/material";
 
 export const SubtitleContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "row",
   justifyContent: "center",
-  alignItems: 'center',
-  margin: '10px 0px',
-  width: '100%'
+  alignItems: "center",
+  margin: "10px 0px",
+  width: "100%",
 }));
 
 export const Subtitle = styled(Typography)(({ theme }) => ({
-  textAlign: 'center',
-  fontSize: '20px'
+  textAlign: "center",
+  fontSize: "20px",
 }));
 
 const DoubleLine = styled(Typography)`
@@ -21,15 +20,15 @@ const DoubleLine = styled(Typography)`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-`
+`;
 export const ChannelTitle = styled(DoubleLine)(({ theme }) => ({
   fontFamily: "Cairo",
   fontSize: "20px",
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
   userSelect: "none",
-  marginBottom: 'auto',
-  textAlign: 'center'
+  marginBottom: "auto",
+  textAlign: "center",
 }));
 export const WelcomeTitle = styled(DoubleLine)(({ theme }) => ({
   fontFamily: "Cairo",
@@ -37,33 +36,32 @@ export const WelcomeTitle = styled(DoubleLine)(({ theme }) => ({
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
   userSelect: "none",
-  textAlign: 'center'
+  textAlign: "center",
 }));
 
 export const WelcomeContainer = styled(Box)(({ theme }) => ({
-  position: 'fixed',
-  width: '90%',
-  height: '90%',
+  position: "fixed",
+  width: "90%",
+  height: "90%",
   backgroundColor: theme.palette.background.paper,
-  left: '50%',
-  top: '50%',
-  transform: 'translate(-50%, -50%)',
+  left: "50%",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
   zIndex: 500,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center'
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
 }));
-
 
 export const ChannelCard = styled(Grid)(({ theme }) => ({
   position: "relative",
   display: "flex",
   flexDirection: "column",
-  alignItems: 'center',
+  alignItems: "center",
   height: "auto",
-  width: '300px',
-  minHeight: '130px',
+  width: "300px",
+  minHeight: "130px",
   backgroundColor: theme.palette.background.paper,
   borderRadius: "8px",
   padding: "10px 15px",
@@ -82,6 +80,20 @@ export const ChannelCard = styled(Grid)(({ theme }) => ({
     boxShadow:
       theme.palette.mode === "dark"
         ? "0px 8px 10px 1px hsla(0,0%,0%,0.14), 0px 3px 14px 2px hsla(0,0%,0%,0.12), 0px 5px 5px -3px hsla(0,0%,0%,0.2)"
-        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;"
-  }
+        : "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;",
+  },
+}));
+
+export const ThemeButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  backgroundColor: "#01a9e9",
+  fontSize: "18px",
+  "&:hover": { backgroundColor: "#3e74c1" },
+}));
+
+export const ThemeButtonBright = styled(Button)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  backgroundColor: "#44c4ff",
+  fontSize: "18px",
+  "&:hover": { backgroundColor: "#01a9e9" },
 }));
