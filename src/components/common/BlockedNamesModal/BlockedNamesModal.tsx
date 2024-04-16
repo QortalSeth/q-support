@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import { Button, List, ListItem, Typography, useTheme } from "@mui/material";
+import { List, ListItem, Typography, useTheme } from "@mui/material";
 import {
   ModalContent,
   ModalText,
   StyledModal,
 } from "./BlockedNamesModal-styles";
+import {
+  ThemeButton,
+  ThemeButtonBright,
+} from "../../../pages/Home/Home-styles.tsx";
 
 interface PostModalProps {
   open: boolean;
@@ -69,30 +73,26 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
               }}
             >
               <Typography>{name}</Typography>
-              <Button
+              <ThemeButton
                 sx={{
-                  backgroundColor: theme.palette.primary.main,
-                  color: theme.palette.text.primary,
                   fontFamily: "Raleway",
                 }}
                 onClick={() => removeFromBlockList(name)}
               >
                 Remove
-              </Button>
+              </ThemeButton>
             </ListItem>
           ))}
         </List>
-        <Button
+        <ThemeButtonBright
           variant="contained"
           onClick={onClose}
           sx={{
-            backgroundColor: theme.palette.primary.light,
-            color: theme.palette.text.primary,
             fontFamily: "Raleway",
           }}
         >
           Close
-        </Button>
+        </ThemeButtonBright>
       </ModalContent>
     </StyledModal>
   );

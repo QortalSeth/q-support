@@ -10,12 +10,14 @@ export const AddCoverImageButton = styled(Button)(({ theme }) => ({
   fontSize: "16px",
   fontWeight: 400,
   letterSpacing: "0.2px",
-  color: "white",
+  color: theme.palette.text.primary,
+  backgroundColor: "#44c4ff",
+  "&:hover": { backgroundColor: "#01a9e9" },
   gap: "5px",
 }));
 
 export const AddLogoIcon = styled(AddPhotoAlternateIcon)(({ theme }) => ({
-  color: "#fff",
+  color: theme.palette.text.primary,
   height: "25px",
   width: "auto",
 }));

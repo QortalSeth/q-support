@@ -5,8 +5,10 @@ import { BlockedNamesModal } from "../../common/BlockedNamesModal/BlockedNamesMo
 import {
   AvatarContainer,
   CustomAppBar,
+  DarkModeIcon,
   DropdownContainer,
   DropdownText,
+  LightModeIcon,
   LogoContainer,
   NavbarName,
   ThemeSelectRow,
@@ -236,6 +238,21 @@ const NavBar: React.FC<Props> = ({
         </Popover>
 
         <DownloadTaskManager />
+        {theme.palette.mode === "dark" ? (
+          <LightModeIcon
+            onClickFunc={() => setTheme("light")}
+            color="white"
+            height="22"
+            width="22"
+          />
+        ) : (
+          <DarkModeIcon
+            onClickFunc={() => setTheme("dark")}
+            color="black"
+            height="22"
+            width="22"
+          />
+        )}
         {isAuthenticated && userName && (
           <>
             <AvatarContainer

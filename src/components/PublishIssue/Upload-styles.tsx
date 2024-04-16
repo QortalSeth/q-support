@@ -475,7 +475,7 @@ export const ActionButton = styled(Button)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   fontFamily: "Montserrat",
-  fontSize: "16px",
+  fontSize: "18px",
   fontWeight: 400,
   letterSpacing: "0.2px",
   color: "white",

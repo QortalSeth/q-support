@@ -7,9 +7,9 @@ import {
   Button,
   Grid,
   Rating,
+  Select,
   TextField,
   Typography,
-  Select
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
@@ -158,8 +158,6 @@ export const CustomInputField = styled(TextField)(({ theme }) => ({
     borderBottomColor: theme.palette.secondary.main,
   },
 }));
-
-
 
 export const CrowdfundTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Copse",
@@ -473,11 +471,11 @@ export const CrowdfundActionButtonRow = styled(Box)({
   width: "100%",
 });
 
-export const CrowdfundActionButton = styled(Button)(({ theme }) => ({
+export const ActionButton = styled(Button)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   fontFamily: "Montserrat",
-  fontSize: "16px",
+  fontSize: "18px",
   fontWeight: 400,
   letterSpacing: "0.2px",
   color: "white",
@@ -539,8 +537,8 @@ export const NoReviewsFont = styled(Typography)(({ theme }) => ({
 
 export const StyledButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
-  color: theme.palette.text.primary
-}))
+  color: theme.palette.text.primary,
+}));
 
 export const CustomSelect = styled(Select)(({ theme }) => ({
   fontFamily: "Mulish",
@@ -549,34 +547,34 @@ export const CustomSelect = styled(Select)(({ theme }) => ({
   fontWeight: 400,
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
-  '& .MuiSelect-select': {
-    padding: '12px',
+  "& .MuiSelect-select": {
+    padding: "12px",
     fontFamily: "Mulish",
     fontSize: "19px",
     letterSpacing: "0px",
     fontWeight: 400,
     borderRadius: theme.shape.borderRadius, // Match border radius
   },
-  '&:before': {
+  "&:before": {
     // Underline style
     borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
   },
-  '&:after': {
+  "&:after": {
     // Underline style when focused
     borderBottomColor: theme.palette.secondary.main,
   },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
       borderColor: "#E0E3E7",
     },
-    '&:hover fieldset': {
+    "&:hover fieldset": {
       borderColor: "#B2BAC2",
     },
-    '&.Mui-focused fieldset': {
+    "&.Mui-focused fieldset": {
       borderColor: "#6F7E8C",
     },
   },
-  '& .MuiInputBase-root': {
+  "& .MuiInputBase-root": {
     fontFamily: "Mulish",
     fontSize: "19px",
     letterSpacing: "0px",
