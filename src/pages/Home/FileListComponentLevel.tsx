@@ -15,7 +15,7 @@ import {
   VideoCardName,
   VideoCardTitle,
   VideoUploadDate,
-} from "./FileList-styles.tsx";
+} from "./IssueList-styles.tsx";
 import { formatDate } from "../../utils/time";
 import { Video } from "../../state/features/fileSlice.ts";
 import { queue } from "../../wrappers/GlobalWrapper";
@@ -149,7 +149,7 @@ export const FileListComponentLevel = ({ mode }: VideoListProps) => {
                 <>
                   <VideoCard
                     onClick={() => {
-                      navigate(`/share/${fileObj?.user}/${fileObj?.id}`);
+                      navigate(`/issue/${fileObj?.user}/${fileObj?.id}`);
                     }}
                     sx={{
                       height: "100%",

@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { FileList } from "./FileList.tsx";
+import { IssueList } from "./IssueList.tsx";
 import { Box, Button, Grid, Input, useTheme } from "@mui/material";
 import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
-import { FiltersCol, FiltersContainer } from "./FileList-styles.tsx";
+import { FiltersCol, FiltersContainer } from "./IssueList-styles.tsx";
 import { SubtitleContainer } from "./Home-styles";
 import {
   changefilterName,
@@ -315,7 +315,7 @@ export const Home = ({ mode }: HomeProps) => {
               maxWidth: "1400px",
             }}
           ></SubtitleContainer>
-          <FileList files={videos} />
+          <IssueList files={videos} />
           <LazyLoad
             onLoadMore={getFilesHandler}
             isLoading={isLoading}

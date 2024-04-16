@@ -26,7 +26,7 @@ function App() {
             <CssBaseline />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/share/:name/:id" element={<IssueContent />} />
+              <Route path="/issue/:name/:id" element={<IssueContent />} />
               <Route path="/channel/:name" element={<IndividualProfile />} />
             </Routes>
           </GlobalWrapper>
