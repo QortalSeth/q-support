@@ -219,7 +219,6 @@ export const EditPlaylist = () => {
 
   async function publishQDNResource() {
     try {
-      if (!title) throw new Error("Please enter a title");
       if (!description) throw new Error("Please enter a description");
       if (!coverImage) throw new Error("Please select cover image");
       if (!selectedCategoryVideos) throw new Error("Please select a category");
@@ -249,6 +248,16 @@ export const EditPlaylist = () => {
         );
         return;
       }
+
+      const sanitizeTitle = title
+        .replace(/[^a-zA-Z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim()
+        .toLowerCase();
+
+      if (!sanitizeTitle) throw new Error("Please enter a title");
+
       const category = selectedCategoryVideos.id;
       const subcategory = selectedSubCategoryVideos?.id || "";
 
@@ -308,12 +317,7 @@ export const EditPlaylist = () => {
       // Description is obtained from raw data
 
       let identifier = editVideoProperties?.id;
-      const sanitizeTitle = title
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim()
-        .toLowerCase();
+
       if (isNew) {
         identifier = `${QSUPPORT_PLAYLIST_BASE}${sanitizeTitle.slice(0, 30)}_${id}`;
       }

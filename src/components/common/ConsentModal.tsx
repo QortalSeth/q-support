@@ -7,8 +7,9 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import localForage from "localforage";
 import { useTheme } from "@mui/material";
+
 const generalLocal = localForage.createInstance({
-  name: "q-share-general",
+  name: "q-support-general",
 });
 
 export default function ConsentModal() {
@@ -44,13 +45,15 @@ export default function ConsentModal() {
         <DialogTitle id="alert-dialog-title">Welcome</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Q-Share is currently in its first version and as such there could be
-            some bugs. The Qortal community, along with its development team and
-            the creators of this application, cannot be held accountable for any
-            content published or displayed. Also, they are not responsible for
-            any loss of coin due to either bad actors or bugs in the
+            Q-Support is currently in its first version and as such there could
+            be some bugs. The Qortal community, along with its development team
+            and the creators of this application, cannot be held accountable for
+            any content published or displayed. Also, they are not responsible
+            for any loss of coin due to either bad actors or bugs in the
             application. Furthermore, they bear no responsibility for any data
-            loss that may occur as a result of using this application. Finally, they bear no responsibility for any of the content uploaded by users.
+            loss that may occur as a result of using this application. Finally,
+            they bear no responsibility for any of the content uploaded by
+            users.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

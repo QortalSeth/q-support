@@ -1,12 +1,12 @@
 import { styled } from "@mui/system";
 import {
-  Box,
-  Grid,
-  Typography,
-  Checkbox,
-  TextField,
-  InputLabel,
   Autocomplete,
+  Box,
+  Checkbox,
+  Grid,
+  InputLabel,
+  TextField,
+  Typography,
 } from "@mui/material";
 
 export const FileContainer = styled(Box)(({ theme }) => ({
@@ -283,6 +283,7 @@ export const BlockIconContainer = styled(Box)({
   padding: "2px",
   borderRadius: "3px",
   transition: "all 0.3s ease-in-out",
+  fontSize: "18px",
   "&:hover": {
     cursor: "pointer",
     transform: "scale(1.1)",

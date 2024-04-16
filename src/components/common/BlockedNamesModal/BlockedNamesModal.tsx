@@ -1,18 +1,9 @@
 import React, { useState } from "react";
+import { Button, List, ListItem, Typography, useTheme } from "@mui/material";
 import {
-  Box,
-  Button,
-  Modal,
-  Typography,
-  SelectChangeEvent,
-  ListItem,
-  List,
-  useTheme
-} from "@mui/material";
-import {
-  StyledModal,
   ModalContent,
-  ModalText
+  ModalText,
+  StyledModal,
 } from "./BlockedNamesModal-styles";
 
 interface PostModalProps {
@@ -22,7 +13,7 @@ interface PostModalProps {
 
 export const BlockedNamesModal: React.FC<PostModalProps> = ({
   open,
-  onClose
+  onClose,
 }) => {
   const [blockedNames, setBlockedNames] = useState<string[]>([]);
   const theme = useTheme();
@@ -31,7 +22,7 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
       const listName = `blockedNames`;
       const response = await qortalRequest({
         action: "GET_LIST_ITEMS",
-        list_name: listName
+        list_name: listName,
       });
       setBlockedNames(response);
     } catch (error) {
@@ -48,11 +39,11 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
       const response = await qortalRequest({
         action: "DELETE_LIST_ITEM",
         list_name: "blockedNames",
-        item: name
+        item: name,
       });
 
       if (response === true) {
-        setBlockedNames((prev) => prev.filter((n) => n !== name));
+        setBlockedNames(prev => prev.filter(n => n !== name));
       }
     } catch (error) {}
   };
@@ -67,22 +58,22 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
             display: "flex",
             flexDirection: "column",
             flex: "1",
-            overflow: "auto"
+            overflow: "auto",
           }}
         >
           {blockedNames.map((name, index) => (
             <ListItem
               key={name + index}
               sx={{
-                display: "flex"
+                display: "flex",
               }}
             >
               <Typography>{name}</Typography>
               <Button
                 sx={{
-                  backgroundColor: theme.palette.primary.light,
+                  backgroundColor: theme.palette.primary.main,
                   color: theme.palette.text.primary,
-                  fontFamily: "Raleway"
+                  fontFamily: "Raleway",
                 }}
                 onClick={() => removeFromBlockList(name)}
               >
@@ -91,7 +82,15 @@ export const BlockedNamesModal: React.FC<PostModalProps> = ({
             </ListItem>
           ))}
         </List>
-        <Button variant="contained" color="primary" onClick={onClose}>
+        <Button
+          variant="contained"
+          onClick={onClose}
+          sx={{
+            backgroundColor: theme.palette.primary.light,
+            color: theme.palette.text.primary,
+            fontFamily: "Raleway",
+          }}
+        >
           Close
         </Button>
       </ModalContent>

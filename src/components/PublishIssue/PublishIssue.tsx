@@ -128,8 +128,6 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
     try {
       if (!categoryListRef.current) throw new Error("No CategoryListRef found");
       if (!userAddress) throw new Error("Unable to locate user address");
-
-      if (!title) throw new Error("Please enter a title");
       if (!description) throw new Error("Please enter a description");
       if (!categoryListRef.current?.getSelectedCategories()[0])
         throw new Error("Please select a category");
@@ -157,18 +155,19 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         return;
       }
 
-      let fileReferences = [];
-
-      let listOfPublishes = [];
-
-      const fullDescription = extractTextFromHTML(description);
-
       const sanitizeTitle = title
         .replace(/[^a-zA-Z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .trim()
         .toLowerCase();
+      if (!sanitizeTitle) throw new Error("Please enter a title");
+
+      let fileReferences = [];
+
+      let listOfPublishes = [];
+
+      const fullDescription = extractTextFromHTML(description);
 
       for (const publish of files) {
         const file = publish.file;

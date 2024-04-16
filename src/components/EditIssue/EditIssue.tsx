@@ -144,7 +144,6 @@ export const EditIssue = () => {
   async function publishQDNResource() {
     try {
       const categoryList = categoryListRef.current?.getSelectedCategories();
-      if (!title) throw new Error("Please enter a title");
       if (!description) throw new Error("Please enter a description");
       if (!categoryList[0]) throw new Error("Please select a category");
       if (!editFileProperties) return;
@@ -173,10 +172,6 @@ export const EditIssue = () => {
         );
         return;
       }
-      let fileReferences = [];
-
-      let listOfPublishes = [];
-      const fullDescription = extractTextFromHTML(description);
 
       const sanitizeTitle = title
         .replace(/[^a-zA-Z0-9\s-]/g, "")
@@ -184,6 +179,12 @@ export const EditIssue = () => {
         .replace(/-+/g, "-")
         .trim()
         .toLowerCase();
+
+      if (!sanitizeTitle) throw new Error("Please enter a title");
+      let fileReferences = [];
+
+      let listOfPublishes = [];
+      const fullDescription = extractTextFromHTML(description);
 
       for (const publish of files) {
         if (publish?.identifier) {

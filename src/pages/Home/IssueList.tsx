@@ -1,4 +1,4 @@
-import { Avatar, Box, Skeleton, Tooltip } from "@mui/material";
+import { Avatar, Box, Skeleton } from "@mui/material";
 import {
   BlockIconContainer,
   BottomParent,
@@ -9,7 +9,7 @@ import {
   VideoCardName,
   VideoCardTitle,
   VideoUploadDate,
-} from "./FileList-styles.tsx";
+} from "./IssueList-styles.tsx";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   blockUser,
@@ -29,7 +29,7 @@ import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions
 interface FileListProps {
   files: Video[];
 }
-export const FileList = ({ files }: FileListProps) => {
+export const IssueList = ({ files }: FileListProps) => {
   const hashMapFiles = useSelector(
     (state: RootState) => state.file.hashMapFiles
   );
@@ -40,7 +40,7 @@ export const FileList = ({ files }: FileListProps) => {
   const navigate = useNavigate();
 
   const blockUserFunc = async (user: string) => {
-    if (user === "Q-Share") return;
+    if (user === "Q-Support") return;
 
     try {
       const response = await qortalRequest({
@@ -88,30 +88,30 @@ export const FileList = ({ files }: FileListProps) => {
                   }}
                 >
                   {fileObj?.user === username && (
-                    <Tooltip title="Edit Issue Properties" placement="top">
-                      <BlockIconContainer>
-                        <EditIcon
-                          onClick={() => {
-                            dispatch(setEditFile(fileObj));
-                          }}
-                        />
-                      </BlockIconContainer>
-                    </Tooltip>
+                    <BlockIconContainer
+                      onClick={() => {
+                        dispatch(setEditFile(fileObj));
+                      }}
+                    >
+                      <EditIcon />
+                      Edit Issue
+                    </BlockIconContainer>
                   )}
 
-                  <Tooltip title="Block user content" placement="top">
-                    <BlockIconContainer>
-                      <BlockIcon
-                        onClick={() => {
-                          blockUserFunc(fileObj?.user);
-                        }}
-                      />
+                  {fileObj?.user !== username && (
+                    <BlockIconContainer
+                      onClick={() => {
+                        blockUserFunc(fileObj?.user);
+                      }}
+                    >
+                      <BlockIcon />
+                      Block User
                     </BlockIconContainer>
-                  </Tooltip>
+                  )}
                 </IconsBox>
                 <VideoCard
                   onClick={() => {
-                    navigate(`/share/${fileObj?.user}/${fileObj?.id}`);
+                    navigate(`/issue/${fileObj?.user}/${fileObj?.id}`);
                   }}
                   sx={{
                     height: "100%",
