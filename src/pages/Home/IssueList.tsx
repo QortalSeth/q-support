@@ -20,17 +20,17 @@ import BlockIcon from "@mui/icons-material/Block";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { formatBytes } from "../IssueContent/IssueContent.tsx";
 import { formatDate } from "../../utils/time.ts";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store.ts";
 import { useNavigate } from "react-router-dom";
 import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
 
 interface FileListProps {
-  files: Video[];
+  issues: Video[];
 }
-export const IssueList = ({ files }: FileListProps) => {
-  const hashMapFiles = useSelector(
+export const IssueList = ({ issues }: FileListProps) => {
+  const hashMapIssues = useSelector(
     (state: RootState) => state.file.hashMapFiles
   );
 
@@ -55,10 +55,14 @@ export const IssueList = ({ files }: FileListProps) => {
     } catch (error) {}
   };
 
+  const filteredIssues = useMemo(() => {
+    return issues.filter((issue: any) => hashMapIssues[issue.id]?.isValid);
+  }, [issues, hashMapIssues]);
+
   return (
     <FileContainer>
-      {files.map((file: any, index: number) => {
-        const existingFile = hashMapFiles[file?.id];
+      {filteredIssues.map((file: any, index: number) => {
+        const existingFile = hashMapIssues[file?.id];
         let hasHash = false;
         let fileObj = file;
         if (existingFile) {

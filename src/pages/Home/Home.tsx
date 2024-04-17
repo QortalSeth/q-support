@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { IssueList } from "./IssueList.tsx";
 import { Box, Grid, Input, useTheme } from "@mui/material";
-import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
+import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
 import { FiltersCol, FiltersContainer } from "./IssueList-styles.tsx";
 import { SubtitleContainer, ThemeButton } from "./Home-styles";
@@ -87,7 +87,7 @@ export const Home = ({ mode }: HomeProps) => {
     checkNewFiles,
     getFilesFiltered,
     getFilesCount,
-  } = useFetchFiles();
+  } = useFetchIssues();
 
   const getFilesHandler = React.useCallback(
     async (reset?: boolean, resetFilers?: boolean) => {
@@ -314,7 +314,7 @@ export const Home = ({ mode }: HomeProps) => {
               maxWidth: "1400px",
             }}
           ></SubtitleContainer>
-          <IssueList files={videos} />
+          <IssueList issues={videos} />
           <LazyLoad
             onLoadMore={getFilesHandler}
             isLoading={isLoading}

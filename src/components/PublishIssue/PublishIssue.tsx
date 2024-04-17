@@ -6,7 +6,7 @@ import {
   ModalBody,
   NewCrowdfundTitle,
   StyledButton,
-} from "./Upload-styles";
+} from "./PublishIssue-styles.tsx";
 import { Box, Modal, Typography, useTheme } from "@mui/material";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShortUniqueId from "short-unique-id";
@@ -74,8 +74,6 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
     useState<any>(null);
   const [playlistTitle, setPlaylistTitle] = useState<string>("");
   const [playlistDescription, setPlaylistDescription] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
 
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
   const [publishes, setPublishes] = useState<any>(null);
@@ -479,12 +477,13 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
             setFiles([]);
             setStep("videos");
             setPlaylistCoverImage(null);
+            setTitle("");
             setPlaylistTitle("");
             setPlaylistDescription("");
-            setSelectedCategory(null);
-            setSelectedSubCategory(null);
+            setDescription("");
             setPlaylistSetting(null);
             categoryListRef.current?.clearCategories();
+            imagePublisherRef.current?.setImageArray([]);
             dispatch(
               setNotification({
                 msg: "Issue published",

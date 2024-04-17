@@ -5,7 +5,7 @@ import { RootState } from "../../state/store";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 import { Avatar, Box, Skeleton, useTheme } from "@mui/material";
-import { useFetchFiles } from "../../hooks/useFetchFiles.tsx";
+import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
 import {
   BottomParent,
@@ -41,7 +41,7 @@ export const FileListComponentLevel = ({ mode }: VideoListProps) => {
 
   const navigate = useNavigate();
   const { getFile, getNewFiles, checkNewFiles, checkAndUpdateFile } =
-    useFetchFiles();
+    useFetchIssues();
 
   const getVideos = React.useCallback(async () => {
     try {

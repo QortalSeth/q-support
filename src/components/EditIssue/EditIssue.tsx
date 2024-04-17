@@ -5,7 +5,7 @@ import {
   CustomInputField,
   ModalBody,
   NewCrowdfundTitle,
-} from "./Upload-styles";
+} from "./EditIssue-styles.tsx";
 import { Box, Modal, Typography, useTheme } from "@mui/material";
 import RemoveIcon from "@mui/icons-material/Remove";
 
