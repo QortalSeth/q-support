@@ -412,9 +412,13 @@ export const IssueContent = () => {
               return (
                 <img
                   src={image}
-                  width={`${1280 / fileData.images.length}px`}
-                  height={"480px"}
-                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                  width={`${1080 / fileData.images.length}px`}
+                  style={{
+                    marginRight: "10px",
+                    marginBottom: "10px",
+                    objectFit: "contain",
+                    maxHeight: "50vh",
+                  }}
                 />
               );
             })}
@@ -422,7 +426,7 @@ export const IssueContent = () => {
         <Spacer height="15px" />
         <Box
           sx={{
-            background: "#333333",
+            background: theme.palette.mode === "dark" ? "#333333" : "#CCCCCC",
             borderRadius: "5px",
             padding: "5px",
             width: "100%",

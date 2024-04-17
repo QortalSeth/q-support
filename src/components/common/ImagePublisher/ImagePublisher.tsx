@@ -11,6 +11,7 @@ import { useTheme } from "@mui/material";
 
 export type ImagePublisherRef = {
   getImageArray: () => string[];
+  setImageArray: (imageArray: string[]) => void;
 };
 
 interface ImagePublisherProps {
@@ -26,6 +27,9 @@ export const ImagePublisher = React.forwardRef<
   useImperativeHandle(ref, () => ({
     getImageArray: () => {
       return imageArray;
+    },
+    setImageArray: (imageArray: string[]) => {
+      setImageArray(imageArray);
     },
   }));
 

@@ -3,7 +3,7 @@ import { CardContentContainerComment } from "../common/Comments/Comments-styles"
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
-} from "../PublishIssue/Upload-styles.tsx";
+} from "../PublishIssue/PublishIssue-styles.tsx";
 import { Box, Button, Input, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";

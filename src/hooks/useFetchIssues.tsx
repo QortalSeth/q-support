@@ -3,30 +3,30 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addFiles,
   addToHashMap,
+  removeFromHashMap,
   setCountNewFiles,
   upsertFiles,
   upsertFilesBeginning,
-  Video,
   upsertFilteredFiles,
+  Video,
 } from "../state/features/fileSlice.ts";
 import {
+  setFilesPerNamePublished,
   setIsLoadingGlobal,
-  setUserAvatarHash,
   setTotalFilesPublished,
   setTotalNamesPublished,
-  setFilesPerNamePublished,
+  setUserAvatarHash,
 } from "../state/features/globalSlice";
 import { RootState } from "../state/store";
-import { fetchAndEvaluateVideos } from "../utils/fetchVideos";
+import { fetchAndEvaluateIssues } from "../utils/fetchVideos";
 import {
-  QSUPPORT_PLAYLIST_BASE,
   QSUPPORT_FILE_BASE,
+  QSUPPORT_PLAYLIST_BASE,
 } from "../constants/Identifiers.ts";
-import { RequestQueue } from "../utils/queue";
 import { queue } from "../wrappers/GlobalWrapper";
 import { getCategoriesFetchString } from "../components/common/CategoryList/CategoryList.tsx";
 
-export const useFetchFiles = () => {
+export const useFetchIssues = () => {
   const dispatch = useDispatch();
   const hashMapFiles = useSelector(
     (state: RootState) => state.file.hashMapFiles
@@ -49,7 +49,7 @@ export const useFetchFiles = () => {
     (state: RootState) => state.global.filesPerNamePublished
   );
 
-  const checkAndUpdateFile = React.useCallback(
+  const checkAndUpdateIssue = React.useCallback(
     (video: Video) => {
       const existingVideo = hashMapFiles[video.id];
       if (!existingVideo) {
@@ -85,27 +85,29 @@ export const useFetchFiles = () => {
     } catch (error) {}
   }, []);
 
-  const getFile = async (
+  const getIssue = async (
     user: string,
-    videoId: string,
+    issueID: string,
     content: any,
     retries: number = 0
   ) => {
     try {
-      const res = await fetchAndEvaluateVideos({
+      const res = await fetchAndEvaluateIssues({
         user,
-        videoId,
+        videoId: issueID,
         content,
       });
-
-      dispatch(addToHashMap(res));
+      console.log("response is: ", res);
+      res?.isValid
+        ? dispatch(addToHashMap(res))
+        : dispatch(removeFromHashMap(issueID));
     } catch (error) {
       retries = retries + 1;
       if (retries < 2) {
         // 3 is the maximum number of retries here, you can adjust it to your needs
-        queue.push(() => getFile(user, videoId, content, retries + 1));
+        queue.push(() => getIssue(user, issueID, content, retries + 1));
       } else {
-        console.error("Failed to get video after 3 attempts", error);
+        console.error("Failed to get issue after 3 attempts", error);
       }
     }
   };
@@ -172,9 +174,9 @@ export const useFetchFiles = () => {
       }, 1000);
       for (const content of structureData) {
         if (content.user && content.id) {
-          const res = checkAndUpdateFile(content);
+          const res = checkAndUpdateIssue(content);
           if (res) {
-            queue.push(() => getFile(content.user, content.id, content));
+            queue.push(() => getIssue(content.user, content.id, content));
           }
         }
       }
@@ -269,9 +271,9 @@ export const useFetchFiles = () => {
         }
         for (const content of structureData) {
           if (content.user && content.id) {
-            const res = checkAndUpdateFile(content);
+            const res = checkAndUpdateIssue(content);
             if (res) {
-              queue.push(() => getFile(content.user, content.id, content));
+              queue.push(() => getIssue(content.user, content.id, content));
             }
           }
         }
@@ -330,9 +332,9 @@ export const useFetchFiles = () => {
 
         for (const content of structureData) {
           if (content.user && content.id) {
-            const res = checkAndUpdateFile(content);
+            const res = checkAndUpdateIssue(content);
             if (res) {
-              queue.push(() => getFile(content.user, content.id, content));
+              queue.push(() => getIssue(content.user, content.id, content));
             }
           }
         }
@@ -410,8 +412,8 @@ export const useFetchFiles = () => {
 
   return {
     getFiles,
-    checkAndUpdateFile,
-    getFile,
+    checkAndUpdateFile: checkAndUpdateIssue,
+    getFile: getIssue,
     hashMapFiles,
     getNewFiles,
     checkNewFiles,

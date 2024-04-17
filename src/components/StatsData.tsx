@@ -3,7 +3,7 @@ import { styled } from "@mui/system";
 import { Grid } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "../state/store.ts";
-import { useFetchFiles } from "../hooks/useFetchFiles.tsx";
+import { useFetchIssues } from "../hooks/useFetchIssues.tsx";
 
 export const StatsData = () => {
   const StatsCol = styled(Grid)(({ theme }) => ({
@@ -23,7 +23,7 @@ export const StatsData = () => {
     checkNewFiles,
     getFilesFiltered,
     getFilesCount,
-  } = useFetchFiles();
+  } = useFetchIssues();
 
   const totalIssuesPublished = useSelector(
     (state: RootState) => state.global.totalFilesPublished

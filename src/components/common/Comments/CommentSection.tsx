@@ -18,7 +18,7 @@ import { QSUPPORT_COMMENT_BASE } from "../../../constants/Identifiers.ts";
 import {
   CrowdfundSubTitle,
   CrowdfundSubTitleRow,
-} from "../../PublishIssue/Upload-styles.tsx";
+} from "../../PublishIssue/PublishIssue-styles.tsx";
 
 interface CommentSectionProps {
   postId: string;
