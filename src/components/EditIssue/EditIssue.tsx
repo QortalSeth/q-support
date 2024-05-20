@@ -25,8 +25,8 @@ import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
-import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
-import { titleFormatter } from "../../constants/Misc.ts";
+import { allCategoryData } from "../../constants/Categories/Categories.ts";
+import { log, titleFormatter } from "../../constants/Misc.ts";
 import {
   CategoryList,
   CategoryListRef,
@@ -37,6 +37,13 @@ import {
   ImagePublisherRef,
 } from "../common/ImagePublisher/ImagePublisher.tsx";
 import { ThemeButtonBright } from "../../pages/Home/Home-styles.tsx";
+import {
+  AutocompleteQappNames,
+  QappNamesRef,
+} from "../common/AutocompleteQappNames.tsx";
+import { payPublishFeeQORT } from "../../constants/PublishFees/SendFeeFunctions.ts";
+import { feeAmountBase } from "../../constants/PublishFees/FeeData.tsx";
+import { verifyPayment } from "../../constants/PublishFees/VerifyPayment.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -58,6 +65,7 @@ interface VideoFile {
   identifier?: string;
   filename?: string;
 }
+
 export const EditIssue = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -65,9 +73,13 @@ export const EditIssue = () => {
   const userAddress = useSelector(
     (state: RootState) => state.auth?.user?.address
   );
-  const editFileProperties = useSelector(
+  const editIssueProperties = useSelector(
     (state: RootState) => state.file.editFileProperties
   );
+  const QappNames = useSelector(
+    (state: RootState) => state.file.publishedQappNames
+  );
+
   const [publishes, setPublishes] = useState<any>(null);
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
   const [videoPropertiesToSetToRedux, setVideoPropertiesToSetToRedux] =
@@ -78,9 +90,11 @@ export const EditIssue = () => {
   const [coverImage, setCoverImage] = useState<string>("");
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState<VideoFile[]>([]);
-  const [editCategories, setEditCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isIssuePaid, setIsIssuePaid] = useState<boolean>(true);
   const categoryListRef = useRef<CategoryListRef>(null);
   const imagePublisherRef = useRef<ImagePublisherRef>(null);
+  const autocompleteRef = useRef<QappNamesRef>(null);
 
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
@@ -118,21 +132,25 @@ export const EditIssue = () => {
   });
 
   useEffect(() => {
-    if (editFileProperties) {
-      setTitle(editFileProperties?.title || "");
-      setFiles(editFileProperties?.files || []);
-      if (editFileProperties?.htmlDescription) {
-        setDescription(editFileProperties?.htmlDescription);
-      } else if (editFileProperties?.fullDescription) {
-        const paragraph = `<p>${editFileProperties?.fullDescription}</p>`;
+    if (editIssueProperties) {
+      setTitle(editIssueProperties?.title || "");
+      setFiles(editIssueProperties?.files || []);
+      if (editIssueProperties?.htmlDescription) {
+        setDescription(editIssueProperties?.htmlDescription);
+      } else if (editIssueProperties?.fullDescription) {
+        const paragraph = `<p>${editIssueProperties?.fullDescription}</p>`;
         setDescription(paragraph);
       }
 
+      verifyPayment(editIssueProperties).then(isIssuePaid => {
+        setIsIssuePaid(isIssuePaid);
+      });
       const categoriesFromEditFile =
-        getCategoriesFromObject(editFileProperties);
-      setEditCategories(categoriesFromEditFile);
+        getCategoriesFromObject(editIssueProperties);
+      setSelectedCategories(categoriesFromEditFile);
     }
-  }, [editFileProperties]);
+  }, [editIssueProperties]);
+
   const onClose = () => {
     dispatch(setEditFile(null));
     setVideoPropertiesToSetToRedux(null);
@@ -142,14 +160,22 @@ export const EditIssue = () => {
     setCoverImage("");
   };
 
-  async function publishQDNResource() {
+  async function publishQDNResource(payFee: boolean) {
     try {
-      const categoryList = categoryListRef.current?.getSelectedCategories();
-      if (!description) throw new Error("Please enter a description");
-      if (!categoryList[0]) throw new Error("Please select a category");
-      if (!editFileProperties) return;
+      if (!categoryListRef.current) throw new Error("No CategoryListRef found");
       if (!userAddress) throw new Error("Unable to locate user address");
+      if (!description) throw new Error("Please enter a description");
+      const allCategoriesSelected = !selectedCategories.includes("");
+      if (!allCategoriesSelected)
+        throw new Error("All Categories must be selected");
 
+      console.log("categories", selectedCategories);
+      const QappsCategoryID = "3";
+      if (
+        selectedCategories[0] === QappsCategoryID &&
+        !autocompleteRef?.current?.getSelectedValue()
+      )
+        throw new Error("Select a published Q-App");
       let errorMsg = "";
       let name = "";
       if (username) {
@@ -160,7 +186,7 @@ export const EditIssue = () => {
           "Cannot publish without access to your name. Please authenticate.";
       }
 
-      if (editFileProperties?.user !== username) {
+      if (editIssueProperties?.user !== username) {
         errorMsg = "Cannot publish another user's resource";
       }
 
@@ -223,9 +249,8 @@ export const EditIssue = () => {
           filename = alphanumericString;
         }
 
-        let metadescription =
-          `**${categoryListRef.current?.getCategoriesFetchString()}**` +
-          fullDescription.slice(0, 150);
+        const categoryString = `**${categoryListRef.current?.getSelectedCategories()}**`;
+        let metadescription = categoryString + fullDescription.slice(0, 150);
 
         const requestBodyVideo: any = {
           action: "PUBLISH_QDN_RESOURCE",
@@ -248,23 +273,50 @@ export const EditIssue = () => {
           size: file.size,
         });
       }
+      const selectedQappName = autocompleteRef?.current?.getSelectedValue();
 
-      const fileObject: any = {
+      const issueObject: any = {
         title,
-        version: editFileProperties.version,
+        version: editIssueProperties.version,
         fullDescription,
         htmlDescription: description,
-        commentsId: editFileProperties.commentsId,
+        commentsId: editIssueProperties.commentsId,
         ...categoryListRef.current?.categoriesToObject(),
         files: fileReferences,
         images: imagePublisherRef?.current?.getImageArray(),
+        QappName: selectedQappName,
+        feeData: editIssueProperties?.feeData,
       };
+      if (payFee) {
+        const publishFeeResponse = await payPublishFeeQORT(feeAmountBase);
+        if (!publishFeeResponse) {
+          dispatch(
+            setNotification({
+              msg: "Fee publish rejected by user.",
+              alertType: "error",
+            })
+          );
+          return;
+        }
+        if (log) console.log("feeResponse: ", publishFeeResponse);
 
-      let metadescription =
-        `**${categoryListRef.current?.getCategoriesFetchString()}**` +
-        fullDescription.slice(0, 150);
+        issueObject.feeData = { signature: publishFeeResponse };
+        dispatch(updateInHashMap(issueObject)); // shows issue as paid right away?
+      }
 
-      const fileObjectToBase64 = await objectToBase64(fileObject);
+      const QappNameString = autocompleteRef?.current?.getQappNameFetchString();
+      const categoryString =
+        categoryListRef.current?.getCategoriesFetchString(selectedCategories);
+      const metaDataString = `**${categoryString + QappNameString}**`;
+
+      let metadescription = metaDataString + fullDescription.slice(0, 150);
+      if (log) console.log("description is: ", metadescription);
+      if (log) console.log("description length is: ", metadescription.length);
+      if (log) console.log("characters left:", 240 - metadescription.length);
+      if (log)
+        console.log("% of characters used:", metadescription.length / 240);
+
+      const fileObjectToBase64 = await objectToBase64(issueObject);
       // Description is obtained from raw data
 
       const requestBodyJson: any = {
@@ -274,7 +326,7 @@ export const EditIssue = () => {
         data64: fileObjectToBase64,
         title: title.slice(0, 50),
         description: metadescription,
-        identifier: editFileProperties.id,
+        identifier: editIssueProperties.id,
         tag1: QSUPPORT_FILE_BASE,
         filename: `video_metadata.json`,
       };
@@ -287,10 +339,13 @@ export const EditIssue = () => {
       setPublishes(multiplePublish);
       setIsOpenMultiplePublish(true);
       setVideoPropertiesToSetToRedux({
-        ...editFileProperties,
-        ...fileObject,
+        ...editIssueProperties,
+        ...issueObject,
       });
     } catch (error: any) {
+      console.log("error is: ", error);
+      if (error === "User declined request") return;
+
       let notificationObj: any = null;
       if (typeof error === "string") {
         notificationObj = {
@@ -315,26 +370,15 @@ export const EditIssue = () => {
     }
   }
 
-  const handleOnchange = (index: number, type: string, value: string) => {
-    // setFiles((prev) => {
-    //   let formattedValue = value
-    //   console.log({type})
-    //   if(type === 'title'){
-    //     formattedValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
-    //   }
-    //   const copyFiles = [...prev];
-    //   copyFiles[index] = {
-    //     ...copyFiles[index],
-    //     [type]: formattedValue,
-    //   };
-    //   return copyFiles;
-    // });
+  const isShowQappNameTextField = () => {
+    const QappID = "3";
+    return selectedCategories[0] === QappID;
   };
 
   return (
     <>
       <Modal
-        open={!!editFileProperties}
+        open={!!editIssueProperties}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
@@ -410,15 +454,26 @@ export const EditIssue = () => {
               >
                 <CategoryList
                   categoryData={allCategoryData}
-                  initialCategories={editCategories}
+                  initialCategories={selectedCategories}
                   columns={3}
                   ref={categoryListRef}
+                  showEmptyItem={false}
+                  afterChange={newSelectedCategories => {
+                    setSelectedCategories(newSelectedCategories);
+                  }}
                 />
               </Box>
             </Box>
+            {isShowQappNameTextField() && (
+              <AutocompleteQappNames
+                ref={autocompleteRef}
+                namesList={QappNames}
+                initialSelection={editIssueProperties?.QappName}
+              />
+            )}
             <ImagePublisher
               ref={imagePublisherRef}
-              initialImages={editFileProperties?.images}
+              initialImages={editIssueProperties?.images}
             />
             <CustomInputField
               name="title"
@@ -466,10 +521,27 @@ export const EditIssue = () => {
                 alignItems: "center",
               }}
             >
+              {isIssuePaid === false && (
+                <ThemeButtonBright
+                  variant="contained"
+                  onClick={() => {
+                    publishQDNResource(true);
+                  }}
+                  sx={{
+                    fontFamily: "Montserrat",
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    letterSpacing: "0.2px",
+                  }}
+                >
+                  Publish Edit with Fee
+                </ThemeButtonBright>
+              )}
+
               <ThemeButtonBright
                 variant="contained"
                 onClick={() => {
-                  publishQDNResource();
+                  publishQDNResource(false);
                 }}
                 sx={{
                   fontFamily: "Montserrat",
@@ -478,7 +550,7 @@ export const EditIssue = () => {
                   letterSpacing: "0.2px",
                 }}
               >
-                Publish
+                Publish Edit
               </ThemeButtonBright>
             </Box>
           </CrowdfundActionButtonRow>
@@ -506,7 +578,7 @@ export const EditIssue = () => {
             dispatch(updateInHashMap(clonedCopy));
             dispatch(
               setNotification({
-                msg: "File updated",
+                msg: "Issue updated",
                 alertType: "success",
               })
             );

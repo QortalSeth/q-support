@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -9,26 +8,26 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { CommentEditor } from "./CommentEditor";
 import {
+  AuthorTextComment,
   CardContentContainerComment,
   CommentActionButtonRow,
   CommentDateText,
   EditReplyButton,
-  StyledCardComment,
-} from "./Comments-styles";
-import { StyledCardHeaderComment } from "./Comments-styles";
-import { StyledCardColComment } from "./Comments-styles";
-import { AuthorTextComment } from "./Comments-styles";
-import {
-  StyledCardContentComment,
   LoadMoreCommentsButton as CommentActionButton,
+  StyledCardColComment,
+  StyledCardComment,
+  StyledCardContentComment,
+  StyledCardHeaderComment,
 } from "./Comments-styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import Portal from "../Portal";
 import { formatDate } from "../../../utils/time";
+import { ThemeButton } from "../../../pages/Home/Home-styles.tsx";
+
 interface CommentProps {
   comment: any;
   postId: string;
@@ -69,12 +68,15 @@ export const Comment = ({
             onClose={() => setCurrentEdit(null)}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
+            maxWidth={false}
           >
-            <DialogTitle id="alert-dialog-title"></DialogTitle>
+            <DialogTitle id="alert-dialog-title" sx={{ fontSize: "30px" }}>
+              Edit Comment
+            </DialogTitle>
             <DialogContent>
               <Box
                 sx={{
-                  width: "300px",
+                  width: "1000px",
                   display: "flex",
                   justifyContent: "center",
                 }}
@@ -90,9 +92,12 @@ export const Comment = ({
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button variant="contained" onClick={() => setCurrentEdit(null)}>
+              <ThemeButton
+                variant="contained"
+                onClick={() => setCurrentEdit(null)}
+              >
                 Close
-              </Button>
+              </ThemeButton>
             </DialogActions>
           </Dialog>
         </Portal>
@@ -125,13 +130,15 @@ export const Comment = ({
             </Typography>
           )}
           <CommentActionButtonRow>
-            <CommentActionButton
-              size="small"
-              variant="contained"
-              onClick={() => setIsReplying(true)}
-            >
-              reply
-            </CommentActionButton>
+            {user?.name !== comment?.name && (
+              <CommentActionButton
+                size="small"
+                variant="contained"
+                onClick={() => setIsReplying(true)}
+              >
+                reply
+              </CommentActionButton>
+            )}
             {user?.name === comment?.name && (
               <CommentActionButton
                 size="small"

@@ -12,40 +12,48 @@ import {
   changefilterName,
   changefilterSearch,
   changeFilterType,
+  setQappNames,
 } from "../../state/features/fileSlice.ts";
-import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
+import {
+  allCategoryData,
+  IssueState,
+} from "../../constants/Categories/Categories.ts";
 import {
   CategoryList,
   CategoryListRef,
+  getCategoriesFetchString,
 } from "../../components/common/CategoryList/CategoryList.tsx";
 import { StatsData } from "../../components/StatsData.tsx";
+import {
+  CategorySelect,
+  CategorySelectRef,
+} from "../../components/common/CategoryList/CategorySelect.tsx";
+import {
+  AutocompleteQappNames,
+  getPublishedQappNames,
+  QappNamesRef,
+} from "../../components/common/AutocompleteQappNames.tsx";
 
 interface HomeProps {
   mode?: string;
 }
 export const Home = ({ mode }: HomeProps) => {
   const theme = useTheme();
-  const prevVal = useRef("");
-  const categoryListRef = useRef<CategoryListRef>(null);
   const isFiltering = useSelector((state: RootState) => state.file.isFiltering);
   const filterValue = useSelector((state: RootState) => state.file.filterValue);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const filterType = useSelector((state: RootState) => state.file.filterType);
-  const totalFilesPublished = useSelector(
-    (state: RootState) => state.global.totalFilesPublished
-  );
-  const totalNamesPublished = useSelector(
-    (state: RootState) => state.global.totalNamesPublished
-  );
-  const filesPerNamePublished = useSelector(
-    (state: RootState) => state.global.filesPerNamePublished
-  );
+
   const setFilterType = payload => {
     dispatch(changeFilterType(payload));
   };
   const filterSearch = useSelector(
     (state: RootState) => state.file.filterSearch
   );
+  const QappNames = useSelector(
+    (state: RootState) => state.file.publishedQappNames
+  );
+  const autocompleteRef = useRef<QappNamesRef>(null);
 
   const setFilterSearch = payload => {
     dispatch(changefilterSearch(payload));
@@ -59,60 +67,66 @@ export const Home = ({ mode }: HomeProps) => {
   const isFilterMode = useRef(false);
   const firstFetch = useRef(false);
   const afterFetch = useRef(false);
-  const isFetchingFiltered = useRef(false);
   const isFetching = useRef(false);
+  const prevVal = useRef("");
+  const categoryListRef = useRef<CategoryListRef>(null);
+  const categorySelectRef = useRef<CategorySelectRef>(null);
 
-  const countNewFiles = useSelector(
-    (state: RootState) => state.file.countNewFiles
-  );
-  const userAvatarHash = useSelector(
-    (state: RootState) => state.global.userAvatarHash
-  );
-
+  const [showCategoryList, setShowCategoryList] = useState<boolean>(true);
+  const [showCategorySelect, setShowCategorySelect] = useState<boolean>(true);
   const { files: globalVideos } = useSelector((state: RootState) => state.file);
-
-  const setSelectedCategoryFiles = payload => {};
 
   const dispatch = useDispatch();
   const filteredFiles = useSelector(
     (state: RootState) => state.file.filteredFiles
   );
 
+  const [QappNamesParam, setQappNamesParam] = useState<string[]>([]);
+
+  useEffect(() => {
+    getPublishedQappNames().then(QappNamesResult => {
+      dispatch(setQappNames(QappNamesResult));
+      setQappNamesParam(QappNamesResult);
+    });
+  }, []);
+
   const {
-    getFiles,
-    checkAndUpdateFile,
-    getFile,
+    getIssues,
+    checkAndUpdateIssue,
+    getIssue,
     hashMapFiles,
-    getNewFiles,
-    checkNewFiles,
-    getFilesFiltered,
-    getFilesCount,
+    getNewIssues,
+    checkNewIssues,
+    getIssuesFiltered,
+    getIssuesCount,
   } = useFetchIssues();
 
-  const getFilesHandler = React.useCallback(
-    async (reset?: boolean, resetFilers?: boolean) => {
+  const getIssuesHandler = React.useCallback(
+    async (reset?: boolean, resetFilters?: boolean) => {
       if (!firstFetch.current || !afterFetch.current) return;
       if (isFetching.current) return;
       isFetching.current = true;
       const selectedCategories =
-        categoryListRef.current.getSelectedCategories() || [];
-
-      await getFiles(
+        categoryListRef.current?.getSelectedCategories() || [];
+      const issueType = categorySelectRef?.current?.getSelectedCategory();
+      if (issueType) selectedCategories[2] = issueType;
+      await getIssues(
         {
           name: filterName,
-          categories: selectedCategories,
+          categories: getCategoriesFetchString(selectedCategories),
+          QappName: autocompleteRef?.current?.getQappNameFetchString(),
           keywords: filterSearch,
           type: filterType,
         },
         reset,
-        resetFilers
+        resetFilters
       );
       isFetching.current = false;
     },
     [
-      getFiles,
+      getIssues,
       filterValue,
-      getFilesFiltered,
+      getIssuesFiltered,
       isFiltering,
       filterName,
       filterSearch,
@@ -122,33 +136,33 @@ export const Home = ({ mode }: HomeProps) => {
 
   const searchOnEnter = e => {
     if (e.keyCode == 13) {
-      getFilesHandler(true);
+      getIssuesHandler(true);
     }
   };
 
   useEffect(() => {
     if (isFiltering && filterValue !== prevVal?.current) {
       prevVal.current = filterValue;
-      getFilesHandler();
+      getIssuesHandler();
     }
-  }, [filterValue, isFiltering, filteredFiles, getFilesCount]);
+  }, [filterValue, isFiltering, filteredFiles, getIssuesCount]);
 
   const getFilesHandlerMount = React.useCallback(async () => {
     if (firstFetch.current) return;
     firstFetch.current = true;
     setIsLoading(true);
 
-    await getFiles();
+    await getIssues();
     afterFetch.current = true;
     isFetching.current = false;
 
     setIsLoading(false);
-  }, [getFiles]);
+  }, [getIssues]);
 
-  let videos = globalVideos;
+  let issues = globalVideos;
 
   if (isFiltering) {
-    videos = filteredFiles;
+    issues = filteredFiles;
     isFilterMode.current = true;
   } else {
     isFilterMode.current = false;
@@ -199,9 +213,10 @@ export const Home = ({ mode }: HomeProps) => {
     setFilterSearch("");
     setFilterName("");
     categoryListRef.current?.clearCategories();
-
+    categorySelectRef.current?.clearCategory();
+    autocompleteRef.current?.setSelectedValue(null);
     ReactDOM.flushSync(() => {
-      getFilesHandler(true, true);
+      getIssuesHandler(true, true);
     });
   };
 
@@ -268,7 +283,43 @@ export const Home = ({ mode }: HomeProps) => {
               fontSize: "20px",
             }}
           />
-          <CategoryList categoryData={allCategoryData} ref={categoryListRef} />
+          {showCategoryList && (
+            <CategoryList
+              categoryData={allCategoryData}
+              ref={categoryListRef}
+              afterChange={value => {
+                setShowCategorySelect(!value[0]);
+              }}
+            />
+          )}
+          {showCategorySelect && (
+            <CategorySelect
+              categoryData={IssueState}
+              ref={categorySelectRef}
+              sx={{ marginTop: "20px" }}
+              afterChange={value => {
+                setShowCategoryList(!value);
+              }}
+            />
+          )}
+
+          {QappNamesParam.length > 0 && (
+            <AutocompleteQappNames
+              ref={autocompleteRef}
+              namesList={QappNamesParam}
+              sx={{ marginTop: "20px" }}
+              required={false}
+              afterChange={() => {
+                const currentSelectedCategories =
+                  categoryListRef?.current?.getSelectedCategories();
+                categoryListRef?.current?.setSelectedCategories([
+                  "3",
+                  currentSelectedCategories[1],
+                  currentSelectedCategories[2],
+                ]);
+              }}
+            />
+          )}
 
           <ThemeButton
             onClick={() => {
@@ -284,7 +335,7 @@ export const Home = ({ mode }: HomeProps) => {
           </ThemeButton>
           <ThemeButton
             onClick={() => {
-              getFilesHandler(true);
+              getIssuesHandler(true);
             }}
             sx={{
               marginTop: "20px",
@@ -314,9 +365,9 @@ export const Home = ({ mode }: HomeProps) => {
               maxWidth: "1400px",
             }}
           ></SubtitleContainer>
-          <IssueList issues={videos} />
+          <IssueList issues={issues} />
           <LazyLoad
-            onLoadMore={getFilesHandler}
+            onLoadMore={getIssuesHandler}
             isLoading={isLoading}
           ></LazyLoad>
         </Box>

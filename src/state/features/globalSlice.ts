@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { FeePrice } from "../../constants/PublishFees/FeePricePublish/FeePricePublish.ts";
 
 interface GlobalState {
   isLoadingGlobal: boolean;
@@ -9,6 +10,7 @@ interface GlobalState {
   totalFilesPublished: number;
   totalNamesPublished: number;
   filesPerNamePublished: number;
+  feeData: FeePrice[];
 }
 const initialState: GlobalState = {
   isLoadingGlobal: false,
@@ -19,6 +21,7 @@ const initialState: GlobalState = {
   totalFilesPublished: null,
   totalNamesPublished: null,
   filesPerNamePublished: null,
+  feeData: [],
 };
 
 export const globalSlice = createSlice({
@@ -61,6 +64,9 @@ export const globalSlice = createSlice({
     setFilesPerNamePublished: (state, action) => {
       state.filesPerNamePublished = action.payload;
     },
+    setFeeData: (state, action) => {
+      state.feeData = action.payload;
+    },
   },
 });
 
@@ -74,6 +80,7 @@ export const {
   setTotalFilesPublished,
   setTotalNamesPublished,
   setFilesPerNamePublished,
+  setFeeData,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

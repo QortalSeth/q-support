@@ -3,6 +3,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
   Box,
   Button,
   Grid,
@@ -11,8 +12,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { TimesSVG } from "../../assets/svgs/TimesSVG";
+import { fontSizeMedium } from "../../constants/Misc.ts";
 
 export const DoubleLine = styled(Typography)`
   display: -webkit-box;
@@ -59,7 +62,7 @@ export const ModalBody = styled(Box)(({ theme }) => ({
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: "75%",
-  maxWidth: "900px",
+  maxWidth: "1000px",
   padding: "15px 35px",
   display: "flex",
   flexDirection: "column",
@@ -113,50 +116,59 @@ export const NewCrowdfundTimeDescription = styled(Typography)(({ theme }) => ({
   textDecoration: "underline",
 }));
 
+const getInputFieldStyles = (theme: any) => {
+  return {
+    fontFamily: "Mulish",
+    letterSpacing: "0px",
+    fontWeight: 400,
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.default,
+    borderColor: theme.palette.background.paper,
+    "& label": {
+      color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
+      fontFamily: "Mulish",
+      fontSize: fontSizeMedium,
+      letterSpacing: "0px",
+      fontWeight: 400,
+    },
+    "& label.Mui-focused": {
+      color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da",
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#E0E3E7",
+      },
+      "&:hover fieldset": {
+        borderColor: "#B2BAC2",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#6F7E8C",
+      },
+    },
+    "& .MuiInputBase-root": {
+      fontFamily: "Mulish",
+      fontSize: "25px",
+      letterSpacing: "0px",
+      fontWeight: 400,
+    },
+    "& [class$='-MuiFilledInput-root']": {
+      padding: "30px 12px 8px",
+    },
+    "& .MuiFilledInput-root:after": {
+      borderBottomColor: theme.palette.secondary.main,
+    },
+  };
+};
+
 export const CustomInputField = styled(TextField)(({ theme }) => ({
-  fontFamily: "Mulish",
-  fontSize: "19px",
-  letterSpacing: "0px",
-  fontWeight: 400,
-  color: theme.palette.text.primary,
-  backgroundColor: theme.palette.background.default,
-  borderColor: theme.palette.background.paper,
-  "& label": {
-    color: theme.palette.mode === "light" ? "#808183" : "#edeef0",
-    fontFamily: "Mulish",
-    fontSize: "19px",
-    letterSpacing: "0px",
-    fontWeight: 400,
-  },
-  "& label.Mui-focused": {
-    color: theme.palette.mode === "light" ? "#A0AAB4" : "#d7d8da",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: theme.palette.mode === "light" ? "#B2BAC2" : "#c9cccf",
-  },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: "#E0E3E7",
-    },
-    "&:hover fieldset": {
-      borderColor: "#B2BAC2",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#6F7E8C",
-    },
-  },
-  "& .MuiInputBase-root": {
-    fontFamily: "Mulish",
-    fontSize: "19px",
-    letterSpacing: "0px",
-    fontWeight: 400,
-  },
-  "& [class$='-MuiFilledInput-root']": {
-    padding: "30px 12px 8px",
-  },
-  "& .MuiFilledInput-root:after": {
-    borderBottomColor: theme.palette.secondary.main,
-  },
+  ...getInputFieldStyles(theme),
+}));
+
+export const CustomAutoCompleteField = styled(Autocomplete)(({ theme }) => ({
+  ...getInputFieldStyles(theme),
 }));
 
 export const CrowdfundTitle = styled(Typography)(({ theme }) => ({

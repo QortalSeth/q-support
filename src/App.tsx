@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
@@ -11,11 +11,15 @@ import { Home } from "./pages/Home/Home";
 import { IssueContent } from "./pages/IssueContent/IssueContent.tsx";
 import DownloadWrapper from "./wrappers/DownloadWrapper";
 import { IndividualProfile } from "./pages/IndividualProfile/IndividualProfile";
+import { fetchFeesRedux } from "./constants/PublishFees/FeePricePublish/FeePricePublish.ts";
 
 function App() {
   // const themeColor = window._qdnTheme
-
   const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    fetchFeesRedux();
+  }, []);
 
   return (
     <Provider store={store}>

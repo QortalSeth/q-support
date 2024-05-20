@@ -1,4 +1,4 @@
-const useTestIdentifiers = true;
+export const useTestIdentifiers = false;
 
 export const QSUPPORT_FILE_BASE = useTestIdentifiers
   ? "MYTEST_support_issue_"

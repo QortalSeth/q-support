@@ -98,6 +98,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       {...getRootProps()}
       sx={{
         display: "flex",
+        width: "170px",
       }}
     >
       <input {...getInputProps()} />

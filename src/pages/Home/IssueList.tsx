@@ -1,11 +1,10 @@
 import { Avatar, Box, Skeleton } from "@mui/material";
 import {
   BlockIconContainer,
-  BottomParent,
-  FileContainer,
   IconsBox,
-  NameContainer,
-  VideoCard,
+  IssueCard,
+  IssueContainer,
+  NameAndDateContainer,
   VideoCardName,
   VideoCardTitle,
   VideoUploadDate,
@@ -13,11 +12,10 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import {
   blockUser,
+  Issue,
   setEditFile,
-  Video,
 } from "../../state/features/fileSlice.ts";
 import BlockIcon from "@mui/icons-material/Block";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { formatBytes } from "../IssueContent/IssueContent.tsx";
 import { formatDate } from "../../utils/time.ts";
 import React, { useMemo, useState } from "react";
@@ -26,8 +24,12 @@ import { RootState } from "../../state/store.ts";
 import { useNavigate } from "react-router-dom";
 import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
 
+import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
+import QORTicon from "../../assets/icons/qort.png";
+import { fontSizeMedium } from "../../constants/Misc.ts";
+
 interface FileListProps {
-  issues: Video[];
+  issues: Issue[];
 }
 export const IssueList = ({ issues }: FileListProps) => {
   const hashMapIssues = useSelector(
@@ -60,16 +62,21 @@ export const IssueList = ({ issues }: FileListProps) => {
   }, [issues, hashMapIssues]);
 
   return (
-    <FileContainer>
-      {filteredIssues.map((file: any, index: number) => {
-        const existingFile = hashMapIssues[file?.id];
+    <IssueContainer>
+      {filteredIssues.map((issue: any, index: number) => {
+        const existingFile = hashMapIssues[issue?.id];
         let hasHash = false;
-        let fileObj = file;
+        let issueObj = issue;
         if (existingFile) {
-          fileObj = existingFile;
+          issueObj = existingFile;
           hasHash = true;
         }
-        const icon = getIconsFromObject(fileObj);
+
+        const issueIcons = getIconsFromObject(issueObj);
+        const fileBytes = issueObj?.files.reduce(
+          (acc, cur) => acc + (cur?.size || 0),
+          0
+        );
         return (
           <Box
             sx={{
@@ -79,22 +86,22 @@ export const IssueList = ({ issues }: FileListProps) => {
               height: "75px",
               position: "relative",
             }}
-            key={fileObj.id}
-            onMouseEnter={() => setShowIcons(fileObj.id)}
+            key={issueObj.id}
+            onMouseEnter={() => setShowIcons(issueObj.id)}
             onMouseLeave={() => setShowIcons(null)}
           >
             {hasHash ? (
               <>
                 <IconsBox
                   sx={{
-                    opacity: showIcons === fileObj.id ? 1 : 0,
+                    opacity: showIcons === issueObj.id ? 1 : 0,
                     zIndex: 2,
                   }}
                 >
-                  {fileObj?.user === username && (
+                  {issueObj?.user === username && (
                     <BlockIconContainer
                       onClick={() => {
-                        dispatch(setEditFile(fileObj));
+                        dispatch(setEditFile(issueObj));
                       }}
                     >
                       <EditIcon />
@@ -102,10 +109,10 @@ export const IssueList = ({ issues }: FileListProps) => {
                     </BlockIconContainer>
                   )}
 
-                  {fileObj?.user !== username && (
+                  {issueObj?.user !== username && (
                     <BlockIconContainer
                       onClick={() => {
-                        blockUserFunc(fileObj?.user);
+                        blockUserFunc(issueObj?.user);
                       }}
                     >
                       <BlockIcon />
@@ -113,15 +120,14 @@ export const IssueList = ({ issues }: FileListProps) => {
                     </BlockIconContainer>
                   )}
                 </IconsBox>
-                <VideoCard
+                <IssueCard
                   onClick={() => {
-                    navigate(`/issue/${fileObj?.user}/${fileObj?.id}`);
+                    navigate(`/issue/${issueObj?.user}/${issueObj?.id}`);
                   }}
                   sx={{
                     height: "100%",
                     width: "100%",
                     display: "flex",
-                    gap: "25px",
                     flexDirection: "row",
                     justifyContent: "space-between",
                   }}
@@ -129,47 +135,59 @@ export const IssueList = ({ issues }: FileListProps) => {
                   <Box
                     sx={{
                       display: "flex",
-                      gap: "25px",
                       alignItems: "center",
                     }}
                   >
-                    {icon ? (
-                      <img
-                        src={icon}
-                        width="50px"
-                        style={{
-                          borderRadius: "5px",
-                        }}
-                      />
-                    ) : (
-                      <AttachFileIcon />
-                    )}
-
-                    <VideoCardTitle
-                      sx={{
-                        width: "100px",
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "200px",
                       }}
                     >
-                      {formatBytes(
-                        fileObj?.files.reduce(
-                          (acc, cur) => acc + (cur?.size || 0),
-                          0
-                        )
-                      )}
+                      <IssueIcons
+                        iconSources={issueIcons}
+                        style={{ marginRight: "20px" }}
+                        showBackupIcon={true}
+                      />
+                    </div>
+                    <VideoCardTitle
+                      sx={{
+                        width: "150px",
+                        fontSize: fontSizeMedium,
+                      }}
+                    >
+                      {fileBytes > 0 && formatBytes(fileBytes)}
                     </VideoCardTitle>
-                    <VideoCardTitle>{fileObj.title}</VideoCardTitle>
+                    <VideoCardTitle sx={{ fontWeight: "bold", width: "500px" }}>
+                      {issueObj.title}
+                    </VideoCardTitle>
                   </Box>
-                  <BottomParent>
-                    <NameContainer
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`/channel/${fileObj?.user}`);
+
+                  {issue?.feeData?.isPaid && (
+                    <IssueIcon
+                      iconSrc={QORTicon}
+                      style={{ marginRight: "20px" }}
+                    />
+                  )}
+
+                  <NameAndDateContainer
+                    sx={{ width: "200px", height: "100%" }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`/channel/${issueObj?.user}`);
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        width: "200px",
                       }}
                     >
                       <Avatar
-                        sx={{ height: 24, width: 24 }}
-                        src={`/arbitrary/THUMBNAIL/${fileObj?.user}/qortal_avatar`}
-                        alt={`${fileObj?.user}'s avatar`}
+                        sx={{ height: 24, width: 24, marginRight: "10px" }}
+                        src={`/arbitrary/THUMBNAIL/${issueObj?.user}/qortal_avatar`}
+                        alt={`${issueObj?.user}'s avatar`}
                       />
                       <VideoCardName
                         sx={{
@@ -178,17 +196,17 @@ export const IssueList = ({ issues }: FileListProps) => {
                           },
                         }}
                       >
-                        {fileObj?.user}
+                        {issueObj?.user}
                       </VideoCardName>
-                    </NameContainer>
+                    </div>
 
-                    {fileObj?.created && (
+                    {issueObj?.created && (
                       <VideoUploadDate>
-                        {formatDate(fileObj.created)}
+                        {formatDate(issueObj.created)}
                       </VideoUploadDate>
                     )}
-                  </BottomParent>
-                </VideoCard>
+                  </NameAndDateContainer>
+                </IssueCard>
               </>
             ) : (
               <Skeleton
@@ -206,6 +224,6 @@ export const IssueList = ({ issues }: FileListProps) => {
           </Box>
         );
       })}
-    </FileContainer>
+    </IssueContainer>
   );
 };

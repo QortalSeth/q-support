@@ -8,8 +8,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { fontSizeMedium, fontSizeSmall } from "../../constants/Misc.ts";
 
-export const FileContainer = styled(Box)(({ theme }) => ({
+export const IssueContainer = styled(Box)(({ theme }) => ({
   position: "relative",
   display: "flex",
   padding: "15px",
@@ -33,7 +34,7 @@ export const StoresRow = styled(Grid)(({ theme }) => ({
   },
 }));
 
-export const VideoCard = styled(Grid)(({ theme }) => ({
+export const IssueCard = styled(Grid)(({ theme }) => ({
   position: "relative",
   display: "flex",
   flexDirection: "column",
@@ -89,14 +90,14 @@ const DoubleLine = styled(Typography)`
 
 export const VideoCardTitle = styled(DoubleLine)(({ theme }) => ({
   fontFamily: "Cairo",
-  fontSize: "16px",
+  fontSize: fontSizeMedium,
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
   userSelect: "none",
 }));
 export const VideoCardName = styled(Typography)(({ theme }) => ({
   fontFamily: "Cairo",
-  fontSize: "14px",
+  fontSize: fontSizeSmall,
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
   userSelect: "none",
@@ -107,14 +108,16 @@ export const VideoCardName = styled(Typography)(({ theme }) => ({
 }));
 export const VideoUploadDate = styled(Typography)(({ theme }) => ({
   fontFamily: "Cairo",
-  fontSize: "12px",
+  display: "span",
+  fontSize: fontSizeSmall,
   letterSpacing: "0.4px",
   color: theme.palette.text.primary,
   userSelect: "none",
 }));
 export const BottomParent = styled(Box)(({ theme }) => ({
   display: "flex",
-  alignItems: "flex-start",
+  justifyItems: "flex-end",
+  alignItems: "flex-end",
   flexDirection: "column",
 }));
 export const VideoCardDescription = styled(Typography)(({ theme }) => ({
@@ -155,11 +158,11 @@ export const MyStoresRow = styled(Grid)(({ theme }) => ({
   width: "100%",
 }));
 
-export const NameContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "flex-start",
-  alignItems: "center",
+export const NameAndDateContainer = styled(Box)(({ theme }) => ({
+  display: "grid",
+  gridTemplateRows: "1fr 1fr",
+  justifyContent: "end",
+  alignContent: "center",
   gap: "10px",
   marginBottom: "10px",
 }));

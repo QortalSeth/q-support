@@ -91,7 +91,7 @@ const lightTheme = createTheme({
     mode: "light",
     primary: {
       main: "#FCFCFC",
-      dark: "#F5F5F5",
+      dark: "#E0E0E0",
       light: "#FFFFFF",
     },
     secondary: {
@@ -138,14 +138,14 @@ const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#01a9e9", //
-      dark: "#008fcd", //
-      light: "#44c4ff", //
+      main: "#01a9e9", // Qortal Blue
+      dark: "#008fcd",
+      light: "#44c4ff",
     },
     secondary: {
       main: "#007FFF", // Electric blue
-      dark: "#0059B2", // Darker shade of electric blue
-      light: "#3399FF", // Lighter shade of electric blue
+      dark: "#0059B2",
+      light: "#3399FF",
     },
     background: {
       default: "#1C1C1C", // Deep space black

@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addFiles,
   addToHashMap,
+  Issue,
   removeFromHashMap,
   setCountNewFiles,
   upsertFiles,
   upsertFilesBeginning,
   upsertFilteredFiles,
-  Video,
 } from "../state/features/fileSlice.ts";
 import {
   setFilesPerNamePublished,
@@ -24,7 +24,8 @@ import {
   QSUPPORT_PLAYLIST_BASE,
 } from "../constants/Identifiers.ts";
 import { queue } from "../wrappers/GlobalWrapper";
-import { getCategoriesFetchString } from "../components/common/CategoryList/CategoryList.tsx";
+import { log } from "../constants/Misc.ts";
+import { verifyAllPayments } from "../constants/PublishFees/VerifyPayment.ts";
 
 export const useFetchIssues = () => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ export const useFetchIssues = () => {
   );
 
   const checkAndUpdateIssue = React.useCallback(
-    (video: Video) => {
+    (video: Issue) => {
       const existingVideo = hashMapFiles[video.id];
       if (!existingVideo) {
         return true;
@@ -97,10 +98,10 @@ export const useFetchIssues = () => {
         videoId: issueID,
         content,
       });
-      console.log("response is: ", res);
       res?.isValid
         ? dispatch(addToHashMap(res))
         : dispatch(removeFromHashMap(issueID));
+      return res;
     } catch (error) {
       retries = retries + 1;
       if (retries < 2) {
@@ -112,7 +113,7 @@ export const useFetchIssues = () => {
     }
   };
 
-  const getNewFiles = React.useCallback(async () => {
+  const getNewIssues = React.useCallback(async () => {
     try {
       dispatch(setIsLoadingGlobal(true));
 
@@ -149,7 +150,7 @@ export const useFetchIssues = () => {
         fetchAll = responseData.slice(0, findVideo);
       }
 
-      const structureData = fetchAll.map((video: any): Video => {
+      const structureData = fetchAll.map((video: any): Issue => {
         return {
           title: video?.metadata?.title,
           category: video?.metadata?.category,
@@ -186,20 +187,21 @@ export const useFetchIssues = () => {
     }
   }, [videos, hashMapFiles]);
 
-  const getFiles = React.useCallback(
+  const getIssues = React.useCallback(
     async (
       filters = {},
       reset?: boolean,
-      resetFilers?: boolean,
+      resetFilters?: boolean,
       limit?: number
     ) => {
       try {
         const {
           name = "",
-          categories = [],
+          categories = "",
+          QappName = "",
           keywords = "",
           type = "",
-        }: any = resetFilers ? {} : filters;
+        }: any = resetFilters ? {} : filters;
         let offset = videos.length;
         if (reset) {
           offset = 0;
@@ -211,10 +213,17 @@ export const useFetchIssues = () => {
           defaultUrl += `&name=${name}`;
         }
 
-        if (categories.length > 0) {
-          defaultUrl += "&description=" + getCategoriesFetchString(categories);
-        }
+        if (categories) {
+          defaultUrl += "&description=";
+          if (log) console.log("categories: ", categories);
+          if (categories) defaultUrl += categories;
 
+          if (log) console.log("description: ", defaultUrl);
+        }
+        if (QappName) {
+          defaultUrl += `&query=${QappName}`;
+        }
+        if (log) console.log("defaultURL: ", defaultUrl);
         if (keywords) {
           defaultUrl = defaultUrl + `&query=${keywords}`;
         }
@@ -236,47 +245,48 @@ export const useFetchIssues = () => {
         });
         const responseData = await response.json();
 
-        // const responseData = await qortalRequest({
-        //   action: "SEARCH_QDN_RESOURCES",
-        //   mode: "ALL",
-        //   service: "DOCUMENT",
-        //   query: "${QTUBE_VIDEO_BASE}",
-        //   limit: 20,
-        //   includeMetadata: true,
-        //   offset: offset,
-        //   reverse: true,
-        //   excludeBlocked: true,
-        //   exactMatchNames: true,
-        //   name: names
-        // })
-        const structureData = responseData.map((video: any): Video => {
+        let structureData = responseData.map((issue: any): Issue => {
           return {
-            title: video?.metadata?.title,
-            service: video?.service,
-            category: video?.metadata?.category,
-            categoryName: video?.metadata?.categoryName,
-            tags: video?.metadata?.tags || [],
-            description: video?.metadata?.description,
-            created: video?.created,
-            updated: video?.updated,
-            user: video.name,
+            title: issue?.metadata?.title,
+            service: issue?.service,
+            category: issue?.metadata?.category,
+            categoryName: issue?.metadata?.categoryName,
+            tags: issue?.metadata?.tags || [],
+            description: issue?.metadata?.description,
+            created: issue?.created,
+            updated: issue?.updated,
+            user: issue.name,
             videoImage: "",
-            id: video.identifier,
+            id: issue.identifier,
           };
         });
-        if (reset) {
-          dispatch(addFiles(structureData));
-        } else {
-          dispatch(upsertFiles(structureData));
-        }
+        const verifiedIssuePromises: Promise<Issue>[] = [];
         for (const content of structureData) {
           if (content.user && content.id) {
             const res = checkAndUpdateIssue(content);
+            const issue: Promise<Issue> = getIssue(
+              content.user,
+              content.id,
+              content
+            );
+            verifiedIssuePromises.push(issue);
             if (res) {
-              queue.push(() => getIssue(content.user, content.id, content));
+              queue.push(() => issue);
             }
           }
         }
+
+        const issues = await Promise.all(verifiedIssuePromises);
+        const verifiedIssues = await verifyAllPayments(issues);
+        structureData = structureData.map((issue, index) => {
+          return {
+            ...issue,
+            feeData: verifiedIssues[index]?.feeData,
+          };
+        });
+
+        if (reset) dispatch(addFiles(structureData));
+        else dispatch(upsertFiles(structureData));
       } catch (error) {
         console.log({ error });
       } finally {
@@ -285,7 +295,7 @@ export const useFetchIssues = () => {
     [videos, hashMapFiles]
   );
 
-  const getFilesFiltered = React.useCallback(
+  const getIssuesFiltered = React.useCallback(
     async (filterValue: string) => {
       try {
         const offset = filteredVideos.length;
@@ -314,7 +324,7 @@ export const useFetchIssues = () => {
         //   exactMatchNames: true,
         //   name: names
         // })
-        const structureData = responseData.map((video: any): Video => {
+        const structureData = responseData.map((video: any): Issue => {
           return {
             title: video?.metadata?.title,
             category: video?.metadata?.category,
@@ -345,7 +355,7 @@ export const useFetchIssues = () => {
     [filteredVideos, hashMapFiles]
   );
 
-  const checkNewFiles = React.useCallback(async () => {
+  const checkNewIssues = React.useCallback(async () => {
     try {
       const url = `/arbitrary/resources/search?mode=ALL&service=DOCUMENT&query=${QSUPPORT_FILE_BASE}&limit=20&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true`;
       const response = await fetch(url, {
@@ -382,7 +392,7 @@ export const useFetchIssues = () => {
     } catch (error) {}
   }, [videos]);
 
-  const getFilesCount = React.useCallback(async () => {
+  const getIssuesCount = React.useCallback(async () => {
     try {
       let url = `/arbitrary/resources/search?mode=ALL&includemetadata=false&limit=0&service=DOCUMENT&identifier=${QSUPPORT_FILE_BASE}`;
 
@@ -411,13 +421,13 @@ export const useFetchIssues = () => {
   }, []);
 
   return {
-    getFiles,
-    checkAndUpdateFile: checkAndUpdateIssue,
-    getFile: getIssue,
+    getIssues,
+    checkAndUpdateIssue,
+    getIssue,
     hashMapFiles,
-    getNewFiles,
-    checkNewFiles,
-    getFilesFiltered,
-    getFilesCount,
+    getNewIssues,
+    checkNewIssues,
+    getIssuesFiltered,
+    getIssuesCount,
   };
 };
