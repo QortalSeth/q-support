@@ -438,6 +438,11 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
                   }}
                 >
                   <CategoryList
+                    initialCategories={
+                      selectedCategories.length > 0
+                        ? selectedCategories
+                        : undefined
+                    }
                     categoryData={allCategoryData}
                     ref={categoryListRef}
                     columns={3}
