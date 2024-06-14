@@ -1,11 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../state/store";
-
 import { Avatar, Box, Skeleton, useTheme } from "@mui/material";
-import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import QORTicon from "../../assets/icons/CoinIcons/qort.png";
+import { BountyDisplay } from "../../components/common/BountyDisplay.tsx";
+import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
+import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
+import { fontSizeExLarge } from "../../constants/Misc.ts";
+import { verifyAllPayments } from "../../constants/PublishFees/VerifyPayment.ts";
+import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
+import { Issue } from "../../state/features/fileSlice.ts";
+import { RootState } from "../../state/store";
+import { BountyData, getBountyAmounts } from "../../utils/qortalRequests.ts";
+import { formatDate } from "../../utils/time";
+import { queue } from "../../wrappers/GlobalWrapper";
 import {
   BottomParent,
   IssueCard,
@@ -15,15 +25,6 @@ import {
   VideoCardTitle,
   VideoUploadDate,
 } from "./IssueList-styles.tsx";
-import { formatDate } from "../../utils/time";
-import { Issue } from "../../state/features/fileSlice.ts";
-import { queue } from "../../wrappers/GlobalWrapper";
-import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
-import { formatBytes } from "../IssueContent/IssueContent.tsx";
-import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
-import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
-import QORTicon from "../../assets/icons/qort.png";
-import { verifyAllPayments } from "../../constants/PublishFees/VerifyPayment.ts";
 
 interface VideoListProps {
   mode?: string;
@@ -97,9 +98,11 @@ export const IssueListComponentLevel = ({ mode }: VideoListProps) => {
 
       const issueData = await Promise.all(verifiedIssuePromises);
       const verifiedIssues = await verifyAllPayments(issueData);
-      setIssues(verifiedIssues);
+      const bountyIssues = await getBountyAmounts(verifiedIssues);
+      console.log("bountyIssues: ", bountyIssues);
+      setIssues(bountyIssues);
     } catch (error) {
-    } finally {
+      console.log(error);
     }
   }, [issues, hashMapVideos]);
 
@@ -140,12 +143,10 @@ export const IssueListComponentLevel = ({ mode }: VideoListProps) => {
             issueObj = existingFile;
             hasHash = true;
           }
-
-          const issueIcons = getIconsFromObject(issueObj);
-          const fileBytes = issueObj?.files.reduce(
-            (acc, cur) => acc + (cur?.size || 0),
-            0
-          );
+          const bountyData: BountyData = {
+            ...issueObj.bountyData,
+            ...issue.bountyData,
+          };
           return (
             <Box
               sx={{
@@ -183,22 +184,32 @@ export const IssueListComponentLevel = ({ mode }: VideoListProps) => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          width: "200px",
+                          width: "280px",
                         }}
                       >
                         <IssueIcons
-                          iconSources={issueIcons}
+                          issueData={issueObj}
                           style={{ marginRight: "20px" }}
                           showBackupIcon={true}
                         />
                       </div>
-                      <VideoCardTitle
+                      <Box
                         sx={{
-                          width: "100px",
+                          display: "flex",
+                          alignItems: "center",
+                          width: "250px",
+                          fontSize: fontSizeExLarge,
+                          fontFamily: "Cairo",
+                          letterSpacing: "0.4px",
+                          color: theme.palette.text.primary,
+                          userSelect: "none",
                         }}
                       >
-                        {fileBytes > 0 && formatBytes(fileBytes)}
-                      </VideoCardTitle>
+                        <BountyDisplay
+                          bountyData={bountyData}
+                          divStyle={{ marginLeft: "20px" }}
+                        />
+                      </Box>
                       <VideoCardTitle
                         sx={{ fontWeight: "bold", width: "500px" }}
                       >
@@ -213,32 +224,40 @@ export const IssueListComponentLevel = ({ mode }: VideoListProps) => {
                     )}
                     <BottomParent>
                       <NameAndDateContainer
+                        sx={{ width: "200px", height: "100%" }}
                         onClick={e => {
                           e.stopPropagation();
                           navigate(`/channel/${issueObj?.user}`);
                         }}
                       >
-                        <Avatar
-                          sx={{ height: 24, width: 24 }}
-                          src={`/arbitrary/THUMBNAIL/${issueObj?.user}/qortal_avatar`}
-                          alt={`${issueObj?.user}'s avatar`}
-                        />
-                        <VideoCardName
-                          sx={{
-                            ":hover": {
-                              textDecoration: "underline",
-                            },
+                        <div
+                          style={{
+                            display: "flex",
+                            width: "200px",
                           }}
                         >
-                          {issueObj?.user}
-                        </VideoCardName>
-                      </NameAndDateContainer>
+                          <Avatar
+                            sx={{ height: 24, width: 24, marginRight: "10px" }}
+                            src={`/arbitrary/THUMBNAIL/${issueObj?.user}/qortal_avatar`}
+                            alt={`${issueObj?.user}'s avatar`}
+                          />
+                          <VideoCardName
+                            sx={{
+                              ":hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                          >
+                            {issueObj?.user}
+                          </VideoCardName>
+                        </div>
 
-                      {issueObj?.created && (
-                        <VideoUploadDate>
-                          {formatDate(issueObj.created)}
-                        </VideoUploadDate>
-                      )}
+                        {issueObj?.created && (
+                          <VideoUploadDate>
+                            {formatDate(issueObj.created)}
+                          </VideoUploadDate>
+                        )}
+                      </NameAndDateContainer>
                     </BottomParent>
                   </IssueCard>
                 </>

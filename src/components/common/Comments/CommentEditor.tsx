@@ -9,7 +9,10 @@ import {
   CommentInputContainer,
   SubmitCommentButton,
 } from "./Comments-styles";
-import { QSUPPORT_COMMENT_BASE } from "../../../constants/Identifiers.ts";
+import {
+  QSUPPORT_COMMENT_BASE,
+  useTestIdentifiers,
+} from "../../../constants/Identifiers.ts";
 import { sendQchatDM } from "../../../utils/qortalRequests.ts";
 import { maxCommentLength } from "../../../constants/Misc.ts";
 
@@ -127,6 +130,10 @@ export const CommentEditor = ({
     address = user?.address;
     name = user?.name || "";
 
+    const notificationMessage = `This is an automated Q-Support notification indicating that someone has commented on your issue here:
+              qortal://APP/Q-Support/issue/${postName}/${postId}`;
+
+    if (useTestIdentifiers) await sendQchatDM(postName, notificationMessage);
     if (!address) {
       errorMsg = "Cannot post: your address isn't available";
     }
@@ -179,9 +186,6 @@ export const CommentEditor = ({
         //   Here are the first ${maxNotificationLength} characters of the comment:
         //
         //   ${value.substring(0, maxNotificationLength)}`;
-
-        const notificationMessage = `This is an automated Q-Support notification indicating that someone has commented on your issue here:
-          qortal://APP/Q-Support/issue/${postName}/${postId}`;
 
         await sendQchatDM(postName, notificationMessage);
       }

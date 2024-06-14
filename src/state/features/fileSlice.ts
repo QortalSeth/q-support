@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PublishFeeData } from "../../constants/PublishFees/SendFeeFunctions.ts";
+import { BountyData } from "../../utils/qortalRequests.ts";
 
 interface GlobalState {
   files: Issue[];
@@ -47,6 +48,7 @@ export interface Issue {
   isValid?: boolean;
   code?: string;
   feeData?: PublishFeeData;
+  bountyData?: BountyData;
   paymentVerified?: boolean;
 }
 

@@ -1,9 +1,9 @@
-import { styled } from "@mui/system";
 import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/system";
 
 export const FilePlayerContainer = styled(Box)(({ theme }) => ({
   maxWidth: "95%",
-  width: "1000px",
+  width: "90vw",
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
@@ -11,7 +11,6 @@ export const FilePlayerContainer = styled(Box)(({ theme }) => ({
 
 export const FileTitle = styled(Typography)(({ theme }) => ({
   fontFamily: "Raleway",
-  fontSize: "20px",
   color: theme.palette.text.primary,
   userSelect: "none",
   wordBreak: "break-word",

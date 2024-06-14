@@ -1,38 +1,38 @@
+import { Box, Grid, Input, useTheme } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../state/store";
-import { IssueList } from "./IssueList.tsx";
-import { Box, Grid, Input, useTheme } from "@mui/material";
-import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
+import {
+  AutocompleteQappNames,
+  getPublishedQappNames,
+  QappNamesRef,
+} from "../../components/common/AutocompleteQappNames.tsx";
+import {
+  CategoryList,
+  CategoryListRef,
+  getCategoriesFetchString,
+} from "../../components/common/CategoryList/CategoryList.tsx";
+import {
+  CategorySelect,
+  CategorySelectRef,
+} from "../../components/common/CategoryList/CategorySelect.tsx";
 import LazyLoad from "../../components/common/LazyLoad";
-import { FiltersCol, FiltersContainer } from "./IssueList-styles.tsx";
-import { SubtitleContainer, ThemeButton } from "./Home-styles";
+import { StatsData } from "../../components/StatsData.tsx";
+import {
+  allCategories,
+  allCategoryData,
+} from "../../constants/Categories/Categories.ts";
+import { useFetchIssues } from "../../hooks/useFetchIssues.tsx";
 import {
   changefilterName,
   changefilterSearch,
   changeFilterType,
   setQappNames,
 } from "../../state/features/fileSlice.ts";
-import {
-  allCategoryData,
-  IssueState,
-} from "../../constants/Categories/Categories.ts";
-import {
-  CategoryList,
-  CategoryListRef,
-  getCategoriesFetchString,
-} from "../../components/common/CategoryList/CategoryList.tsx";
-import { StatsData } from "../../components/StatsData.tsx";
-import {
-  CategorySelect,
-  CategorySelectRef,
-} from "../../components/common/CategoryList/CategorySelect.tsx";
-import {
-  AutocompleteQappNames,
-  getPublishedQappNames,
-  QappNamesRef,
-} from "../../components/common/AutocompleteQappNames.tsx";
+import { RootState } from "../../state/store";
+import { SubtitleContainer, ThemeButton } from "./Home-styles";
+import { FiltersCol, FiltersContainer } from "./IssueList-styles.tsx";
+import { IssueList } from "./IssueList.tsx";
 
 interface HomeProps {
   mode?: string;
@@ -109,11 +109,12 @@ export const Home = ({ mode }: HomeProps) => {
       const selectedCategories =
         categoryListRef.current?.getSelectedCategories() || [];
       const issueType = categorySelectRef?.current?.getSelectedCategory();
-      if (issueType) selectedCategories[2] = issueType;
+      let categoriesString = getCategoriesFetchString(selectedCategories);
+      if (issueType) categoriesString = ":" + issueType + ";";
       await getIssues(
         {
           name: filterName,
-          categories: getCategoriesFetchString(selectedCategories),
+          categories: categoriesString,
           QappName: autocompleteRef?.current?.getQappNameFetchString(),
           keywords: filterSearch,
           type: filterType,
@@ -167,32 +168,6 @@ export const Home = ({ mode }: HomeProps) => {
   } else {
     isFilterMode.current = false;
   }
-
-  // const interval = useRef<any>(null);
-
-  // const checkNewVideosFunc = useCallback(() => {
-  //   let isCalling = false;
-  //   interval.current = setInterval(async () => {
-  //     if (isCalling || !firstFetch.current) return;
-  //     isCalling = true;
-  //     await checkNewVideos();
-  //     isCalling = false;
-  //   }, 30000); // 1 second interval
-  // }, [checkNewVideos]);
-
-  // useEffect(() => {
-  //   if (isFiltering && interval.current) {
-  //     clearInterval(interval.current);
-  //     return;
-  //   }
-  //   checkNewVideosFunc();
-
-  //   return () => {
-  //     if (interval?.current) {
-  //       clearInterval(interval.current);
-  //     }
-  //   };
-  // }, [mode, checkNewVideosFunc, isFiltering]);
 
   useEffect(() => {
     if (
@@ -294,7 +269,7 @@ export const Home = ({ mode }: HomeProps) => {
           )}
           {showCategorySelect && (
             <CategorySelect
-              categoryData={IssueState}
+              categoryData={allCategories}
               ref={categorySelectRef}
               sx={{ marginTop: "20px" }}
               afterChange={value => {

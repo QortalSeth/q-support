@@ -39,6 +39,8 @@ interface QortalRequestOptions {
   excludeBlocked?: boolean;
   exactMatchNames?: boolean;
   message?: string;
+  txType?: string[];
+  confirmationStatus?: string;
 }
 
 declare function qortalRequest(options: QortalRequestOptions): Promise<any>;

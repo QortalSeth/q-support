@@ -10,6 +10,17 @@ export const FEE_BASE = useTestIdentifiers
   ? "MYTEST_support_fees"
   : "q_support_fees";
 
+export const supportedCoins = [
+  "QORT",
+  "BTC",
+  "LTC",
+  "DOGE",
+  "DGB",
+  "RVN",
+  "ARRR",
+].sort((a, b) => {
+  return a.localeCompare(b);
+});
 export const maxFeePublishTimeDiff = 10; // time in minutes before/after publish when fee is considered valid
 export type FeeType = "default" | "comment" | "like" | "dislike" | "superlike";
 
