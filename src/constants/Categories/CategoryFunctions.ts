@@ -2,7 +2,7 @@ import {
   Category,
   getCategoriesFromObject,
 } from "../../components/common/CategoryList/CategoryList.tsx";
-import { allCategoryData, iconCategories } from "./1stCategories.ts";
+import { allCategoryData, iconCategories } from "./Categories.ts";
 
 export const sortCategory = (a: Category, b: Category) => {
   if (a.name === "Other") return 1;
@@ -81,11 +81,9 @@ export const getAllCategoriesWithIcons = () => {
 
 export const getIconsFromObject = (fileObj: any) => {
   const categories = getCategoriesFromObject(fileObj);
-  const icons = categories
-    .map(categoryID => {
-      return iconCategories.find(category => category.id === +categoryID)?.icon;
-    })
-    .reverse();
+  const icons = categories.map(categoryID => {
+    return iconCategories.find(category => category.id === +categoryID)?.icon;
+  });
 
-  return icons.find(icon => icon !== undefined);
+  return icons.filter(icon => icon !== undefined);
 };

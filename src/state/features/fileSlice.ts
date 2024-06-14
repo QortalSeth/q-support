@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { RootState } from "../store";
+import { PublishFeeData } from "../../constants/PublishFees/SendFeeFunctions.ts";
 
 interface GlobalState {
-  files: Video[];
-  filteredFiles: Video[];
-  hashMapFiles: Record<string, Video>;
+  files: Issue[];
+  filteredFiles: Issue[];
+  hashMapFiles: Record<string, Issue>;
   countNewFiles: number;
   isFiltering: boolean;
   filterValue: string;
@@ -14,6 +14,7 @@ interface GlobalState {
   selectedCategoryFiles: any[];
   editFileProperties: any;
   editPlaylistProperties: any;
+  publishedQappNames: string[];
 }
 const initialState: GlobalState = {
   files: [],
@@ -28,9 +29,10 @@ const initialState: GlobalState = {
   selectedCategoryFiles: [null, null, null, null],
   editFileProperties: null,
   editPlaylistProperties: null,
+  publishedQappNames: [],
 };
 
-export interface Video {
+export interface Issue {
   title: string;
   description: string;
   created: number | string;
@@ -44,6 +46,8 @@ export interface Video {
   updated?: number | string;
   isValid?: boolean;
   code?: string;
+  feeData?: PublishFeeData;
+  paymentVerified?: boolean;
 }
 
 export const fileSlice = createSlice({
@@ -113,12 +117,12 @@ export const fileSlice = createSlice({
     },
     addArrayToHashMap: (state, action) => {
       const videos = action.payload;
-      videos.forEach((video: Video) => {
+      videos.forEach((video: Issue) => {
         state.hashMapFiles[video.id] = video;
       });
     },
     upsertFiles: (state, action) => {
-      action.payload.forEach((video: Video) => {
+      action.payload.forEach((video: Issue) => {
         const index = state.files.findIndex(p => p.id === video.id);
         if (index !== -1) {
           state.files[index] = video;
@@ -128,7 +132,7 @@ export const fileSlice = createSlice({
       });
     },
     upsertFilteredFiles: (state, action) => {
-      action.payload.forEach((video: Video) => {
+      action.payload.forEach((video: Issue) => {
         const index = state.filteredFiles.findIndex(p => p.id === video.id);
         if (index !== -1) {
           state.filteredFiles[index] = video;
@@ -138,7 +142,7 @@ export const fileSlice = createSlice({
       });
     },
     upsertFilesBeginning: (state, action) => {
-      action.payload.reverse().forEach((video: Video) => {
+      action.payload.reverse().forEach((video: Issue) => {
         const index = state.files.findIndex(p => p.id === video.id);
         if (index !== -1) {
           state.files[index] = video;
@@ -156,6 +160,9 @@ export const fileSlice = createSlice({
     blockUser: (state, action) => {
       const username = action.payload;
       state.files = state.files.filter(item => item.user !== username);
+    },
+    setQappNames: (state, action) => {
+      state.publishedQappNames = action.payload;
     },
   },
 });
@@ -183,6 +190,7 @@ export const {
   blockUser,
   setEditFile,
   setEditPlaylist,
+  setQappNames,
 } = fileSlice.actions;
 
 export default fileSlice.reducer;

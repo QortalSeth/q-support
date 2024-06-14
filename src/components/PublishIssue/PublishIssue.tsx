@@ -21,19 +21,34 @@ import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
-import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
-import { titleFormatter } from "../../constants/Misc.ts";
+import { allCategoryData } from "../../constants/Categories/Categories.ts";
 import {
-  appendCategoryToList,
+  fontSizeLarge,
+  fontSizeSmall,
+  log,
+  titleFormatter,
+} from "../../constants/Misc.ts";
+import {
   CategoryList,
   CategoryListRef,
 } from "../common/CategoryList/CategoryList.tsx";
-import { SupportState } from "../../constants/Categories/2ndCategories.ts";
 import {
   ImagePublisher,
   ImagePublisherRef,
 } from "../common/ImagePublisher/ImagePublisher.tsx";
 import { ThemeButtonBright } from "../../pages/Home/Home-styles.tsx";
+import {
+  AutocompleteQappNames,
+  QappNamesRef,
+} from "../common/AutocompleteQappNames.tsx";
+import {
+  feeAmountBase,
+  feeDisclaimer,
+} from "../../constants/PublishFees/FeeData.tsx";
+import {
+  payPublishFeeQORT,
+  PublishFeeData,
+} from "../../constants/PublishFees/SendFeeFunctions.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -53,13 +68,20 @@ interface VideoFile {
   description: string;
   coverImage?: string;
 }
+
 export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
+  const [QappName, setQappName] = useState<string>("");
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const userAddress = useSelector(
     (state: RootState) => state.auth?.user?.address
+  );
+  const QappNames = useSelector(
+    (state: RootState) => state.file.publishedQappNames
   );
   const [files, setFiles] = useState<VideoFile[]>([]);
 
@@ -77,8 +99,11 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
   const [publishes, setPublishes] = useState<any>(null);
+
   const categoryListRef = useRef<CategoryListRef>(null);
   const imagePublisherRef = useRef<ImagePublisherRef>(null);
+  const autocompleteRef = useRef<QappNamesRef>(null);
+
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 10,
     maxSize: 419430400, // 400 MB in bytes
@@ -128,8 +153,18 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
       if (!categoryListRef.current) throw new Error("No CategoryListRef found");
       if (!userAddress) throw new Error("Unable to locate user address");
       if (!description) throw new Error("Please enter a description");
-      if (!categoryListRef.current?.getSelectedCategories()[0])
-        throw new Error("Please select a category");
+
+      const allCategoriesSelected =
+        selectedCategories && selectedCategories[0] && selectedCategories[1];
+      if (!allCategoriesSelected)
+        throw new Error("All Categories must be selected");
+
+      const QappsCategoryID = "3";
+      if (
+        selectedCategories[0] === QappsCategoryID &&
+        !autocompleteRef?.current?.getSelectedValue()
+      )
+        throw new Error("Select a published Q-App");
       let errorMsg = "";
       let name = "";
       if (username) {
@@ -200,14 +235,10 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
           filename = alphanumericString;
         }
 
-        const categoryList = appendCategoryToList(
-          categoryListRef.current?.getSelectedCategories(),
-          "101"
-        );
-        const categoryString = `**${categoryListRef.current?.getCategoriesFetchString(categoryList)}**`;
+        const categoryString = `**${categoryListRef.current?.getSelectedCategories()}**`;
         let metadescription = categoryString + fullDescription.slice(0, 150);
 
-        const requestBodyVideo: any = {
+        const requestBodyFile: any = {
           action: "PUBLISH_QDN_RESOURCE",
           name: name,
           service: "FILE",
@@ -218,7 +249,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
           filename,
           tag1: QSUPPORT_FILE_BASE,
         };
-        listOfPublishes.push(requestBodyVideo);
+        listOfPublishes.push(requestBodyFile);
         fileReferences.push({
           filename: file.name,
           identifier,
@@ -232,12 +263,19 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
       const idMeta = uid();
       const identifier = `${QSUPPORT_FILE_BASE}${sanitizeTitle.slice(0, 30)}_${idMeta}`;
 
-      const categoryList = appendCategoryToList(
-        categoryListRef.current?.getSelectedCategories(),
-        "101"
-      );
+      const categoryList = categoryListRef.current?.getSelectedCategories();
 
-      const fileObject: any = {
+      const selectedQappName = autocompleteRef?.current?.getSelectedValue();
+
+      const publishFeeResponse = await payPublishFeeQORT(feeAmountBase);
+      if (log) console.log("feeResponse: ", publishFeeResponse);
+
+      const feeData: PublishFeeData = {
+        signature: publishFeeResponse,
+        senderName: "",
+      };
+
+      const issueObject: any = {
         title,
         version: 1,
         fullDescription,
@@ -246,12 +284,24 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         ...categoryListRef.current?.categoriesToObject(categoryList),
         files: fileReferences,
         images: imagePublisherRef?.current?.getImageArray(),
+        QappName: selectedQappName,
+        feeData,
       };
 
-      const categoryString = `**${categoryListRef.current?.getCategoriesFetchString(categoryList)}**`;
-      let metadescription = categoryString + fullDescription.slice(0, 150);
+      const QappNameString = autocompleteRef?.current?.getQappNameFetchString();
+      const categoryString =
+        categoryListRef.current?.getCategoriesFetchString(categoryList);
+      const metaDataString = `**${categoryString + QappNameString}**`;
 
-      const fileObjectToBase64 = await objectToBase64(fileObject);
+      let metadescription = metaDataString + fullDescription.slice(0, 150);
+
+      if (log) console.log("description is: ", metadescription);
+      if (log) console.log("description length is: ", metadescription.length);
+      if (log) console.log("characters left:", 240 - metadescription.length);
+      if (log)
+        console.log("% of characters used:", metadescription.length / 240);
+
+      const fileObjectToBase64 = await objectToBase64(issueObject);
       // Description is obtained from raw data
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
@@ -294,6 +344,11 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
       dispatch(setNotification(notificationObj));
     }
   }
+
+  const isShowQappNameTextField = () => {
+    const QappID = "3";
+    return selectedCategories[0] === QappID;
+  };
 
   return (
     <>
@@ -386,13 +441,29 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
                     categoryData={allCategoryData}
                     ref={categoryListRef}
                     columns={3}
-                    excludeCategories={SupportState}
+                    afterChange={newSelectedCategories => {
+                      if (
+                        newSelectedCategories[0] &&
+                        newSelectedCategories[1] &&
+                        !newSelectedCategories[2]
+                      ) {
+                        newSelectedCategories[2] = "101";
+                      }
+                      setSelectedCategories(newSelectedCategories);
+                    }}
+                    showEmptyItem={false}
                   />
                 </Box>
+                {isShowQappNameTextField() && (
+                  <AutocompleteQappNames
+                    ref={autocompleteRef}
+                    namesList={QappNames}
+                  />
+                )}
                 <ImagePublisher ref={imagePublisherRef} />
                 <CustomInputField
                   name="title"
-                  label="Title of Issue"
+                  label="Title"
                   variant="filled"
                   value={title}
                   onChange={e => {
@@ -400,15 +471,15 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
                     const formattedValue = value.replace(titleFormatter, "");
                     setTitle(formattedValue);
                   }}
-                  inputProps={{ maxLength: 180 }}
+                  inputProps={{ maxLength: 60 }}
                   required
                 />
                 <Typography
                   sx={{
-                    fontSize: "18px",
+                    fontSize: fontSizeLarge,
                   }}
                 >
-                  Description of Issue
+                  Description
                 </Typography>
                 <TextEditor
                   inlineContent={description}
@@ -426,7 +497,10 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
               }}
               variant="contained"
               color="error"
-              sx={{ color: theme.palette.text.primary }}
+              sx={{
+                color: theme.palette.text.primary,
+                fontSize: fontSizeSmall,
+              }}
             >
               Cancel
             </ActionButton>
@@ -439,13 +513,10 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
             >
               <ThemeButtonBright
                 variant="contained"
-                onClick={() => {
-                  publishQDNResource();
-                }}
+                onClick={publishQDNResource}
                 sx={{
                   fontFamily: "Montserrat",
-                  fontSize: "16px",
-                  fontWeight: 400,
+                  fontWeight: "400",
                   letterSpacing: "0.2px",
                 }}
               >
@@ -453,6 +524,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
               </ThemeButtonBright>
             </Box>
           </ActionButtonRow>
+          {feeDisclaimer}
         </ModalBody>
       </Modal>
 

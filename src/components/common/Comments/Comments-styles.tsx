@@ -1,5 +1,6 @@
 import { styled } from "@mui/system";
-import { Card, Box, Typography, Button, TextField } from "@mui/material";
+import { Box, Button, Card, TextField, Typography } from "@mui/material";
+import { ThemeButton } from "../../../pages/Home/Home-styles.tsx";
 
 export const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor:
@@ -93,7 +94,7 @@ export const StyledCardComment = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   color: theme.palette.text.primary,
   fontSize: "19px",
-  wordBreak: "break-word"
+  wordBreak: "break-word",
 }));
 
 export const TitleText = styled(Typography)({
@@ -200,13 +201,10 @@ export const EditReplyButton = styled(Button)(({ theme }) => ({
   color: "#ffffff",
 }));
 
-export const LoadMoreCommentsButton = styled(Button)(({ theme }) => ({
+export const LoadMoreCommentsButton = styled(ThemeButton)(({ theme }) => ({
   fontFamily: "Montserrat",
   fontWeight: 400,
   letterSpacing: "0.2px",
-  fontSize: "15px",
-  backgroundColor: theme.palette.primary.main,
-  color: "#ffffff",
 }));
 
 export const CommentActionButtonRow = styled(Box)({
@@ -234,8 +232,7 @@ export const CommentInputContainer = styled(Box)({
   display: "flex",
   flexDirection: "column",
   marginTop: "15px",
-  width: "90%",
-  maxWidth: "1000px",
+  width: "100%",
   borderRadius: "8px",
   gap: "10px",
   alignItems: "center",
@@ -270,12 +267,9 @@ export const CommentInput = styled(TextField)(({ theme }) => ({
   },
 }));
 
-export const SubmitCommentButton = styled(Button)(({ theme }) => ({
+export const SubmitCommentButton = styled(ThemeButton)(({ theme }) => ({
   fontFamily: "Montserrat",
   fontWeight: 400,
   letterSpacing: "0.2px",
-  fontSize: "15px",
-  backgroundColor: theme.palette.primary.main,
-  color: "#ffffff",
   width: "75%",
 }));

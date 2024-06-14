@@ -15,14 +15,14 @@ export const StatsData = () => {
   }));
 
   const {
-    getFiles,
-    checkAndUpdateFile,
-    getFile,
+    getIssues,
+    checkAndUpdateIssue,
+    getIssue,
     hashMapFiles,
-    getNewFiles,
-    checkNewFiles,
-    getFilesFiltered,
-    getFilesCount,
+    getNewIssues,
+    checkNewIssues,
+    getIssuesFiltered,
+    getIssuesCount,
   } = useFetchIssues();
 
   const totalIssuesPublished = useSelector(
@@ -36,8 +36,8 @@ export const StatsData = () => {
   );
 
   useEffect(() => {
-    getFilesCount();
-  }, [getFilesCount]);
+    getIssuesCount();
+  }, [getIssuesCount]);
 
   return (
     totalIssuesPublished > 0 && (

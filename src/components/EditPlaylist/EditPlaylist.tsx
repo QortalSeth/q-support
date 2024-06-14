@@ -43,9 +43,9 @@ import { PlaylistListEdit } from "../PlaylistListEdit/PlaylistListEdit";
 import { TextEditor } from "../common/TextEditor/TextEditor";
 import { extractTextFromHTML } from "../common/TextEditor/utils";
 import {
-  firstCategories,
-  secondCategories,
-} from "../../constants/Categories/1stCategories.ts";
+  issueLocation,
+  thirdCategories,
+} from "../../constants/Categories/Categories.ts";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -183,7 +183,7 @@ export const EditPlaylist = () => {
       setVideos(editVideoProperties?.videos || []);
 
       if (editVideoProperties?.category) {
-        const selectedOption = firstCategories.find(
+        const selectedOption = issueLocation.find(
           option => option.id === +editVideoProperties.category
         );
         setSelectedCategoryVideos(selectedOption || null);
@@ -192,9 +192,9 @@ export const EditPlaylist = () => {
       if (
         editVideoProperties?.category &&
         editVideoProperties?.subcategory &&
-        secondCategories[+editVideoProperties?.category]
+        thirdCategories[+editVideoProperties?.category]
       ) {
-        const selectedOption = secondCategories[
+        const selectedOption = thirdCategories[
           +editVideoProperties?.category
         ]?.find(option => option.id === +editVideoProperties.subcategory);
         setSelectedSubCategoryVideos(selectedOption || null);
@@ -405,7 +405,7 @@ export const EditPlaylist = () => {
     event: SelectChangeEvent<string>
   ) => {
     const optionId = event.target.value;
-    const selectedOption = firstCategories.find(
+    const selectedOption = issueLocation.find(
       option => option.id === +optionId
     );
     setSelectedCategoryVideos(selectedOption || null);
@@ -479,7 +479,7 @@ export const EditPlaylist = () => {
                   value={selectedCategoryVideos?.id || ""}
                   onChange={handleOptionCategoryChangeVideos}
                 >
-                  {firstCategories.map(option => (
+                  {issueLocation.map(option => (
                     <MenuItem key={option.id} value={option.id}>
                       {option.name}
                     </MenuItem>
@@ -487,7 +487,7 @@ export const EditPlaylist = () => {
                 </Select>
               </FormControl>
               {selectedCategoryVideos &&
-                secondCategories[selectedCategoryVideos?.id] && (
+                thirdCategories[selectedCategoryVideos?.id] && (
                   <FormControl fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="Category">Select a Sub-Category</InputLabel>
                     <Select
@@ -497,11 +497,11 @@ export const EditPlaylist = () => {
                       onChange={e =>
                         handleOptionSubCategoryChangeVideos(
                           e,
-                          secondCategories[selectedCategoryVideos?.id]
+                          thirdCategories[selectedCategoryVideos?.id]
                         )
                       }
                     >
-                      {secondCategories[selectedCategoryVideos.id].map(
+                      {thirdCategories[selectedCategoryVideos.id].map(
                         option => (
                           <MenuItem key={option.id} value={option.id}>
                             {option.name}

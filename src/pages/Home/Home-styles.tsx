@@ -1,5 +1,6 @@
 import { styled } from "@mui/system";
 import { Box, Button, Grid, Typography } from "@mui/material";
+import { fontSizeSmall } from "../../constants/Misc.ts";
 
 export const SubtitleContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -88,12 +89,12 @@ export const ThemeButton = styled(Button)(({ theme }) => ({
   color: theme.palette.text.primary,
   backgroundColor: "#01a9e9",
   fontSize: "18px",
-  "&:hover": { backgroundColor: "#3e74c1" },
+  "&:hover": { backgroundColor: "#008fcd" },
 }));
 
 export const ThemeButtonBright = styled(Button)(({ theme }) => ({
   color: theme.palette.text.primary,
   backgroundColor: "#44c4ff",
-  fontSize: "18px",
+  fontSize: fontSizeSmall,
   "&:hover": { backgroundColor: "#01a9e9" },
 }));

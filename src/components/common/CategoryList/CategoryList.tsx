@@ -12,13 +12,15 @@ import {
 
 import React, { useEffect, useImperativeHandle, useState } from "react";
 import { CategoryContainer } from "./CategoryList-styles.tsx";
-import { allCategoryData } from "../../../constants/Categories/1stCategories.ts";
+import { allCategoryData } from "../../../constants/Categories/Categories.ts";
 import { log } from "../../../constants/Misc.ts";
+import { findCategoryData } from "../../../constants/Categories/CategoryFunctions.ts";
 
 export interface Category {
   id: number;
   name: string;
   icon?: string;
+  label?: string;
 }
 
 export interface Categories {
@@ -29,8 +31,6 @@ export interface CategoryData {
   subCategories: Categories[];
 }
 
-type ListDirection = "column" | "row";
-
 interface CategoryListProps {
   sx?: SxProps<Theme>;
   categoryData: CategoryData;
@@ -38,6 +38,7 @@ interface CategoryListProps {
   columns?: number;
   afterChange?: (categories: string[]) => void;
   excludeCategories?: Category[];
+  showEmptyItem?: boolean;
 }
 
 export type CategoryListRef = {
@@ -60,6 +61,7 @@ export const CategoryList = React.forwardRef<
       columns = 1,
       afterChange,
       excludeCategories,
+      showEmptyItem = true,
     }: CategoryListProps,
     ref
   ) => {
@@ -127,7 +129,8 @@ export const CategoryList = React.forwardRef<
       const newSelectedCategories: string[] = selectedCategories.map(
         (category, categoryIndex) => {
           if (index > categoryIndex) return category;
-          else if (index === categoryIndex) return selectedOption.id.toString();
+          else if (index === categoryIndex)
+            return selectedOption?.id?.toString();
           else return "";
         }
       );
@@ -140,23 +143,31 @@ export const CategoryList = React.forwardRef<
     };
 
     const categorySelectSX = {
-      // Target the input field
-      ".MuiSelect-select": {
-        fontSize: "16px", // Change font size for the selected value
-        padding: "10px 5px 15px 15px;",
-      },
-      // Target the dropdown icon
-      ".MuiSelect-icon": {
-        fontSize: "20px", // Adjust if needed
-      },
-      // Target the dropdown menu
-      "& .MuiMenu-paper": {
-        ".MuiMenuItem-root": {
-          fontSize: "14px", // Change font size for the menu items
-        },
-      },
+      // // Target the input field
+      // ".MuiSelect-select": {
+      //   padding: "10px 5px 15px 15px;",
+      // },
+      // // Target the dropdown icon
+      // ".MuiSelect-icon": {
+      //   fontSize: "20px", // Adjust if needed
+      // },
+      // // Target the dropdown menu
+      // "& .MuiMenu-paper": {
+      //   ".MuiMenuItem-root": {
+      //     fontSize: "14px", // Change font size for the menu items
+      //   },
+      // },
     };
 
+    const emptyMenuItem = (
+      <MenuItem
+        key={""}
+        value={""}
+        sx={{
+          "@media (min-width: 600px)": { minHeight: "46.5px" },
+        }}
+      />
+    );
     const fillMenu = (category: Categories, index: number) => {
       const subCategoryIndex = selectedCategories[index];
       if (log) console.log("selected categories: ", selectedCategories);
@@ -171,12 +182,23 @@ export const CategoryList = React.forwardRef<
       if (log) console.log("categoryData: ", categoryData);
 
       const menuToFill = category[subCategoryIndex];
-      if (menuToFill)
-        return menuToFill.map(option => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.name}
-          </MenuItem>
-        ));
+      if (menuToFill) {
+        const menuItems = [];
+
+        if (showEmptyItem) menuItems.push(emptyMenuItem);
+
+        menuToFill.map(option =>
+          menuItems.push(
+            <MenuItem key={option.id} value={option.id}>
+              {option.name}
+            </MenuItem>
+          )
+        );
+        if (log) console.log(" returning menuItems: ", menuItems);
+
+        return menuItems;
+      }
+      if (log) console.log("not returning menuItems");
     };
 
     const hasSubCategory = (category: Categories, index: number) => {
@@ -202,11 +224,11 @@ export const CategoryList = React.forwardRef<
             <FormControl fullWidth sx={{ marginBottom: 1 }}>
               <InputLabel
                 sx={{
-                  fontSize: "16px",
+                  fontSize: "24px",
                 }}
                 id="Category-1"
               >
-                Category
+                {categoryData.category[0]?.label || "Category"}
               </InputLabel>
               <Select
                 labelId="Category 1"
@@ -217,6 +239,7 @@ export const CategoryList = React.forwardRef<
                 }}
                 sx={categorySelectSX}
               >
+                {showEmptyItem && emptyMenuItem}
                 {categoryData.category.map(option => (
                   <MenuItem key={option.id} value={option.id}>
                     {option.name}
@@ -237,11 +260,14 @@ export const CategoryList = React.forwardRef<
                   >
                     <InputLabel
                       sx={{
-                        fontSize: "16px",
+                        fontSize: "24px",
                       }}
                       id={`Category-${index + 2}`}
                     >
-                      {`Category-${index + 2}`}
+                      {findCategoryData(+selectedCategories[index + 1])
+                        ?.label ||
+                        category[selectedCategories[index]][0]?.label ||
+                        `Category-${index + 2}`}
                     </InputLabel>
                     <Select
                       labelId={`Category ${index + 2}`}
@@ -249,24 +275,6 @@ export const CategoryList = React.forwardRef<
                       value={selectedCategories[index + 1] || ""}
                       onChange={e => {
                         selectCategoryEvent(e, index + 1);
-                      }}
-                      sx={{
-                        width: "100%",
-                        // Target the input field
-                        ".MuiSelect-select": {
-                          fontSize: "16px", // Change font size for the selected value
-                          padding: "10px 5px 15px 15px;",
-                        },
-                        // Target the dropdown icon
-                        ".MuiSelect-icon": {
-                          fontSize: "20px", // Adjust if needed
-                        },
-                        // Target the dropdown menu
-                        "& .MuiMenu-paper": {
-                          ".MuiMenuItem-root": {
-                            fontSize: "14px", // Change font size for the menu items
-                          },
-                        },
                       }}
                     >
                       {fillMenu(category, index)}
@@ -285,9 +293,9 @@ export const getCategoriesFetchString = (categories: string[]) => {
   let fetchString = "";
   categories.map((category, index) => {
     if (category) {
-      if (index === 0) fetchString += `cat:${category}`;
-      else if (index === 1) fetchString += `;sub:${category}`;
-      else fetchString += `;sub${index}:${category}`;
+      if (index === 0 && category) fetchString += `cat:${category};`;
+      else if (index === 1 && category) fetchString += `sub:${category};`;
+      else if (category) fetchString += `sub${index}:${category};`;
     }
   });
   if (log) console.log("categoriesAsDescription: ", fetchString);
@@ -317,4 +325,17 @@ export const getCategoriesFromObject = (editFileProperties: any) => {
     else categoryList.push(editFileProperties[`subcategory${i}`] || "");
   }
   return categoryList;
+};
+
+export const getCategoriesLength = categoryList => {
+  return categoryList.filter(category => category !== "").length;
+};
+
+export const hasCategories = (categories: string[]) => {
+  return categories.findIndex(category => category !== "") >= 0;
+};
+
+export const appendCategory = (categoryList: string[], category: string) => {
+  const nextIndex = categoryList.findIndex(category => category === "");
+  categoryList[nextIndex] = category;
 };

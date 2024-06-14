@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
 import { Box, useTheme } from "@mui/material";
-import { FileContainer } from "./IssueList-styles.tsx";
+import { IssueContainer } from "./IssueList-styles.tsx";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import { ChannelCard, ChannelTitle } from "./Home-styles";
 
@@ -30,7 +30,7 @@ export const Channels = ({ mode }: VideoListProps) => {
         minHeight: "50vh",
       }}
     >
-      <FileContainer>
+      <IssueContainer>
         {publishNames &&
           publishNames?.slice(0, 10).map(name => {
             let avatarUrl = "";
@@ -62,7 +62,7 @@ export const Channels = ({ mode }: VideoListProps) => {
               </Box>
             );
           })}
-      </FileContainer>
+      </IssueContainer>
     </Box>
   );
 };

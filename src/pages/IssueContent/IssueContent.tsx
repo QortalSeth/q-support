@@ -5,7 +5,6 @@ import { setIsLoadingGlobal } from "../../state/features/globalSlice";
 import { Avatar, Box, Typography, useTheme } from "@mui/material";
 import { RootState } from "../../state/store";
 import { addToHashMap } from "../../state/features/fileSlice.ts";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import {
   AuthorTextComment,
@@ -24,14 +23,20 @@ import { CommentSection } from "../../components/common/Comments/CommentSection"
 import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
 import FileElement from "../../components/common/FileElement";
-import { allCategoryData } from "../../constants/Categories/1stCategories.ts";
+import { allCategoryData } from "../../constants/Categories/Categories.ts";
 import {
   Category,
   getCategoriesFromObject,
 } from "../../components/common/CategoryList/CategoryList.tsx";
 import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
+import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
+import QORTicon from "../../assets/icons/qort.png";
+import {
+  appendIsPaidToFeeData,
+  verifyPayment,
+} from "../../constants/PublishFees/VerifyPayment.ts";
 
-export function formatBytes(bytes, decimals = 2) {
+export function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
 
   const k = 1024;
@@ -50,7 +55,7 @@ export const IssueContent = () => {
   const [descriptionHeight, setDescriptionHeight] = useState<null | number>(
     null
   );
-  const [icon, setIcon] = useState<string>("");
+  const [issueIcons, setIssueIcons] = useState<string[]>([]);
   const userAvatarHash = useSelector(
     (state: RootState) => state.global.userAvatarHash
   );
@@ -67,15 +72,15 @@ export const IssueContent = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const [fileData, setFileData] = useState<any>(null);
+  const [issueData, setIssueData] = useState<any>(null);
   const [playlistData, setPlaylistData] = useState<any>(null);
 
   const hashMapVideos = useSelector(
     (state: RootState) => state.file.hashMapFiles
   );
   const videoReference = useMemo(() => {
-    if (!fileData) return null;
-    const { videoReference } = fileData;
+    if (!issueData) return null;
+    const { videoReference } = issueData;
     if (
       videoReference?.identifier &&
       videoReference?.name &&
@@ -85,13 +90,13 @@ export const IssueContent = () => {
     } else {
       return null;
     }
-  }, [fileData]);
+  }, [issueData]);
 
   const videoCover = useMemo(() => {
-    if (!fileData) return null;
-    const { videoImage } = fileData;
+    if (!issueData) return null;
+    const { videoImage } = issueData;
     return videoImage || null;
-  }, [fileData]);
+  }, [issueData]);
   const dispatch = useDispatch();
 
   const getVideoData = React.useCallback(async (name: string, id: string) => {
@@ -135,9 +140,16 @@ export const IssueContent = () => {
             ...resourceData,
             ...responseData,
           };
-          setFileData(combinedData);
-          dispatch(addToHashMap(combinedData));
-          checkforPlaylist(name, id, combinedData?.code);
+
+          verifyPayment(combinedData).then(feeData => {
+            console.log(
+              "async data: ",
+              appendIsPaidToFeeData(combinedData, feeData)
+            );
+            setIssueData(appendIsPaidToFeeData(combinedData, feeData));
+            dispatch(addToHashMap(combinedData));
+            checkforPlaylist(name, id, combinedData?.code);
+          });
         }
       }
     } catch (error) {
@@ -217,8 +229,10 @@ export const IssueContent = () => {
       const existingVideo = hashMapVideos[id];
 
       if (existingVideo) {
-        setFileData(existingVideo);
-        checkforPlaylist(name, id, existingVideo?.code);
+        verifyPayment(existingVideo).then(feeData => {
+          setIssueData(appendIsPaidToFeeData(existingVideo, feeData));
+          checkforPlaylist(name, id, existingVideo?.code);
+        });
       } else {
         getVideoData(name, id);
       }
@@ -259,21 +273,21 @@ export const IssueContent = () => {
   useEffect(() => {
     if (contentRef.current) {
       const height = contentRef.current.offsetHeight;
-      if (height > 100) {
+      const maxDescriptionHeight = 200;
+      if (height > maxDescriptionHeight) {
         // Assuming 100px is your threshold
-        setDescriptionHeight(100);
+        setDescriptionHeight(maxDescriptionHeight);
       }
     }
-    if (fileData) {
-      const icon = getIconsFromObject(fileData);
-      setIcon(icon);
+    if (issueData) {
+      const icons = getIconsFromObject(issueData);
+      setIssueIcons(icons);
     }
-  }, [fileData]);
+  }, [issueData]);
 
   const categoriesDisplay = useMemo(() => {
-    if (fileData) {
-      const categoryList = getCategoriesFromObject(fileData);
-
+    if (issueData) {
+      const categoryList = getCategoriesFromObject(issueData);
       const categoryNames = categoryList.map((categoryID, index) => {
         let categoryName: Category;
         if (index === 0) {
@@ -294,14 +308,21 @@ export const IssueContent = () => {
       const filteredCategoryNames = categoryNames.filter(name => name);
       let categoryDisplay = "";
       const separator = " > ";
+      const QappName = issueData?.QappName || "";
+
       filteredCategoryNames.map((name, index) => {
-        categoryDisplay +=
-          index !== filteredCategoryNames.length - 1 ? name + separator : name;
+        if (QappName && index === 1) {
+          categoryDisplay += QappName + separator;
+        }
+        categoryDisplay += name;
+
+        if (index !== filteredCategoryNames.length - 1)
+          categoryDisplay += separator;
       });
       return categoryDisplay;
     }
     return "no videodata";
-  }, [fileData]);
+  }, [issueData]);
 
   return (
     <Box
@@ -325,18 +346,12 @@ export const IssueContent = () => {
             alignItems: "center",
           }}
         >
-          {icon ? (
-            <img
-              src={icon}
-              width="50px"
-              style={{
-                borderRadius: "5px",
-                marginRight: "10px",
-              }}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <IssueIcons
+              iconSources={issueIcons}
+              style={{ marginRight: "20px" }}
             />
-          ) : (
-            <AttachFileIcon />
-          )}
+          </div>
           <FileTitle
             variant="h1"
             color="textPrimary"
@@ -344,10 +359,13 @@ export const IssueContent = () => {
               textAlign: "center",
             }}
           >
-            {fileData?.title}
+            {issueData?.title}
           </FileTitle>
+          {issueData?.feeData?.isPaid && (
+            <IssueIcon iconSrc={QORTicon} style={{ marginLeft: "10px" }} />
+          )}
         </div>
-        {fileData?.created && (
+        {issueData?.created && (
           <Typography
             variant="h6"
             sx={{
@@ -355,7 +373,7 @@ export const IssueContent = () => {
             }}
             color={theme.palette.text.primary}
           >
-            {formatDate(fileData.created)}
+            {formatDate(issueData.created)}
           </Typography>
         )}
 
@@ -407,12 +425,13 @@ export const IssueContent = () => {
           </Typography>
         </Box>
         <ImageContainer>
-          {fileData?.images &&
-            fileData.images.map(image => {
+          {issueData?.images &&
+            issueData.images.map(image => {
               return (
                 <img
+                  key={image}
                   src={image}
-                  width={`${1080 / fileData.images.length}px`}
+                  width={`${1080 / issueData.images.length}px`}
                   style={{
                     marginRight: "10px",
                     marginBottom: "10px",
@@ -464,12 +483,12 @@ export const IssueContent = () => {
                 ? "auto"
                 : isExpandedDescription
                   ? "auto"
-                  : "100px",
+                  : "30vh",
               overflow: "hidden",
             }}
           >
-            {fileData?.htmlDescription ? (
-              <DisplayHtml html={fileData?.htmlDescription} />
+            {issueData?.htmlDescription ? (
+              <DisplayHtml html={issueData?.htmlDescription} />
             ) : (
               <FileDescription
                 variant="body1"
@@ -478,7 +497,7 @@ export const IssueContent = () => {
                   cursor: "default",
                 }}
               >
-                {fileData?.fullDescription}
+                {issueData?.fullDescription}
               </FileDescription>
             )}
           </Box>
@@ -509,7 +528,7 @@ export const IssueContent = () => {
             marginTop: "25px",
           }}
         >
-          {fileData?.files?.map((file, index) => {
+          {issueData?.files?.map((file, index) => {
             return (
               <FileAttachmentContainer
                 sx={{

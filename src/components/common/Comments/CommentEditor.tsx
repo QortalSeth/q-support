@@ -1,10 +1,8 @@
-import { Box, Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
 import ShortUniqueId from "short-unique-id";
 import { setNotification } from "../../../state/features/notificationsSlice";
-import { toBase64 } from "../../../utils/toBase64";
 import localforage from "localforage";
 import {
   CommentInput,
@@ -12,6 +10,9 @@ import {
   SubmitCommentButton,
 } from "./Comments-styles";
 import { QSUPPORT_COMMENT_BASE } from "../../../constants/Identifiers.ts";
+import { sendQchatDM } from "../../../utils/qortalRequests.ts";
+import { maxCommentLength } from "../../../constants/Misc.ts";
+
 const uid = new ShortUniqueId();
 
 const notification = localforage.createInstance({
@@ -123,7 +124,6 @@ export const CommentEditor = ({
     let address;
     let name;
     let errorMsg = "";
-
     address = user?.address;
     name = user?.name || "";
 
@@ -134,8 +134,8 @@ export const CommentEditor = ({
       errorMsg = "Cannot post without a name";
     }
 
-    if (value.length > 200) {
-      errorMsg = "Comment needs to be under 200 characters";
+    if (value.length > maxCommentLength) {
+      errorMsg = `Comment needs to be under ${maxCommentLength} characters`;
     }
 
     if (errorMsg) {
@@ -157,6 +157,7 @@ export const CommentEditor = ({
         data64: base64,
         identifier: identifier,
       });
+
       dispatch(
         setNotification({
           msg: "Comment successfully published",
@@ -171,7 +172,19 @@ export const CommentEditor = ({
           postName: postName,
         });
       }
+      if (!isReply && !isEdit) {
+        // const notificationMessage = `This is an automated Q-Support notification indicating that someone has commented on your issue here:
+        //   qortal://APP/Q-Support/issue/${postName}/${postId}
+        //
+        //   Here are the first ${maxNotificationLength} characters of the comment:
+        //
+        //   ${value.substring(0, maxNotificationLength)}`;
 
+        const notificationMessage = `This is an automated Q-Support notification indicating that someone has commented on your issue here:
+          qortal://APP/Q-Support/issue/${postName}/${postId}`;
+
+        await sendQchatDM(postName, notificationMessage);
+      }
       return resourceResponse;
     } catch (error: any) {
       let notificationObj: any = null;
@@ -236,11 +249,11 @@ export const CommentEditor = ({
         id="standard-multiline-flexible"
         label="Your comment"
         multiline
-        maxRows={4}
+        maxRows={10}
         variant="filled"
         value={value}
         inputProps={{
-          maxLength: 200,
+          maxLength: maxCommentLength,
         }}
         InputLabelProps={{ style: { fontSize: "18px" } }}
         onChange={e => setValue(e.target.value)}
@@ -252,3 +265,5 @@ export const CommentEditor = ({
     </CommentInputContainer>
   );
 };
+
+const sendDMwithComment = () => {};

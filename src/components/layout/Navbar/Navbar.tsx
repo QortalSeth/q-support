@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 
 import { DownloadTaskManager } from "../../common/DownloadTaskManager";
-import QSupportLogo from "../../../assets/img/Q-SupportIcon.webp";
+import QSupportIcon from "../../../assets/img/Q-SupportIcon(AlphaX).webp";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addFilteredFiles,
@@ -32,6 +32,7 @@ import {
 import { RootState } from "../../../state/store";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { PublishIssue } from "../../PublishIssue/PublishIssue.tsx";
+import { FeeHistoryModal } from "../../../constants/PublishFees/FeePricePublish/FeeHistoryModal.tsx";
 
 interface Props {
   isAuthenticated: boolean;
@@ -114,7 +115,7 @@ const NavBar: React.FC<Props> = ({
             }}
           >
             <img
-              src={QSupportLogo}
+              src={QSupportIcon}
               style={{
                 width: "auto",
                 height: "100px",
@@ -238,6 +239,7 @@ const NavBar: React.FC<Props> = ({
         </Popover>
 
         <DownloadTaskManager />
+        <FeeHistoryModal />
         {theme.palette.mode === "dark" ? (
           <LightModeIcon
             onClickFunc={() => setTheme("light")}

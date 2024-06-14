@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { FileListComponentLevel } from "../Home/FileListComponentLevel.tsx";
+import { IssueListComponentLevel } from "../Home/IssueListComponentLevel.tsx";
 import { HeaderContainer, ProfileContainer } from "./Profile-styles";
 import {
   AuthorTextComment,
@@ -62,7 +62,7 @@ export const IndividualProfile = () => {
           </StyledCardHeaderComment>
         </Box>
       </HeaderContainer>
-      <FileListComponentLevel />
+      <IssueListComponentLevel />
     </ProfileContainer>
   );
 };
