@@ -18,3 +18,13 @@ export const printVar = (variable: object) => {
   const [key, value] = Object.entries(variable)[0];
   console.log(key, " is: ", value);
 };
+
+export const isNumber = (input: string) => {
+  if (input === "") return false;
+  const num = Number(input);
+  return !isNaN(num);
+};
+
+export const truncateNumber = (value: string | number, sigDigits: number) => {
+  return Number(value).toFixed(sigDigits);
+};

@@ -1,8 +1,8 @@
-import { appName, FEE_BASE, feeAmountBase, FeeType } from "../FeeData.tsx";
-import { objectToBase64 } from "../../../utils/toBase64.ts";
-import { store } from "../../../state/store.ts";
 import { setFeeData } from "../../../state/features/globalSlice.ts";
+import { store } from "../../../state/store.js";
+import { objectToBase64 } from "../../../utils/toBase64.ts";
 import { useTestIdentifiers } from "../../Identifiers.ts";
+import { appName, FEE_BASE, feeAmountBase, FeeType } from "../FeeData.tsx";
 
 export type CoinType = "QORT" | "BTC" | "LTC" | "DOGE" | "DGB" | "RVN" | "ARRR";
 

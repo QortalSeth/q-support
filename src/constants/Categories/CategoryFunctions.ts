@@ -43,7 +43,7 @@ export const findAllCategoryData = (
   categories: string[],
   direction: Direction = "forward"
 ) => {
-  let foundIcons: Category[] = [];
+  const foundIcons: Category[] = [];
   if (direction === "backward") categories.reverse();
 
   categories.map(category => {
@@ -77,6 +77,15 @@ export const getAllCategoriesWithIcons = () => {
     }
   }
   return categoriesWithIcons;
+};
+
+export const getnamesFromObject = (fileObj: any) => {
+  const categories = getCategoriesFromObject(fileObj);
+  const names = categories.map(categoryID => {
+    return iconCategories.find(category => category.id === +categoryID)?.name;
+  });
+
+  return names
 };
 
 export const getIconsFromObject = (fileObj: any) => {

@@ -1,22 +1,21 @@
+import BugReportIcon from "../../assets/icons/Bug-Report-Icon.webp";
+import ClosedIcon from "../../assets/icons/Closed-Icon.webp";
+import CompleteIcon from "../../assets/icons/Complete-Icon.webp";
+import FeatureRequestIcon from "../../assets/icons/Feature-Request-Icon.webp";
+import InProgressIcon from "../../assets/icons/In-Progress-Icon.webp";
+
+import OpenIcon from "../../assets/icons/Open-Icon.webp";
+import QappIcon from "../../assets/icons/Q-App-Icon.webp";
+import CoreIcon from "../../assets/icons/Qortal-Core-Icon.webp";
+import UIicon from "../../assets/icons/Qortal-UI-Icon.webp";
+import TechSupportIcon from "../../assets/icons/Tech-Support-Icon.webp";
+import UnknownIcon from "../../assets/icons/unknown.webp";
 import {
   Categories,
   Category,
   CategoryData,
 } from "../../components/common/CategoryList/CategoryList.tsx";
 import { getAllCategoriesWithIcons } from "./CategoryFunctions.ts";
-import CoreIcon from "../../assets/icons/Qortal-Core-Icon.webp";
-import UIicon from "../../assets/icons/Qortal-UI-Icon.webp";
-import QappIcon from "../../assets/icons/Q-App-Icon.webp";
-import UnknownIcon from "../../assets/icons/unknown.webp";
-
-import BugReportIcon from "../../assets/icons/Bug-Report-Icon.webp";
-import FeatureRequestIcon from "../../assets/icons/Feature-Request-Icon.webp";
-import TechSupportIcon from "../../assets/icons/Tech-Support-Icon.webp";
-
-import OpenIcon from "../../assets/icons/Open-Icon.webp";
-import ClosedIcon from "../../assets/icons/Closed-Icon.webp";
-import InProgressIcon from "../../assets/icons/In-Progress-Icon.webp";
-import CompleteIcon from "../../assets/icons/Complete-Icon.webp";
 
 const issueLocationLabel = "Issue Location";
 export const issueLocation: Category[] = [
@@ -48,7 +47,7 @@ export const secondCategories: Categories = {};
 issueLocation.map(c => (secondCategories[c.id] = issueType));
 
 const issueLabel = "Issue State";
-export const IssueState = [
+export const issueState = [
   { id: 101, name: "Open", icon: OpenIcon, label: issueLabel },
   { id: 102, name: "Closed", icon: ClosedIcon, label: issueLabel },
   { id: 103, name: "In Progress", icon: InProgressIcon, label: issueLabel },
@@ -57,7 +56,16 @@ export const IssueState = [
 
 export const thirdCategories: Categories = {};
 
-issueType.map(issueType => (thirdCategories[issueType.id] = IssueState));
+issueType.map(issueType => (thirdCategories[issueType.id] = issueState));
+
+export const allCategories = [
+  ...issueLocation,
+  ...issueType,
+  ...issueState,
+].map(category => ({
+  ...category,
+  label: "Single Category",
+}));
 
 export const allCategoryData: CategoryData = {
   category: issueLocation,

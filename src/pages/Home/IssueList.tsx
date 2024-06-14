@@ -1,4 +1,26 @@
-import { Avatar, Box, Skeleton } from "@mui/material";
+import BlockIcon from "@mui/icons-material/Block";
+import EditIcon from "@mui/icons-material/Edit";
+import { Avatar, Box, Skeleton, useTheme } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import QORTicon from "../../assets/icons/CoinIcons/qort.png";
+import { BountyDisplay } from "../../components/common/BountyDisplay.tsx";
+import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
+import {
+  getIconsFromObject,
+  getnamesFromObject,
+} from "../../constants/Categories/CategoryFunctions.ts";
+import { fontSizeExLarge } from "../../constants/Misc.ts";
+import {
+  blockUser,
+  Issue,
+  setEditFile,
+} from "../../state/features/fileSlice.ts";
+import { RootState } from "../../state/store.ts";
+import { BountyData } from "../../utils/qortalRequests.ts";
+import { formatDate } from "../../utils/time.ts";
 import {
   BlockIconContainer,
   IconsBox,
@@ -9,24 +31,6 @@ import {
   VideoCardTitle,
   VideoUploadDate,
 } from "./IssueList-styles.tsx";
-import EditIcon from "@mui/icons-material/Edit";
-import {
-  blockUser,
-  Issue,
-  setEditFile,
-} from "../../state/features/fileSlice.ts";
-import BlockIcon from "@mui/icons-material/Block";
-import { formatBytes } from "../IssueContent/IssueContent.tsx";
-import { formatDate } from "../../utils/time.ts";
-import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../state/store.ts";
-import { useNavigate } from "react-router-dom";
-import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
-
-import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
-import QORTicon from "../../assets/icons/qort.png";
-import { fontSizeMedium } from "../../constants/Misc.ts";
 
 interface FileListProps {
   issues: Issue[];
@@ -35,7 +39,7 @@ export const IssueList = ({ issues }: FileListProps) => {
   const hashMapIssues = useSelector(
     (state: RootState) => state.file.hashMapFiles
   );
-
+  const theme = useTheme();
   const [showIcons, setShowIcons] = useState(null);
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const dispatch = useDispatch();
@@ -54,7 +58,9 @@ export const IssueList = ({ issues }: FileListProps) => {
       if (response === true) {
         dispatch(blockUser(user));
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const filteredIssues = useMemo(() => {
@@ -71,12 +77,11 @@ export const IssueList = ({ issues }: FileListProps) => {
           issueObj = existingFile;
           hasHash = true;
         }
+        const bountyData: BountyData = {
+          ...issueObj.bountyData,
+          ...issue.bountyData,
+        };
 
-        const issueIcons = getIconsFromObject(issueObj);
-        const fileBytes = issueObj?.files.reduce(
-          (acc, cur) => acc + (cur?.size || 0),
-          0
-        );
         return (
           <Box
             sx={{
@@ -142,24 +147,34 @@ export const IssueList = ({ issues }: FileListProps) => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        width: "200px",
+                        width: "280px",
                       }}
                     >
                       <IssueIcons
-                        iconSources={issueIcons}
+                        issueData={issueObj}
                         style={{ marginRight: "20px" }}
                         showBackupIcon={true}
                       />
                     </div>
-                    <VideoCardTitle
+                    <Box
                       sx={{
-                        width: "150px",
-                        fontSize: fontSizeMedium,
+                        display: "flex",
+                        justifyContent: "left",
+                        alignItems: "center",
+                        width: "250px",
+                        fontSize: fontSizeExLarge,
+                        fontFamily: "Cairo",
+                        letterSpacing: "0.4px",
+                        color: theme.palette.text.primary,
+                        userSelect: "none",
                       }}
                     >
-                      {fileBytes > 0 && formatBytes(fileBytes)}
-                    </VideoCardTitle>
-                    <VideoCardTitle sx={{ fontWeight: "bold", width: "500px" }}>
+                      <BountyDisplay
+                        bountyData={bountyData}
+                        divStyle={{ marginLeft: "20px" }}
+                      />
+                    </Box>
+                    <VideoCardTitle sx={{ fontWeight: "bold", width: "400px" }}>
                       {issueObj.title}
                     </VideoCardTitle>
                   </Box>

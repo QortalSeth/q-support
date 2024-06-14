@@ -1,33 +1,46 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  ActionButton,
-  ActionButtonRow,
-  CustomInputField,
-  ModalBody,
-  NewCrowdfundTitle,
-  StyledButton,
-} from "./PublishIssue-styles.tsx";
-import { Box, Modal, Typography, useTheme } from "@mui/material";
-import RemoveIcon from "@mui/icons-material/Remove";
-import ShortUniqueId from "short-unique-id";
-import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import RemoveIcon from "@mui/icons-material/Remove";
+import {
+  Box,
+  MenuItem,
+  Modal,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-
-import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
-import { RootState } from "../../state/store";
-import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
-import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
-import { TextEditor } from "../common/TextEditor/TextEditor";
-import { extractTextFromHTML } from "../common/TextEditor/utils";
+import { useDispatch, useSelector } from "react-redux";
+import ShortUniqueId from "short-unique-id";
 import { allCategoryData } from "../../constants/Categories/Categories.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import {
   fontSizeLarge,
   fontSizeSmall,
   log,
   titleFormatter,
 } from "../../constants/Misc.ts";
+import {
+  feeAmountBase,
+  feeDisclaimer,
+  supportedCoins,
+} from "../../constants/PublishFees/FeeData.tsx";
+import { CoinType } from "../../constants/PublishFees/FeePricePublish/FeePricePublish.ts";
+import {
+  payPublishFeeQORT,
+  PublishFeeData,
+} from "../../constants/PublishFees/SendFeeFunctions.ts";
+import { ThemeButtonBright } from "../../pages/Home/Home-styles.tsx";
+
+import { setNotification } from "../../state/features/notificationsSlice";
+import { RootState } from "../../state/store";
+import { BountyData, validateBountyInput } from "../../utils/qortalRequests.ts";
+import { objectToBase64 } from "../../utils/toBase64";
+import { isNumber } from "../../utils/utilFunctions.ts";
+import {
+  AutocompleteQappNames,
+  QappNamesRef,
+} from "../common/AutocompleteQappNames.tsx";
 import {
   CategoryList,
   CategoryListRef,
@@ -36,19 +49,17 @@ import {
   ImagePublisher,
   ImagePublisherRef,
 } from "../common/ImagePublisher/ImagePublisher.tsx";
-import { ThemeButtonBright } from "../../pages/Home/Home-styles.tsx";
+import { MultiplePublish } from "../common/MultiplePublish/MultiplePublishAll";
+import { TextEditor } from "../common/TextEditor/TextEditor";
+import { extractTextFromHTML } from "../common/TextEditor/utils";
 import {
-  AutocompleteQappNames,
-  QappNamesRef,
-} from "../common/AutocompleteQappNames.tsx";
-import {
-  feeAmountBase,
-  feeDisclaimer,
-} from "../../constants/PublishFees/FeeData.tsx";
-import {
-  payPublishFeeQORT,
-  PublishFeeData,
-} from "../../constants/PublishFees/SendFeeFunctions.ts";
+  ActionButton,
+  ActionButtonRow,
+  CustomInputField,
+  ModalBody,
+  NewCrowdfundTitle,
+  StyledButton,
+} from "./PublishIssue-styles.tsx";
 
 const uid = new ShortUniqueId();
 const shortuid = new ShortUniqueId({ length: 5 });
@@ -72,10 +83,6 @@ interface VideoFile {
 export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
-  const [QappName, setQappName] = useState<string>("");
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const username = useSelector((state: RootState) => state.auth?.user?.name);
   const userAddress = useSelector(
     (state: RootState) => state.auth?.user?.address
@@ -83,6 +90,12 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
   const QappNames = useSelector(
     (state: RootState) => state.file.publishedQappNames
   );
+
+  const [isOpenMultiplePublish, setIsOpenMultiplePublish] = useState(false);
+  const [QappName, setQappName] = useState<string>("");
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
   const [files, setFiles] = useState<VideoFile[]>([]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -99,6 +112,10 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
 
   const [playlistSetting, setPlaylistSetting] = useState<null | string>(null);
   const [publishes, setPublishes] = useState<any>(null);
+  const [bounty, setBounty] = useState<string>("");
+  const [sourceCode, setSourceCode] = useState<string>("");
+  const [coin, setCoin] = useState<CoinType>("QORT");
+  const [showCoins, setShowCoins] = useState<boolean>(false);
 
   const categoryListRef = useRef<CategoryListRef>(null);
   const imagePublisherRef = useRef<ImagePublisherRef>(null);
@@ -139,17 +156,16 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
     },
   });
 
-  useEffect(() => {
-    if (editContent) {
-    }
-  }, [editContent]);
-
   const onClose = () => {
     setIsOpen(false);
   };
 
-  async function publishQDNResource() {
+  const publishQDNResource = async () => {
     try {
+      if (bounty) {
+        const isValidated = await validateBountyInput(bounty);
+        if (!isValidated) throw new Error("Bounty is not valid");
+      }
       if (!categoryListRef.current) throw new Error("No CategoryListRef found");
       if (!userAddress) throw new Error("Unable to locate user address");
       if (!description) throw new Error("Please enter a description");
@@ -197,9 +213,9 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         .toLowerCase();
       if (!sanitizeTitle) throw new Error("Please enter a title");
 
-      let fileReferences = [];
+      const fileReferences = [];
 
-      let listOfPublishes = [];
+      const listOfPublishes = [];
 
       const fullDescription = extractTextFromHTML(description);
 
@@ -214,17 +230,17 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         if (fileExtensionSplit?.length > 1) {
           fileExtension = fileExtensionSplit?.pop() || "";
         }
-        let firstPartName = fileExtensionSplit[0];
+        const firstPartName = fileExtensionSplit[0];
 
         let filename = firstPartName.slice(0, 15);
 
         // Step 1: Replace all white spaces with underscores
 
         // Replace all forms of whitespace (including non-standard ones) with underscores
-        let stringWithUnderscores = filename.replace(/[\s\uFEFF\xA0]+/g, "_");
+        const stringWithUnderscores = filename.replace(/[\s\uFEFF\xA0]+/g, "_");
 
         // Remove all non-alphanumeric characters (except underscores)
-        let alphanumericString = stringWithUnderscores.replace(
+        const alphanumericString = stringWithUnderscores.replace(
           /[^a-zA-Z0-9_]/g,
           ""
         );
@@ -236,7 +252,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         }
 
         const categoryString = `**${categoryListRef.current?.getSelectedCategories()}**`;
-        let metadescription = categoryString + fullDescription.slice(0, 150);
+        const metadescription = categoryString + fullDescription.slice(0, 150);
 
         const requestBodyFile: any = {
           action: "PUBLISH_QDN_RESOURCE",
@@ -275,6 +291,13 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         senderName: "",
       };
 
+      const isBountyNumber = isNumber(bounty);
+      const bountyData: BountyData = {
+        amount: isBountyNumber ? Number(bounty) : undefined,
+        crowdfundLink: isBountyNumber ? undefined : bounty,
+        coinType: coin,
+        sourceCodeLink: sourceCode,
+      };
       const issueObject: any = {
         title,
         version: 1,
@@ -286,6 +309,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         images: imagePublisherRef?.current?.getImageArray(),
         QappName: selectedQappName,
         feeData,
+        bountyData,
       };
 
       const QappNameString = autocompleteRef?.current?.getQappNameFetchString();
@@ -293,7 +317,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         categoryListRef.current?.getCategoriesFetchString(categoryList);
       const metaDataString = `**${categoryString + QappNameString}**`;
 
-      let metadescription = metaDataString + fullDescription.slice(0, 150);
+      const metadescription = metaDataString + fullDescription.slice(0, 150);
 
       if (log) console.log("description is: ", metadescription);
       if (log) console.log("description length is: ", metadescription.length);
@@ -343,7 +367,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
       if (!notificationObj) return;
       dispatch(setNotification(notificationObj));
     }
-  }
+  };
 
   const isShowQappNameTextField = () => {
     const QappID = "3";
@@ -438,6 +462,11 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
                   }}
                 >
                   <CategoryList
+                    initialCategories={
+                      selectedCategories.length > 0
+                        ? selectedCategories
+                        : undefined
+                    }
                     categoryData={allCategoryData}
                     ref={categoryListRef}
                     columns={3}
@@ -455,11 +484,52 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
                   />
                 </Box>
                 {isShowQappNameTextField() && (
-                  <AutocompleteQappNames
-                    ref={autocompleteRef}
-                    namesList={QappNames}
-                  />
+                  <>
+                    <AutocompleteQappNames
+                      ref={autocompleteRef}
+                      namesList={QappNames}
+                    />
+                  </>
                 )}
+                <CustomInputField
+                  name="q-app-source-code"
+                  label="Link to Source Code"
+                  variant="filled"
+                  value={sourceCode}
+                  onChange={e => setSourceCode(e.target.value.trim())}
+                  inputProps={{ maxLength: 200 }}
+                />
+                <CustomInputField
+                  name="q-fund-link"
+                  label="Bounty Amount or Q-Fund Link"
+                  variant="filled"
+                  value={bounty}
+                  onChange={e => {
+                    const bountyValue = e.target.value.trim();
+                    setBounty(bountyValue);
+                    const bountyIsNumber = isNumber(bountyValue);
+                    setShowCoins(bountyIsNumber);
+                    if (!bountyIsNumber) setCoin("QORT");
+                  }}
+                  inputProps={{ maxLength: 200 }}
+                />
+                <TextField
+                  label={"Select Coin"}
+                  select
+                  fullWidth
+                  value={coin}
+                  onChange={e => setCoin(e.target.value as CoinType)}
+                  sx={{
+                    display: showCoins ? "block" : "none",
+                    width: "20%",
+                  }}
+                >
+                  {supportedCoins.map((coin, index) => (
+                    <MenuItem value={coin} key={coin + index}>
+                      {coin}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <ImagePublisher ref={imagePublisherRef} />
                 <CustomInputField
                   name="title"

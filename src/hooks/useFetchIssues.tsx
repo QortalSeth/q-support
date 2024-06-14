@@ -1,6 +1,12 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  QSUPPORT_FILE_BASE,
+  QSUPPORT_PLAYLIST_BASE,
+} from "../constants/Identifiers.ts";
+import { log } from "../constants/Misc.ts";
+import { verifyAllPayments } from "../constants/PublishFees/VerifyPayment.ts";
+import {
   addFiles,
   addToHashMap,
   Issue,
@@ -19,13 +25,8 @@ import {
 } from "../state/features/globalSlice";
 import { RootState } from "../state/store";
 import { fetchAndEvaluateIssues } from "../utils/fetchVideos";
-import {
-  QSUPPORT_FILE_BASE,
-  QSUPPORT_PLAYLIST_BASE,
-} from "../constants/Identifiers.ts";
+import { getBountyAmounts } from "../utils/qortalRequests.ts";
 import { queue } from "../wrappers/GlobalWrapper";
-import { log } from "../constants/Misc.ts";
-import { verifyAllPayments } from "../constants/PublishFees/VerifyPayment.ts";
 
 export const useFetchIssues = () => {
   const dispatch = useDispatch();
@@ -70,7 +71,7 @@ export const useFetchIssues = () => {
 
   const getAvatar = React.useCallback(async (author: string) => {
     try {
-      let url = await qortalRequest({
+      const url = await qortalRequest({
         action: "GET_QDN_RESOURCE_URL",
         name: author,
         service: "THUMBNAIL",
@@ -83,14 +84,16 @@ export const useFetchIssues = () => {
           url,
         })
       );
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   const getIssue = async (
     user: string,
     issueID: string,
     content: any,
-    retries: number = 0
+    retries = 0
   ) => {
     try {
       const res = await fetchAndEvaluateIssues({
@@ -182,6 +185,7 @@ export const useFetchIssues = () => {
         }
       }
     } catch (error) {
+      console.log(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
@@ -277,11 +281,16 @@ export const useFetchIssues = () => {
         }
 
         const issues = await Promise.all(verifiedIssuePromises);
-        const verifiedIssues = await verifyAllPayments(issues);
+        const [verifiedIssues, bountyIssues] = await Promise.all([
+          verifyAllPayments(issues),
+          getBountyAmounts(issues),
+        ]);
+
         structureData = structureData.map((issue, index) => {
           return {
             ...issue,
             feeData: verifiedIssues[index]?.feeData,
+            bountyData: bountyIssues[index]?.bountyData,
           };
         });
 
@@ -289,7 +298,6 @@ export const useFetchIssues = () => {
         else dispatch(upsertFiles(structureData));
       } catch (error) {
         console.log({ error });
-      } finally {
       }
     },
     [videos, hashMapFiles]
@@ -349,7 +357,7 @@ export const useFetchIssues = () => {
           }
         }
       } catch (error) {
-      } finally {
+        console.log(error);
       }
     },
     [filteredVideos, hashMapFiles]
@@ -389,12 +397,14 @@ export const useFetchIssues = () => {
       const newArray = responseData.slice(0, findVideo);
       dispatch(setCountNewFiles(newArray.length));
       return;
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }, [videos]);
 
   const getIssuesCount = React.useCallback(async () => {
     try {
-      let url = `/arbitrary/resources/search?mode=ALL&includemetadata=false&limit=0&service=DOCUMENT&identifier=${QSUPPORT_FILE_BASE}`;
+      const url = `/arbitrary/resources/search?mode=ALL&includemetadata=false&limit=0&service=DOCUMENT&identifier=${QSUPPORT_FILE_BASE}`;
 
       const response = await fetch(url, {
         method: "GET",
@@ -416,7 +426,6 @@ export const useFetchIssues = () => {
       dispatch(setFilesPerNamePublished(filesPerNamePublished));
     } catch (error) {
       console.log({ error });
-    } finally {
     }
   }, []);
 

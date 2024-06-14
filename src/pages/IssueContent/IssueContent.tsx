@@ -1,11 +1,40 @@
+import DownloadIcon from "@mui/icons-material/Download";
+import { Avatar, Box, Typography, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { setIsLoadingGlobal } from "../../state/features/globalSlice";
-import { Avatar, Box, Typography, useTheme } from "@mui/material";
-import { RootState } from "../../state/store";
+import QORTicon from "../../assets/icons/CoinIcons/qort.png";
+import { BountyDisplay } from "../../components/common/BountyDisplay.tsx";
+import {
+  Category,
+  getCategoriesFromObject,
+} from "../../components/common/CategoryList/CategoryList.tsx";
+import { CommentSection } from "../../components/common/Comments/CommentSection";
+import { Donate } from "../../components/common/Donate/Donate.tsx";
+import FileElement from "../../components/common/FileElement";
+import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
+import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
+import { allCategoryData } from "../../constants/Categories/Categories.ts";
+import {
+  getIconsFromObject,
+  getnamesFromObject,
+} from "../../constants/Categories/CategoryFunctions.ts";
+import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
+import { fontSizeExLarge } from "../../constants/Misc.ts";
+import {
+  appendIsPaidToFeeData,
+  verifyPayment,
+} from "../../constants/PublishFees/VerifyPayment.ts";
 import { addToHashMap } from "../../state/features/fileSlice.ts";
-import DownloadIcon from "@mui/icons-material/Download";
+import { setIsLoadingGlobal } from "../../state/features/globalSlice";
+import { RootState } from "../../state/store";
+import { getAvatarFromName } from "../../utils/qortalRequests.ts";
+import { formatDate } from "../../utils/time";
+import {
+  categoryNamesToString,
+  getCategoryNames,
+  getIconsAndLabels,
+} from "./IssueContent-functions.ts";
 import {
   AuthorTextComment,
   FileAttachmentContainer,
@@ -18,23 +47,6 @@ import {
   StyledCardColComment,
   StyledCardHeaderComment,
 } from "./IssueContent-styles.tsx";
-import { formatDate } from "../../utils/time";
-import { CommentSection } from "../../components/common/Comments/CommentSection";
-import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
-import { DisplayHtml } from "../../components/common/TextEditor/DisplayHtml";
-import FileElement from "../../components/common/FileElement";
-import { allCategoryData } from "../../constants/Categories/Categories.ts";
-import {
-  Category,
-  getCategoriesFromObject,
-} from "../../components/common/CategoryList/CategoryList.tsx";
-import { getIconsFromObject } from "../../constants/Categories/CategoryFunctions.ts";
-import { IssueIcon, IssueIcons } from "../../components/common/IssueIcon.tsx";
-import QORTicon from "../../assets/icons/qort.png";
-import {
-  appendIsPaidToFeeData,
-  verifyPayment,
-} from "../../constants/PublishFees/VerifyPayment.ts";
 
 export function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
@@ -55,7 +67,6 @@ export const IssueContent = () => {
   const [descriptionHeight, setDescriptionHeight] = useState<null | number>(
     null
   );
-  const [issueIcons, setIssueIcons] = useState<string[]>([]);
   const userAvatarHash = useSelector(
     (state: RootState) => state.global.userAvatarHash
   );
@@ -99,7 +110,7 @@ export const IssueContent = () => {
   }, [issueData]);
   const dispatch = useDispatch();
 
-  const getVideoData = React.useCallback(async (name: string, id: string) => {
+  const getIssueData = React.useCallback(async (name: string, id: string) => {
     try {
       if (!name || !id) return;
       dispatch(setIsLoadingGlobal(true));
@@ -142,17 +153,16 @@ export const IssueContent = () => {
           };
 
           verifyPayment(combinedData).then(feeData => {
-            console.log(
-              "async data: ",
-              appendIsPaidToFeeData(combinedData, feeData)
-            );
-            setIssueData(appendIsPaidToFeeData(combinedData, feeData));
+            const dataWithFees = appendIsPaidToFeeData(combinedData, feeData);
+            console.log("dataWithFees: ", dataWithFees);
+            setIssueData(dataWithFees);
             dispatch(addToHashMap(combinedData));
             checkforPlaylist(name, id, combinedData?.code);
           });
         }
       }
     } catch (error) {
+      console.log(error);
     } finally {
       dispatch(setIsLoadingGlobal(false));
     }
@@ -212,7 +222,7 @@ export const IssueContent = () => {
               const responseDataSearchVid = await response.json();
 
               if (responseDataSearchVid?.length > 0) {
-                let resourceData2 = responseDataSearchVid[0];
+                const resourceData2 = responseDataSearchVid[0];
                 videos.push(resourceData2);
               }
             }
@@ -221,10 +231,12 @@ export const IssueContent = () => {
           setPlaylistData(combinedData);
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (name && id) {
       const existingVideo = hashMapVideos[id];
 
@@ -234,41 +246,10 @@ export const IssueContent = () => {
           checkforPlaylist(name, id, existingVideo?.code);
         });
       } else {
-        getVideoData(name, id);
+        getIssueData(name, id);
       }
     }
   }, [id, name]);
-
-  // const getAvatar = React.useCallback(async (author: string) => {
-  //   try {
-  //     let url = await qortalRequest({
-  //       action: 'GET_QDN_RESOURCE_URL',
-  //       name: author,
-  //       service: 'THUMBNAIL',
-  //       identifier: 'qortal_avatar'
-  //     })
-
-  //     setAvatarUrl(url)
-  //     dispatch(setUserAvatarHash({
-  //       name: author,
-  //       url
-  //     }))
-  //   } catch (error) { }
-  // }, [])
-
-  // React.useEffect(() => {
-  //   if (name && !avatarUrl) {
-  //     const existingAvatar = userAvatarHash[name]
-
-  //     if (existingAvatar) {
-  //       setAvatarUrl(existingAvatar)
-  //     } else {
-  //       getAvatar(name)
-  //     }
-
-  //   }
-
-  // }, [name, userAvatarHash])
 
   useEffect(() => {
     if (contentRef.current) {
@@ -279,49 +260,14 @@ export const IssueContent = () => {
         setDescriptionHeight(maxDescriptionHeight);
       }
     }
-    if (issueData) {
-      const icons = getIconsFromObject(issueData);
-      setIssueIcons(icons);
-    }
   }, [issueData]);
 
   const categoriesDisplay = useMemo(() => {
     if (issueData) {
-      const categoryList = getCategoriesFromObject(issueData);
-      const categoryNames = categoryList.map((categoryID, index) => {
-        let categoryName: Category;
-        if (index === 0) {
-          categoryName = allCategoryData.category.find(
-            item => item?.id === +categoryList[0]
-          );
-        } else {
-          const subCategories = allCategoryData.subCategories[index - 1];
-          const selectedSubCategory = subCategories[categoryList[index - 1]];
-          if (selectedSubCategory) {
-            categoryName = selectedSubCategory.find(
-              item => item?.id === +categoryList[index]
-            );
-          }
-        }
-        return categoryName?.name;
-      });
-      const filteredCategoryNames = categoryNames.filter(name => name);
-      let categoryDisplay = "";
-      const separator = " > ";
-      const QappName = issueData?.QappName || "";
-
-      filteredCategoryNames.map((name, index) => {
-        if (QappName && index === 1) {
-          categoryDisplay += QappName + separator;
-        }
-        categoryDisplay += name;
-
-        if (index !== filteredCategoryNames.length - 1)
-          categoryDisplay += separator;
-      });
-      return categoryDisplay;
+      const categoryNames = getCategoryNames(issueData);
+      return categoryNamesToString(categoryNames, issueData?.QappName);
     }
-    return "no videodata";
+    return "No Issue Data";
   }, [issueData]);
 
   return (
@@ -347,10 +293,12 @@ export const IssueContent = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            <IssueIcons
-              iconSources={issueIcons}
-              style={{ marginRight: "20px" }}
-            />
+            {issueData && (
+              <IssueIcons
+                issueData={issueData}
+                style={{ marginRight: "20px" }}
+              />
+            )}
           </div>
           <FileTitle
             variant="h1"
@@ -367,9 +315,9 @@ export const IssueContent = () => {
         </div>
         {issueData?.created && (
           <Typography
-            variant="h6"
+            variant="h4"
             sx={{
-              fontSize: "12px",
+              fontSize: "18px",
             }}
             color={theme.palette.text.primary}
           >
@@ -413,11 +361,33 @@ export const IssueContent = () => {
           </StyledCardHeaderComment>
         </Box>
         <Spacer height="15px" />
+        <Box sx={{ display: "flex", direction: "row", alignItems: "center" }}>
+          {issueData?.bountyData && (
+            <div style={{ fontWeight: "bold" }}>
+              <BountyDisplay
+                bountyData={issueData?.bountyData}
+                timeDisplay={"BOTH"}
+                fontStyle={{ fontSize: fontSizeExLarge, fontWeight: "bold" }}
+              />
+              {(issueData?.bountyData?.sourceCodeLink ||
+                issueData?.bountyData?.crowdfundLink) && (
+                <>
+                  <div>Relevant Links:</div>
+                  <div style={{ fontWeight: "bold" }}>
+                    <div>{issueData?.bountyData?.crowdfundLink}</div>
+                    <div>{issueData?.bountyData?.sourceCodeLink}</div>
+                  </div>
+                </>
+              )}
+              <Donate crowdfundLink={issueData?.bountyData?.crowdfundLink} />
+            </div>
+          )}
+        </Box>
+        <Spacer height="15px" />
         <Box>
           <Typography
             sx={{
               fontWeight: "bold",
-              fontSize: "16px",
               userSelect: "none",
             }}
           >

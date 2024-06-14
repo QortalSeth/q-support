@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import notificationsReducer from "./features/notificationsSlice";
-import authReducer from "./features/authSlice";
-import globalReducer from "./features/globalSlice";
+import authReducer from "./features/authSlice.js";
 import fileReducer from "./features/fileSlice.ts";
+import globalReducer from "./features/globalSlice.js";
+import notificationsReducer from "./features/notificationsSlice.js";
 
 export const store = configureStore({
   reducer: {
