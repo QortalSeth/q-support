@@ -173,10 +173,11 @@ export const EditIssue = () => {
       setShowCoins(
         isNumber(editIssueProperties?.bountyData?.amount || undefined)
       );
+
       if (editIssueProperties?.bountyData?.coinType)
         setCoin(editIssueProperties?.bountyData?.coinType);
       if (editIssueProperties?.bountyData?.sourceCodeLink)
-        setCoin(editIssueProperties?.bountyData?.sourceCodeLink);
+        setSourceCode(editIssueProperties?.bountyData?.sourceCodeLink);
     }
   }, [editIssueProperties]);
 
