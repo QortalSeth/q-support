@@ -32,7 +32,7 @@ import {
 import { setNotification } from "../../state/features/notificationsSlice.ts";
 import { RootState } from "../../state/store.ts";
 import { BountyData, validateBountyInput } from "../../utils/qortalRequests.ts";
-import { objectToBase64 } from "../../utils/toBase64.js";
+import { objectToBase64, objectToFile } from "../../utils/PublishFormatter.ts";
 import { isNumber } from "../../utils/utilFunctions.ts";
 import {
   AutocompleteQappNames,
@@ -360,13 +360,12 @@ export const EditIssue = () => {
       if (log)
         console.log("% of characters used:", metadescription.length / 240);
 
-      const fileObjectToBase64 = await objectToBase64(issueObject);
       // Description is obtained from raw data
       const requestBodyJson: any = {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
-        data64: fileObjectToBase64,
+        file: objectToFile(issueObject),
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editIssueProperties.id,
