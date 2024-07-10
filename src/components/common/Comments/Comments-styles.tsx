@@ -93,8 +93,9 @@ export const StyledCardComment = styled(Typography)(({ theme }) => ({
   letterSpacing: 0,
   fontWeight: 400,
   color: theme.palette.text.primary,
-  fontSize: "19px",
+  fontSize: "100%",
   wordBreak: "break-word",
+  whiteSpace: "pre-wrap",
 }));
 
 export const TitleText = styled(Typography)({

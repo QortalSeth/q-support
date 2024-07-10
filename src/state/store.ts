@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./features/authSlice.js";
 import fileReducer from "./features/fileSlice.ts";

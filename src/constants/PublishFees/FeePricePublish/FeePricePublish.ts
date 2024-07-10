@@ -1,6 +1,9 @@
 import { setFeeData } from "../../../state/features/globalSlice.ts";
 import { store } from "../../../state/store.js";
-import { objectToBase64 } from "../../../utils/toBase64.ts";
+import {
+  objectToBase64,
+  objectToFile,
+} from "../../../utils/PublishFormatter.ts";
 import { useTestIdentifiers } from "../../Identifiers.ts";
 import { appName, FEE_BASE, feeAmountBase, FeeType } from "../FeeData.tsx";
 
@@ -50,7 +53,7 @@ export const addFeePrice = async (
   feeType: FeeType = "default",
   coinType: CoinType = "QORT"
 ) => {
-  let fees = await fetchFees();
+  const fees = await fetchFees();
 
   fees.push({
     time: Date.now(),
@@ -59,14 +62,13 @@ export const addFeePrice = async (
     coinType,
   });
 
-  const feesBase64 = await objectToBase64(fees);
   console.log("fees are: ", fees);
   await qortalRequest({
     action: "PUBLISH_QDN_RESOURCE",
     name: appName,
     identifier: FEE_BASE,
     service: feesPublishService,
-    data64: feesBase64,
+    file: objectToFile(fees),
   });
 };
 

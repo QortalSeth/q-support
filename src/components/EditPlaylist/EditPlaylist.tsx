@@ -27,7 +27,7 @@ import ShortUniqueId from "short-unique-id";
 import { useDispatch, useSelector } from "react-redux";
 
 import { setNotification } from "../../state/features/notificationsSlice";
-import { objectToBase64 } from "../../utils/toBase64";
+import { objectToBase64, objectToFile } from "../../utils/PublishFormatter.ts";
 import { RootState } from "../../state/store";
 import {
   setEditPlaylist,
@@ -159,14 +159,16 @@ export const EditPlaylist = () => {
           const responseDataSearchVid = await response.json();
 
           if (responseDataSearchVid?.length > 0) {
-            let resourceData2 = responseDataSearchVid[0];
+            const resourceData2 = responseDataSearchVid[0];
             videos.push(resourceData2);
           }
         }
       }
       combinedData.videos = videos;
       setPlaylistData(combinedData);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   useEffect(() => {
@@ -266,13 +268,13 @@ export const EditPlaylist = () => {
         if (!descriptionVid) throw new Error("cannot find video code");
 
         // Split the string by ';'
-        let parts = descriptionVid.split(";");
+        const parts = descriptionVid.split(";");
 
         // Initialize a variable to hold the code value
         let codeValue = "";
 
         // Loop through the parts to find the one that starts with 'code:'
-        for (let part of parts) {
+        for (const part of parts) {
           if (part.startsWith("code:")) {
             codeValue = part.split(":")[1];
             break;
@@ -309,11 +311,10 @@ export const EditPlaylist = () => {
       };
 
       const codes = videoStructured.map(item => `c:${item.code};`).join("");
-      let metadescription =
+      const metadescription =
         `**category:${category};subcategory:${subcategory};${codes}**` +
         stringDescription.slice(0, 120);
 
-      const crowdfundObjectToBase64 = await objectToBase64(playlistObject);
       // Description is obtained from raw data
 
       let identifier = editVideoProperties?.id;
@@ -325,7 +326,7 @@ export const EditPlaylist = () => {
         action: "PUBLISH_QDN_RESOURCE",
         name: username,
         service: "PLAYLIST",
-        data64: crowdfundObjectToBase64,
+        file: objectToFile(playlistObject),
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier,
