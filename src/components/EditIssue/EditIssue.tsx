@@ -15,10 +15,7 @@ import ShortUniqueId from "short-unique-id";
 import { allCategoryData } from "../../constants/Categories/Categories.ts";
 import { QSUPPORT_FILE_BASE } from "../../constants/Identifiers.ts";
 import { log, titleFormatter } from "../../constants/Misc.ts";
-import {
-  feeAmountBase,
-  supportedCoins,
-} from "../../constants/PublishFees/FeeData.tsx";
+import { supportedCoins } from "../../constants/PublishFees/FeeData.tsx";
 import { CoinType } from "../../constants/PublishFees/FeePricePublish/FeePricePublish.ts";
 import { payPublishFeeQORT } from "../../constants/PublishFees/SendFeeFunctions.ts";
 import { verifyPayment } from "../../constants/PublishFees/VerifyPayment.ts";
@@ -332,7 +329,7 @@ export const EditIssue = () => {
         bountyData,
       };
       if (payFee) {
-        const publishFeeResponse = await payPublishFeeQORT(feeAmountBase);
+        const publishFeeResponse = await payPublishFeeQORT("default", "QORT");
         if (!publishFeeResponse) {
           dispatch(
             setNotification({
@@ -365,7 +362,7 @@ export const EditIssue = () => {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
-        file: objectToFile(issueObject),
+        data64: await objectToBase64(issueObject),
         title: title.slice(0, 50),
         description: metadescription,
         identifier: editIssueProperties.id,

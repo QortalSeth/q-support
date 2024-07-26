@@ -10,19 +10,20 @@ import React, { useRef, useState } from "react";
 
 type eventType = React.ChangeEvent<HTMLInputElement>;
 type BoundedNumericTextFieldProps = {
-  minValue: number;
-  maxValue: number;
+  minValue?: number;
+  maxValue?: number;
   addIconButtons?: boolean;
   allowDecimals?: boolean;
   allowNegatives?: boolean;
   onChange?: (s: string) => void;
+  onBlur?: (s: string) => void;
   initialValue?: string;
   maxSigDigits?: number;
 } & TextFieldProps;
 
 export const BoundedNumericTextField = ({
-  minValue,
-  maxValue,
+  minValue = 0,
+  maxValue = Number.MAX_VALUE,
   addIconButtons = true,
   allowDecimals = true,
   allowNegatives = false,
@@ -30,6 +31,8 @@ export const BoundedNumericTextField = ({
   maxSigDigits = 6,
   ...props
 }: BoundedNumericTextFieldProps) => {
+  const { onChange, onBlur, ...noChangeProps } = { ...props };
+
   const [textFieldValue, setTextFieldValue] = useState<string>(
     initialValue || ""
   );
@@ -108,6 +111,7 @@ export const BoundedNumericTextField = ({
     let value = e.target.value;
     if (stringIsEmpty(value) || value === ".") {
       setTextFieldValue("");
+      if (onBlur) onBlur("");
       return;
     }
 
@@ -116,9 +120,9 @@ export const BoundedNumericTextField = ({
     if (isAllZerosNum.test(value)) value = minValue.toString();
 
     setTextFieldValue(value);
+    if (onBlur) onBlur(value);
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { onChange, ...noChangeProps } = { ...props };
+
   return (
     <TextField
       {...noChangeProps}

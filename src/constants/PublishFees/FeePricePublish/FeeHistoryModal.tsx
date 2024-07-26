@@ -4,21 +4,19 @@ import { appName } from "../FeeData.tsx";
 import { ModalBody } from "./FeePricePublish-styles.tsx";
 import { useEffect, useState } from "react";
 import { userHasName } from "../VerifyPayment-Functions.ts";
-import { FeeHistoryTable } from "./FeeHistoryTable.tsx";
+import { FeeHistoryModalBody } from "./FeeHistoryModalBody.tsx";
 
 export const FeeHistoryModal = () => {
   const [open, setOpen] = useState<boolean>(false);
-  const [userOwnsApp, setUserOwnsApp] = useState<boolean>(false);
+
   const theme = useTheme();
-  useEffect(() => {
-    userHasName(appName).then(userHasName => setUserOwnsApp(userHasName));
-  }, []);
 
   const buttonSX = {
     fontSize: "20px",
     color: theme.palette.secondary.main,
     fontWeight: "bold",
   };
+
   if (theme.palette.mode === "light")
     buttonSX["&:hover"] = { backgroundColor: theme.palette.primary.dark };
 
@@ -37,7 +35,7 @@ export const FeeHistoryModal = () => {
         onClose={() => setOpen(false)}
       >
         <ModalBody sx={{ width: "75vw", maxWidth: "75vw" }}>
-          <FeeHistoryTable />
+          <FeeHistoryModalBody />
           <Button sx={buttonSX} onClick={() => setOpen(false)}>
             Close
           </Button>

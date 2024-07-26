@@ -45,7 +45,7 @@ const verifySignature = async (feeData: PublishFeeData) => {
   });
 
   const signatureTime = signatureData.timestamp;
-  let doesTimeMatch: boolean = false;
+  let doesTimeMatch = false;
   if (!updatedTimestamp) {
     const timeDiff = createdTimestamp - signatureTime;
     const timeDiffMinutes = Math.abs(timeDiff) / 1000 / 60;
