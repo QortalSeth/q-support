@@ -1,5 +1,8 @@
 import { feeDestinationName, FeeType } from "./FeeData.tsx";
-import { CoinType } from "./FeePricePublish/FeePricePublish.ts";
+import {
+  CoinType,
+  fetchCurrentPriceData,
+} from "./FeePricePublish/FeePricePublish.ts";
 
 export interface NameData {
   name: string;
@@ -58,7 +61,7 @@ export const sendQORTtoName = async (name: string, amount: number) => {
 
 export interface PublishFeeData {
   signature: string;
-  senderName: string;
+  senderName?: string;
   createdTimestamp?: number; //timestamp of the metadata publish, NOT the send feeAmount publish, added after publish is fetched
   updatedTimestamp?: number;
   feeType?: FeeType;
@@ -73,7 +76,11 @@ export interface CommentObject {
   feeData: PublishFeeData;
 }
 
-export const payPublishFeeQORT = async (feeAmount: number) => {
-  const publish = await sendQORTtoName(feeDestinationName, feeAmount);
+export const payPublishFeeQORT = async (
+  feeType: FeeType = "default",
+  coinType: CoinType = "QORT"
+) => {
+  const feeData = await fetchCurrentPriceData(feeType, coinType);
+  const publish = await sendQORTtoName(feeDestinationName, feeData.feeAmount);
   return publish?.signature;
 };

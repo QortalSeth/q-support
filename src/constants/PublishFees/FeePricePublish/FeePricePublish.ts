@@ -1,11 +1,7 @@
 import { setFeeData } from "../../../state/features/globalSlice.ts";
 import { store } from "../../../state/store.js";
-import {
-  objectToBase64,
-  objectToFile,
-} from "../../../utils/PublishFormatter.ts";
-import { useTestIdentifiers } from "../../Identifiers.ts";
-import { appName, FEE_BASE, feeAmountBase, FeeType } from "../FeeData.tsx";
+import { objectToFile } from "../../../utils/PublishFormatter.ts";
+import { appName, FEE_BASE, FeeType } from "../FeeData.tsx";
 
 export type CoinType = "QORT" | "BTC" | "LTC" | "DOGE" | "DGB" | "RVN" | "ARRR";
 
@@ -16,7 +12,7 @@ export interface FeePrice {
   coinType: CoinType;
 }
 
-const feesPublishService = "DOCUMENT";
+export const feesPublishService = "DOCUMENT";
 
 export const fetchFees = async () => {
   const feeData = store.getState().global.feeData;
@@ -48,45 +44,39 @@ export const fetchFeesRedux = () => {
   fetchFees().then(feeData => store.dispatch(setFeeData(feeData)));
 };
 
-export const addFeePrice = async (
-  feeAmount = feeAmountBase,
+export const fetchCurrentPriceData = async (
   feeType: FeeType = "default",
   coinType: CoinType = "QORT"
 ) => {
   const fees = await fetchFees();
+  if (fees?.length === 0 || !fees) return undefined;
 
-  fees.push({
-    time: Date.now(),
-    feeAmount,
-    feeType,
-    coinType,
-  });
+  const filteredFees = fees.filter(
+    price => price.feeType === feeType && price.coinType === coinType
+  );
 
-  console.log("fees are: ", fees);
-  await qortalRequest({
-    action: "PUBLISH_QDN_RESOURCE",
-    name: appName,
-    identifier: FEE_BASE,
-    service: feesPublishService,
-    file: objectToFile(fees),
-  });
+  return filteredFees.at(-1) as FeePrice;
 };
 
 const feeFilter = (fee: FeePrice, feeToVerify: FeePrice) => {
   const nameCheck = fee.feeType === feeToVerify.feeType;
   const coinTypeCheck = fee.coinType === feeToVerify.coinType;
-  const timeCheck = feeToVerify.time <= feeToVerify.time;
+  const timeCheck = fee.time <= feeToVerify.time;
+  const filter = nameCheck && coinTypeCheck && timeCheck;
 
-  return nameCheck && coinTypeCheck && timeCheck;
+  return filter;
 };
 
 export const verifyFeeAmount = async (feeToVerify: FeePrice) => {
-  if (useTestIdentifiers) return true;
-
   const fees = await fetchFees();
   const filteredFees = fees.filter(fee => feeFilter(fee, feeToVerify));
-  if (filteredFees.length === 0) return false;
+  if (filteredFees.length === 0) {
+    console.log("no filtered fees");
+    return false;
+  }
+  // gets fee that applies at the time of feeToVerify
+  const feeToCheck = filteredFees.at(-1);
+  const isFeeAmountValid = feeToVerify.feeAmount >= feeToCheck.feeAmount;
 
-  const feeToCheck = filteredFees[filteredFees.length - 1]; // gets fee that applies at the time of feeToVerify
-  return feeToVerify.feeAmount >= feeToCheck.feeAmount;
+  return isFeeAmountValid;
 };

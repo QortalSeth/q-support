@@ -8,46 +8,51 @@ import {
 } from "@mui/material";
 import React from "react";
 import { SxProps } from "@mui/material/styles";
+import { FeePrice } from "./FeePricePublish.ts";
 
 export interface DataTableProps {
   columnNames: string[];
-  data: string[][];
+  data: FeePrice[];
   sx?: SxProps;
 }
+
 export const DataTable = ({ columnNames, data, sx }: DataTableProps) => {
+  const boldSX = {
+    fontSize: "30px",
+    textAlign: "center",
+    fontWeight: "bold",
+  };
+  const cellSX = {
+    fontSize: "25px",
+    fontWeight: "normal",
+    textAlign: "center",
+  };
+
+  const formatCell = (s: string, index: number) => {
+    if (index === 0) return new Date(s).toDateString();
+    else return s;
+  };
   return (
     <TableContainer sx={{ ...sx }}>
       <Table align="center" stickyHeader>
         <TableHead>
           <TableRow>
             {columnNames.map((columnName, index) => (
-              <TableCell
-                sx={{
-                  fontSize: "30px",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-                key={columnName + index}
-              >
+              <TableCell sx={boldSX} key={columnName + index}>
                 {columnName}
               </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((tableRow, index) => {
+          {data.map((tableRow, rowIndex) => {
             return (
-              <TableRow key={tableRow.toString() + index}>
-                {tableRow.map((tableCell, index) => (
-                  <TableCell
-                    sx={{
-                      fontSize: index === 0 ? "30px" : "25px",
-                      fontWeight: index === 0 ? "bold" : "normal",
-                      textAlign: "center",
-                    }}
-                    key={tableCell + index}
-                  >
-                    {tableCell}
+              <TableRow key={tableRow.toString() + rowIndex}>
+                {<TableCell sx={boldSX}>{rowIndex + 1}</TableCell>}
+
+                {Object.values(tableRow).map((tableCell, cellIndex) => (
+                  <TableCell sx={cellSX} key={tableCell + cellIndex}>
+                    {formatCell(tableCell, cellIndex)}
                   </TableCell>
                 ))}
               </TableRow>

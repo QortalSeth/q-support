@@ -76,7 +76,7 @@ export const getCrowdfund = async (crowdfundLink: string) => {
   const splitLink = crowdfundLink.split("/");
   const name = splitLink[5];
   const identifier = splitLink[6];
-  console.log("fetching crowdfund");
+
   return await qortalRequest({
     action: "FETCH_QDN_RESOURCE",
     service: "DOCUMENT",

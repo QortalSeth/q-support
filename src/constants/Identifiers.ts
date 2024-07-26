@@ -11,3 +11,5 @@ export const QSUPPORT_PLAYLIST_BASE = useTestIdentifiers
 export const QSUPPORT_COMMENT_BASE = useTestIdentifiers
   ? "qcomment_v1_MYTEST_support_"
   : "qcomment_v1_q_support_";
+
+// have fee payment as checkbox

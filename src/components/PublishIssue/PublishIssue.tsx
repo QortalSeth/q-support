@@ -21,8 +21,9 @@ import {
   titleFormatter,
 } from "../../constants/Misc.ts";
 import {
-  feeAmountBase,
-  feeDisclaimer,
+  appName,
+  feeDataDefault,
+  feePriceToString,
   supportedCoins,
 } from "../../constants/PublishFees/FeeData.tsx";
 import { CoinType } from "../../constants/PublishFees/FeePricePublish/FeePricePublish.ts";
@@ -36,6 +37,7 @@ import { setNotification } from "../../state/features/notificationsSlice";
 import { RootState } from "../../state/store";
 import { BountyData, validateBountyInput } from "../../utils/qortalRequests.ts";
 import { objectToBase64, objectToFile } from "../../utils/PublishFormatter.ts";
+import { StateCheckBox } from "../../utils/StateCheckBox.tsx";
 import { isNumber } from "../../utils/utilFunctions.ts";
 import {
   AutocompleteQappNames,
@@ -116,7 +118,7 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
   const [sourceCode, setSourceCode] = useState<string>("");
   const [coin, setCoin] = useState<CoinType>("QORT");
   const [showCoins, setShowCoins] = useState<boolean>(false);
-
+  const [payFee, setPayFee] = useState<boolean>(true);
   const categoryListRef = useRef<CategoryListRef>(null);
   const imagePublisherRef = useRef<ImagePublisherRef>(null);
   const autocompleteRef = useRef<QappNamesRef>(null);
@@ -283,12 +285,14 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
 
       const selectedQappName = autocompleteRef?.current?.getSelectedValue();
 
-      const publishFeeResponse = await payPublishFeeQORT(feeAmountBase);
-      if (log) console.log("feeResponse: ", publishFeeResponse);
+      let publishFeeResponse = undefined;
 
-      const feeData: PublishFeeData = {
+      if (payFee) {
+        publishFeeResponse = await payPublishFeeQORT("default", "QORT");
+        if (log) console.log("feeResponse: ", publishFeeResponse);
+      }
+      const feeData = {
         signature: publishFeeResponse,
-        senderName: "",
       };
 
       const isBountyNumber = isNumber(bounty);
@@ -311,7 +315,6 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         feeData,
         bountyData,
       };
-
       const QappNameString = autocompleteRef?.current?.getQappNameFetchString();
       const categoryString =
         categoryListRef.current?.getCategoriesFetchString(categoryList);
@@ -330,13 +333,15 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
         action: "PUBLISH_QDN_RESOURCE",
         name: name,
         service: "DOCUMENT",
-        file: objectToFile(issueObject),
+        data64: await objectToBase64(issueObject),
         title: title.slice(0, 50),
         description: metadescription,
         identifier: identifier + "_metadata",
         tag1: QSUPPORT_FILE_BASE,
         filename: `video_metadata.json`,
       };
+      console.log("issue object: ", issueObject);
+      console.log("request body: ", requestBodyJson);
       listOfPublishes.push(requestBodyJson);
 
       const multiplePublish = {
@@ -559,6 +564,11 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
               </>
             </>
           )}
+          <StateCheckBox
+            label={`I agree to pay a fee of ${feePriceToString(feeDataDefault)} for further development of ${appName}`}
+            defaultChecked
+            onChange={b => setPayFee(b)}
+          />
           <ActionButtonRow>
             <ActionButton
               onClick={() => {
@@ -593,7 +603,6 @@ export const PublishIssue = ({ editId, editContent }: NewCrowdfundProps) => {
               </ThemeButtonBright>
             </Box>
           </ActionButtonRow>
-          {feeDisclaimer}
         </ModalBody>
       </Modal>
 

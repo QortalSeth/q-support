@@ -28,3 +28,12 @@ export const isNumber = (input: string) => {
 export const truncateNumber = (value: string | number, sigDigits: number) => {
   return Number(value).toFixed(sigDigits);
 };
+export const objectIndexToKey = (obj: object, index: number) => {
+  const keys = Object.keys(obj);
+
+  if (index < 0 || index >= keys.length) {
+    throw new Error(`Invalid index: ${index}`);
+  }
+  const key = keys[index];
+  return key;
+};
