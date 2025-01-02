@@ -87,14 +87,14 @@ export const ChannelCard = styled(Grid)(({ theme }) => ({
 
 export const ThemeButton = styled(Button)(({ theme }) => ({
   color: theme.palette.text.primary,
-  backgroundColor: "#01a9e9",
+  backgroundColor: "#008FCD",
   fontSize: "18px",
-  "&:hover": { backgroundColor: "#008fcd" },
+  "&:hover": { backgroundColor: "#0075B1" },
 }));
 
 export const ThemeButtonBright = styled(Button)(({ theme }) => ({
   color: theme.palette.text.primary,
-  backgroundColor: "#44c4ff",
+  backgroundColor: "#01A9E9",
   fontSize: fontSizeSmall,
-  "&:hover": { backgroundColor: "#01a9e9" },
+  "&:hover": { backgroundColor: "#005C96" },
 }));
