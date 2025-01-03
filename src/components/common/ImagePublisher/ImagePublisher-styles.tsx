@@ -12,8 +12,8 @@ export const AddCoverImageButton = styled(Button)(({ theme }) => ({
   letterSpacing: "0.2px",
   color: theme.palette.text.primary,
   width: "170px",
-  backgroundColor: "#44c4ff",
-  "&:hover": { backgroundColor: "#01a9e9" },
+  backgroundColor: "#01A9E9",
+  "&:hover": { backgroundColor: "#005C96" },
   gap: "5px",
 }));
 

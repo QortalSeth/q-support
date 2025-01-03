@@ -3,6 +3,8 @@
   src: url("./styles/fonts/Cambon-Light.ttf") format("truetype");
 }
 
+a:link { color: #8AB4F8}
+
 @font-face {
   font-family: 'Merriweather Sans';
   src: url("./styles/fonts/Merriweather Sans.ttf") format("truetype");
