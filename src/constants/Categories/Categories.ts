@@ -19,11 +19,50 @@ import { getAllCategoriesWithIcons } from "./CategoryFunctions.ts";
 
 const issueLocationLabel = "Issue Location";
 export const issueLocation: Category[] = [
-  { id: 1, name: "Core", icon: CoreIcon, label: issueLocationLabel },
-  { id: 2, name: "UI", icon: UIicon, label: issueLocationLabel },
-  { id: 3, name: "Q-Apps/Websites", icon: QappIcon, label: issueLocationLabel },
-  { id: 99, name: "Other", icon: UnknownIcon, label: issueLocationLabel },
-];
+  { id: 1, sortID: 1, name: "Core", icon: CoreIcon, label: issueLocationLabel },
+  {
+    id: 2,
+    sortID: 2,
+    name: "Legacy UI",
+    icon: UIicon,
+    label: issueLocationLabel,
+  },
+  {
+    id: 3,
+    sortID: 6,
+    name: "Q-Apps/Websites",
+    icon: QappIcon,
+    label: issueLocationLabel,
+  },
+  {
+    id: 4,
+    sortID: 4,
+    name: "Qortal Hub",
+    icon: UIicon,
+    label: issueLocationLabel,
+  },
+  {
+    id: 5,
+    sortID: 3,
+    name: "Qortal Extension",
+    icon: UIicon,
+    label: issueLocationLabel,
+  },
+  {
+    id: 6,
+    sortID: 5,
+    name: "Qortal Go",
+    icon: UIicon,
+    label: issueLocationLabel,
+  },
+  {
+    id: 99,
+    sortID: 99,
+    name: "Other",
+    icon: UnknownIcon,
+    label: issueLocationLabel,
+  },
+].sort((a, b) => a.sortID - b.sortID);
 
 const issueTypeLabel = "Issue Type";
 export const issueType = [
