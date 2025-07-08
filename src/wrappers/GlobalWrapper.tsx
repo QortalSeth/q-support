@@ -75,17 +75,10 @@ const GlobalWrapper: React.FC<Props> = ({ children, setTheme }) => {
   const { isLoadingGlobal } = useSelector((state: RootState) => state.global);
 
   async function getNameInfo(address: string) {
-    const response = await qortalRequest({
-      action: "GET_ACCOUNT_NAMES",
+    return await qortalRequest({
+      action: "GET_PRIMARY_NAME",
       address: address,
     });
-    const nameData = response;
-
-    if (nameData?.length > 0) {
-      return nameData[0].name;
-    } else {
-      return "";
-    }
   }
 
   const askForAccountInformation = React.useCallback(async () => {
