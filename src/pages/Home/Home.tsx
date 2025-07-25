@@ -1,4 +1,4 @@
-import { Box, Grid, Input, useTheme } from "@mui/material";
+import { Box, Grid, Input, Select, MenuItem, useTheme } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,6 +42,7 @@ export const Home = ({ mode }: HomeProps) => {
   const isFiltering = useSelector((state: RootState) => state.file.isFiltering);
   const filterValue = useSelector((state: RootState) => state.file.filterValue);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [sortOption, setSortOption] = useState<string>("Newest");
   const filterType = useSelector((state: RootState) => state.file.filterType);
 
   const setFilterType = payload => {
@@ -187,6 +188,7 @@ export const Home = ({ mode }: HomeProps) => {
     setFilterType("videos");
     setFilterSearch("");
     setFilterName("");
+    setSortOption("Newest");
     categoryListRef.current?.clearCategories();
     categorySelectRef.current?.clearCategory();
     autocompleteRef.current?.setSelectedValue(null);
@@ -296,6 +298,19 @@ export const Home = ({ mode }: HomeProps) => {
             />
           )}
 
+          <Box sx={{ marginTop: "20px" }}>
+            <Select
+              value={sortOption}
+              onChange={e => setSortOption(e.target.value as string)}
+              sx={{ width: "100%" }}
+            >
+              <MenuItem value="Newest">Sort by Newest</MenuItem>
+              <MenuItem value="Oldest">Sort by Oldest</MenuItem>
+              <MenuItem value="User">Sort by User</MenuItem>
+              <MenuItem value="Bounty">Sort by Bounty</MenuItem>
+            </Select>
+          </Box>
+
           <ThemeButton
             onClick={() => {
               filtersToDefault();
@@ -340,7 +355,7 @@ export const Home = ({ mode }: HomeProps) => {
               maxWidth: "1400px",
             }}
           ></SubtitleContainer>
-          <IssueList issues={issues} />
+          <IssueList issues={issues} sortOption={sortOption} />
           <LazyLoad
             onLoadMore={getIssuesHandler}
             isLoading={isLoading}

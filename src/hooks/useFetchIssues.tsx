@@ -210,7 +210,7 @@ export const useFetchIssues = () => {
         if (reset) {
           offset = 0;
         }
-        const videoLimit = limit || 50;
+        const videoLimit = limit || 0;
         let defaultUrl = `/arbitrary/resources/search?mode=ALL&includemetadata=false&reverse=true&excludeblocked=true&exactmatchnames=true&offset=${offset}&limit=${videoLimit}`;
 
         if (name) {

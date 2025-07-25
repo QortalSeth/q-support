@@ -34,8 +34,9 @@ import {
 
 interface FileListProps {
   issues: Issue[];
+  sortOption: string;
 }
-export const IssueList = ({ issues }: FileListProps) => {
+export const IssueList = ({ issues, sortOption }: FileListProps) => {
   const hashMapIssues = useSelector(
     (state: RootState) => state.file.hashMapFiles
   );
@@ -67,10 +68,43 @@ export const IssueList = ({ issues }: FileListProps) => {
     return issues.filter((issue: any) => hashMapIssues[issue.id]?.isValid);
   }, [issues, hashMapIssues]);
 
+  const ts = (value: number | string | undefined): number => {
+    if (value == null) return 0;
+    return typeof value === "number"
+      ? value
+      : Date.parse(value);
+  };
+
+  const sortedIssues = useMemo(() => {
+    const sorted = [...filteredIssues];
+    switch (sortOption) {
+      case "Oldest":
+        sorted.sort((a, b) => ts(a.created) - ts(b.created));
+        break;
+      case "User":
+        sorted.sort((a, b) => (a.user || "").localeCompare(b.user || "", undefined, { sensitivity: "base" }));
+        break;
+      case "Bounty":
+        sorted.sort((a, b) => {
+          const bountyA = Number(a.bountyData?.amount) || 0;
+          const bountyB = Number(b.bountyData?.amount) || 0;
+          if (bountyA === bountyB) {
+            return ts(b.created) - ts(a.created);
+          }
+          return bountyB - bountyA;
+        });
+        break;
+      case "Newest":
+      default:
+        sorted.sort((a, b) => ts(b.created) - ts(a.created));
+    }
+    return sorted;
+  }, [filteredIssues, sortOption]);
+
   return (
     <IssueContainer>
-      {filteredIssues.map((issue: any, index: number) => {
-        const existingFile = hashMapIssues[issue?.id];
+      {sortedIssues.map((issue: Issue, index: number) => {
+        const existingFile = hashMapIssues[issue.id];
         let hasHash = false;
         let issueObj = issue;
         if (existingFile) {
@@ -217,7 +251,7 @@ export const IssueList = ({ issues }: FileListProps) => {
 
                     {issueObj?.created && (
                       <VideoUploadDate>
-                        {formatDate(issueObj.created)}
+                        {formatDate(ts(issueObj.created))}
                       </VideoUploadDate>
                     )}
                   </NameAndDateContainer>
